@@ -13,6 +13,9 @@ namespace KuchCraft {
 
 		void Run();
 
+		inline static Application& Get() { return *s_Instance; }
+		inline Window& GetWindow() { return *m_Window; }
+
 	private:
 		float   m_DeltaTime     = 0.0f;
 		float   m_LastFrametime = 0.0f;
