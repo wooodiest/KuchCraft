@@ -1,0 +1,17 @@
+# Directories
+.vs/
+bin/
+bin-int/
+x64/
+
+# Files
+*.user
+*.sln
+*.suo
+*.sln.docstates
+*.sdf
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+**.csproj
+*.log
