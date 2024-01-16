@@ -3,6 +3,8 @@
 #include <iostream>
 #include <glad/glad.h>
 
+#include "Core/Application.h"
+
 namespace KuchCraft {
 
 	static void GLFWErrorCallback(int error, const char* description)
@@ -16,12 +18,27 @@ namespace KuchCraft {
 		glfwInit();
 		glfwSetErrorCallback(GLFWErrorCallback);
 
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
 		m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
 		
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 		SetVsync(m_Vsync);
+
+		// Set glfw callbacks
+		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+			{			
+				if (width == 0 || height == 0)
+					Application::Get().SetWindowMinimized(true);
+				else
+				{
+					Application::Get().SetWindowMinimized(false);
+					Application::Get().GetWindow().SetSize(width, height);
+					Application::Get().SetWindowResized(true);
+				}		
+			});
 	}
 
 	Window::~Window()

@@ -28,22 +28,29 @@ namespace KuchCraft {
 			glClearColor(0.8f, 0.3f, 1.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			// Calculate delta time
-			float time = (float)glfwGetTime();
-			m_DeltaTime = time - m_LastFrametime;
-			m_DeltaTime = m_DeltaTime > (1.0f / 60.0f) ? (1.0f / 60.0f) : m_DeltaTime;
-			m_LastFrametime = time;
+			if (!m_Minimized)
+			{
+				// Calculate delta time
+				float time = (float)glfwGetTime();
+				m_DeltaTime = time - m_LastFrametime;
+				m_DeltaTime = m_DeltaTime > (1.0f / 60.0f) ? (1.0f / 60.0f) : m_DeltaTime;
+				m_LastFrametime = time;
 
-			// Update main game loop
-			if (Input::IsKeyPressed(KeyCode::A))
-				std::cout << "AAAAAAAA" << std::endl;
+				// Update main game loop
+				if (m_WindowResized)
+				{
+					// Update cameras / frame buffers
+					m_WindowResized = false;
+				}
 
-			// Render
+				// Render
 
+			}
 
-			// Window swapping buffers etc..
+			// Window swap buffers etc..
 			m_Window->OnUpdate();
 			m_Running = !m_Window->ShouldClose();
+			
 		}
 	}
 

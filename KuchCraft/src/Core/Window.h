@@ -16,6 +16,7 @@ namespace KuchCraft {
 
 		uint32_t GetWidth()  const { return m_Width;  }
 		uint32_t GetHeight() const { return m_Height; }
+		std::pair<uint32_t, uint32_t> GetWindowSize() const { return { m_Width, m_Height }; }
 		bool     IsVsync()   const { return m_Vsync;  }
 
 		GLFWwindow* GetWindow() { return m_Window; }
