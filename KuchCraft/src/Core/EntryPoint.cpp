@@ -1,39 +1,16 @@
-#include <GLFW/glfw3.h>
+#include "Core/Window.h"
 #include <glad/glad.h>
 
 int main(void)
 {
-    GLFWwindow* window;
+    KuchCraft::Window window("KuchCraft", 1600, 900, true);
 
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
-
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(1690, 900, "Hello World", NULL, NULL);
-    if (!window)
+    while (!glfwWindowShouldClose(window.GetWindow()))
     {
-        glfwTerminate();
-        return -1;
-    }
-
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
         glClearColor(0.8f, 0.3f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
+        window.OnUpdate();
     }
 
     glfwTerminate();
