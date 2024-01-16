@@ -36,6 +36,11 @@ namespace KuchCraft {
 		glfwSwapBuffers(m_Window);
 	}
 
+	bool Window::ShouldClose()
+	{
+		return glfwWindowShouldClose(m_Window);
+	}
+
 	void Window::SetSize(uint32_t width, uint32_t height)
 	{
 		m_Width = width;

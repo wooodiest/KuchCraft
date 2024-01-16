@@ -12,6 +12,7 @@ namespace KuchCraft {
 		~Window();
 
 		void OnUpdate();
+		bool ShouldClose();
 
 		uint32_t GetWidth()  const { return m_Width;  }
 		uint32_t GetHeight() const { return m_Height; }
