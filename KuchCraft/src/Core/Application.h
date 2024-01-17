@@ -1,7 +1,10 @@
 #pragma once
 
-#include "Core/Window.h"
 #include <glad/glad.h>
+
+#include "Core/Window.h"
+
+#include "KuchCraft.h"
 
 namespace KuchCraft {
 
@@ -26,6 +29,8 @@ namespace KuchCraft {
 		bool    m_Minimized     = false;
 		bool    m_WindowResized = false;
 		Window* m_Window;
+
+		KuchCraft* m_Game;
 
 	private:
 		static Application* s_Instance;

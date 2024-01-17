@@ -13,10 +13,14 @@ namespace KuchCraft {
 		s_Instance = this;
 
 		m_Window = new Window("KuchCraft", 1600, 900, true);
+
+		m_Game = new KuchCraft();
+		m_Game->Init();
 	}
 
 	Application::~Application()
 	{
+		delete m_Game;
 		delete m_Window;
 	}
 
@@ -25,8 +29,8 @@ namespace KuchCraft {
 		while (m_Running)
 		{
 			// Renderer commands
-			glClearColor(0.8f, 0.3f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			glClearColor(0.8f, 0.8f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			if (!m_Minimized)
 			{
@@ -39,11 +43,11 @@ namespace KuchCraft {
 				// Update main game loop
 				if (m_WindowResized)
 				{
-					// Update cameras / frame buffers
+					auto [width, height] = GetWindow().GetWindowSize();
+					m_Game->OnViewportSizeChanged(width, height);
 					m_WindowResized = false;
 				}
-
-				// Render
+				m_Game->OnUpdate(m_DeltaTime);
 
 			}
 
