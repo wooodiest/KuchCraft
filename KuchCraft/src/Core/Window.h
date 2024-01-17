@@ -25,6 +25,7 @@ namespace KuchCraft {
 		void SetWidth(uint32_t width);
 		void SetHeight(uint32_t height);
 		void SetVsync(bool vsync);
+		void SetCursor(bool visible);
 
 	private:
 		// Window data

@@ -2,6 +2,7 @@
 
 #include "Core/KeyCodes.h"
 
+#include <glm/glm.hpp>
 #include <utility>
 
 namespace KuchCraft {
@@ -15,7 +16,7 @@ namespace KuchCraft {
 	public:
 		static bool IsKeyPressed(KeyCode keycode);
 		static bool IsMouseButtonPressed(MouseCode button);
-		static std::pair<float, float> GetMousePosition();
+		static glm::vec2 GetMousePosition();
 		static float GetMousePositionX();
 		static float GetMousePositionY();
 

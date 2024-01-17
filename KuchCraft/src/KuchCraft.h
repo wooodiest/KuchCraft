@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/Shader.h"
+#include "Renderer/Camera.h"
 
 namespace KuchCraft {
 
@@ -17,6 +18,7 @@ namespace KuchCraft {
 
 	private:
 		Shader m_Shader;
+		Camera m_Camera;
 		unsigned int m_VBO, m_VAO;
 
 	};

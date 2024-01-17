@@ -26,6 +26,7 @@ namespace KuchCraft {
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 		SetVsync(m_Vsync);
+		SetCursor(false);
 
 		// Set glfw callbacks
 		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
@@ -88,6 +89,14 @@ namespace KuchCraft {
 			glfwSwapInterval(1);
 		else
 			glfwSwapInterval(0);
+	}
+
+	void Window::SetCursor(bool visible)
+	{
+		if (visible)
+			glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		else
+			glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
 }

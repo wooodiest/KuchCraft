@@ -1,7 +1,8 @@
 #include "KuchCraft.h"
 
 #include <glad/glad.h>
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Core/Application.h"
 
 namespace KuchCraft {
@@ -43,7 +44,12 @@ namespace KuchCraft {
 
 	void KuchCraft::OnUpdate(float dt)
 	{
+		m_Camera.OnUpdate(dt);
+
 		m_Shader.Bind();
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), { 0.0f, 0.0f, 0.0f });
+		m_Shader.SetMat4("u_MVP", m_Camera.GetViewProjection() * model);
+
 		glBindVertexArray(m_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 	}

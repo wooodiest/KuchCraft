@@ -20,7 +20,7 @@ namespace KuchCraft {
 		return state == GLFW_PRESS;
 	}
 
-	std::pair<float, float> Input::GetMousePosition()
+	glm::vec2 Input::GetMousePosition()
 	{
 		auto window = Application::Get().GetWindow().GetWindow();
 		double xpos, ypos;
@@ -31,14 +31,14 @@ namespace KuchCraft {
 
 	float Input::GetMousePositionX()
 	{
-		auto [x, y] = GetMousePosition();
-		return x;
+		auto position = GetMousePosition();
+		return position.x;
 	}
 
 	float Input::GetMousePositionY()
 	{
-		auto [x, y] = GetMousePosition();
-		return y;
+		auto position = GetMousePosition();
+		return position.y;
 	}
 
 }
