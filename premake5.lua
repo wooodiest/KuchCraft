@@ -28,14 +28,17 @@ project "KuchCraft"
     files
     {
         "%{wks.location}/KuchCraft/src/**.h",
-		"%{wks.location}/KuchCraft/src/**.cpp"
+		"%{wks.location}/KuchCraft/src/**.cpp",
+        "%{wks.location}/KuchCraft/vendor/glm/glm/**.hpp",
+        "%{wks.location}/KuchCraft/vendor/glm/glm/**.inl",
 	}
 
     includedirs
     {
         "%{wks.location}/KuchCraft/src",
         "%{wks.location}/KuchCraft/vendor/glfw/include",
-        "%{wks.location}/KuchCraft/vendor/Glad/include"
+        "%{wks.location}/KuchCraft/vendor/Glad/include",
+        "%{wks.location}/KuchCraft/vendor/glm"
     }
 
     links

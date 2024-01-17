@@ -1,3 +1,6 @@
 [submodule "KuchCraft/vendor/glfw"]
 	path = KuchCraft/vendor/glfw
 	url = https://github.com/wooodiest/glfw
+[submodule "KuchCraft/vendor/glm"]
+	path = KuchCraft/vendor/glm
+	url = https://github.com/wooodiest/glm
