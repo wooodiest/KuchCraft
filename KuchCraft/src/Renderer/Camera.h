@@ -24,7 +24,7 @@ namespace KuchCraft {
 		glm::mat4 m_Projection{ 1.0f };
 		glm::mat4 m_View{ 1.0f };
 
-		glm::vec3 m_Position{ 0.0f, 0.0f, 3.0f };
+		glm::vec3 m_Position{ 0.0f, 1.0f, 5.0f };
 		glm::vec3 m_Front   { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Up      { 0.0f, 1.0f, 0.0f };
 

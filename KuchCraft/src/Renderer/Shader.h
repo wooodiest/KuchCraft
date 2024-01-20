@@ -12,6 +12,7 @@ namespace KuchCraft {
 		~Shader();
 
 		void SetMat4(const std::string& name, const glm::mat4& v);
+		void SetInt(const std::string& name, int v);
 
 		void Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 			

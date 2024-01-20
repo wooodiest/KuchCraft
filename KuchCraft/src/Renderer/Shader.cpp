@@ -22,6 +22,12 @@ namespace KuchCraft {
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(v));
 	}
 
+	void Shader::SetInt(const std::string& name, int v)
+	{
+		int location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform1i(location, v);
+	}
+
 	void Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
 		std::string vertex   = ReadFile(vertexShaderPath);

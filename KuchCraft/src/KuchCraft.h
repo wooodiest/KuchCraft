@@ -19,7 +19,7 @@ namespace KuchCraft {
 	private:
 		Shader m_Shader;
 		Camera m_Camera;
-		unsigned int m_VBO, m_VAO;
+		unsigned int m_VBO, m_VAO, m_IBO, m_Texture;
 
 	};
 
