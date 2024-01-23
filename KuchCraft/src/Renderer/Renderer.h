@@ -10,6 +10,7 @@ namespace KuchCraft {
 	struct RendererStatistics
 	{
 		uint32_t DrawCalls = 0;
+		uint32_t Triangles = 0;
 	};
 
 	class Renderer
@@ -17,6 +18,8 @@ namespace KuchCraft {
 	public:
 		Renderer();
 		inline static Renderer& Get() { return *s_Instance; }
+		inline RendererStatistics& GetStats() { return m_Stats; }
+
 		void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
 		void ShutDown();

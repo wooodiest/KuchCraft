@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include <memory>
+#include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glad/glad.h>
 #include <stb_image.h>
@@ -10,15 +11,32 @@ namespace KuchCraft {
 
 	Renderer* Renderer::s_Instance = nullptr;
 
-	struct CubeVertex
+	struct Vertex
 	{
 		glm::vec3 Position;
-		glm::vec2 TexIndex;
+		glm::vec2 TexCoord;
+		float     TexIndex;
 	};
 
-	CubeVertex cube_vertices[]
+	struct RendererData
 	{
-		{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f } }
+		static const uint32_t MaxQuads = 20004; // % 6 == 0
+		static const uint32_t MaxVertices = MaxQuads * 4;
+		static const uint32_t MaxIndices = MaxQuads * 6;
+		static const uint32_t MaxTextureSlots = 48;
+
+		uint32_t QuadVertexArray;
+		uint32_t QuadVertexBuffer;
+		uint32_t QuadIndexBuffer;
+		uint32_t QuadShader;
+
+		Vertex*  VertexBufferBase = nullptr;
+		Vertex*  VertexBufferPtr = nullptr;
+		uint32_t IndexCount = 0;
+
+		uint32_t TextureSlots[MaxTextureSlots];
+		uint32_t TextureSlotindex = 0;
+
 	};
 
 	Renderer::Renderer()
@@ -134,6 +152,7 @@ namespace KuchCraft {
 
 	void Renderer::BeginScene(Camera& camera)
 	{
+
 		m_Camera = &camera;
 
 		glActiveTexture(GL_TEXTURE0);
@@ -146,6 +165,9 @@ namespace KuchCraft {
 
 	void Renderer::EndScene()
 	{
+		std::cout << "Draw calls: " << Renderer::Get().GetStats().DrawCalls << ", Triangles: " << Renderer::Get().GetStats().Triangles << std::endl;
+		m_Stats.DrawCalls = 0;
+		m_Stats.Triangles = 0;
 	}
 
 	void Renderer::DrawCube(const glm::vec3& position, const Block& block)
@@ -153,6 +175,8 @@ namespace KuchCraft {
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
 		m_DefaultCubeShader.SetMat4("u_MVP", m_Camera->GetViewProjection() * model);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+		Renderer::Get().GetStats().DrawCalls++;
+		Renderer::Get().GetStats().Triangles += 12;
 	}
 
 }
