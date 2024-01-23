@@ -21,10 +21,7 @@ namespace KuchCraft {
 	private:
 		Renderer m_Renderer;
 		World m_World;
-
-		Shader m_Shader;
 		Camera m_Camera;
-		unsigned int m_VBO, m_VAO, m_IBO, m_Texture;
 
 	};
 

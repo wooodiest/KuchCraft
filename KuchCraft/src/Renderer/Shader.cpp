@@ -28,7 +28,13 @@ namespace KuchCraft {
 		glUniform1i(location, v);
 	}
 
-	void Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	void Shader::SetIntArray(const std::string& name, int* values, uint32_t count)
+	{
+		int location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform1iv(location, count, values);
+	}
+
+	uint32_t Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
 		std::string vertex   = ReadFile(vertexShaderPath);
 		std::string fragment = ReadFile(fragmentShaderPath);
@@ -79,6 +85,8 @@ namespace KuchCraft {
 		}
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+
+		return m_RendererID;
 	}
 
 	std::string Shader::ReadFile(const std::string& filepath)

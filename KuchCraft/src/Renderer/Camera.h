@@ -26,7 +26,7 @@ namespace KuchCraft {
 		glm::mat4 m_Projection{ 1.0f };
 		glm::mat4 m_View{ 1.0f };
 
-		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 m_Position{ -3.0f, 0.0f, -5.0f };
 		glm::vec3 m_Front   { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Up      { 0.0f, 1.0f, 0.0f };
 
@@ -36,7 +36,7 @@ namespace KuchCraft {
 		float m_Yaw   = glm::radians(-90.0f);
 		float m_Fov   = glm::radians(45.0f);
 
-		float m_Near        = 0.01;
+		float m_Near        = 0.01f;
 		float m_Far         = 1000.0f;
 		float m_AspectRatio = 16.0f / 9.0f;
 

@@ -15,7 +15,7 @@ namespace KuchCraft {
 	{
 	public:
 		BlockType m_BlockType = BlockType::Grass; // Temporary
-		glm::vec3 m_Rotation{ 0.0f, 0.0f, 0.0f }; // TODO: Change to not use rotation matrix
+		//glm::vec3 m_Rotation{ 0.0f, 0.0f, 0.0f }; // TODO: Change to not use rotation matrix
 
 	};
 

@@ -17,12 +17,19 @@ namespace KuchCraft {
 	{
 	public:
 		Renderer();
+		~Renderer();
+
 		inline static Renderer& Get() { return *s_Instance; }
 		inline RendererStatistics& GetStats() { return m_Stats; }
 
 		void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
 		void ShutDown();
+		uint32_t LoadTexture(const std::string& path);
+
+		void Flush();
+		void StartBatch();
+		void NextBatch();
 
 		void BeginScene(Camera& camera);
 		void EndScene();
@@ -32,10 +39,7 @@ namespace KuchCraft {
 		RendererStatistics m_Stats;
 
 	private:
-		Camera* m_Camera;
-
-		Shader m_DefaultCubeShader;
-		unsigned int m_VBO, m_VAO, m_IBO, m_Texture;
+		unsigned int m_Texture;
 
 	private:
 		static Renderer* s_Instance;
