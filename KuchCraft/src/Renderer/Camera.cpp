@@ -57,6 +57,8 @@ namespace KuchCraft {
 
 		UpdateFront();
 		UpdateView(); 
+
+		std::cout << "Position: (" << m_Position.x << ", " << m_Position.y << ", " << m_Position.z << ")" << std::endl;
 	}
 
 	void Camera::UpdateProjection()
