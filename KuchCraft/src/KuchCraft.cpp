@@ -12,37 +12,28 @@ namespace KuchCraft {
 
 	KuchCraft::KuchCraft()
 	{
+#if 1 // Show all blocks
 		auto ch = m_World.GetChunk({ 0.0f, 0.0f,0.0f });
-		ch->m_Blocks[5][5][5].m_BlockType = BlockType::Air;
-		ch->m_Blocks[5][5][6].m_BlockType = BlockType::Air;
-		ch->m_Blocks[5][5][7].m_BlockType = BlockType::Air;
-
-		ch->m_Blocks[0][0][0].m_BlockType = BlockType::Air;
-		ch->m_Blocks[1][0][0].m_BlockType = BlockType::Air;
-		ch->m_Blocks[0][0][1].m_BlockType = BlockType::Air;
-		ch->m_Blocks[1][1][1].m_BlockType = BlockType::Air;
-
-		ch->m_Blocks[5][3][0].m_BlockType = BlockType::Air;
-		ch->m_Blocks[6][3][0].m_BlockType = BlockType::Air;
-		ch->m_Blocks[7][3][0].m_BlockType = BlockType::Air;
-		ch->m_Blocks[5][4][0].m_BlockType = BlockType::Air;
-		ch->m_Blocks[6][4][0].m_BlockType = BlockType::Air;
-		ch->m_Blocks[7][4][0].m_BlockType = BlockType::Air;
-#if 1
+		int count = (int)BlockType::LastElement - 1;
 		for (int x = 0; x < 16; x++)
 		{
 			for (int y = 0; y < 128; y++)
 			{
 				for (int z = 0; z < 16; z++)
 				{
-					if (y > 45)
+					if (x % 2 == 0 && y % 2 == 0 && z % 2 == 0)
 					{
-						ch->m_Blocks[x][y][z].m_BlockType = BlockType::Stone;
+						ch->m_Blocks[x][y][z].m_BlockType = static_cast<BlockType>(count);
+						count--;
+						if (count == 0)
+							return;
+
 					}
 				}
 			}
 		}
 #endif
+
 	}
 
 	KuchCraft::~KuchCraft()

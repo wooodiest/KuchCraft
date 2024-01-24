@@ -7,14 +7,23 @@ namespace KuchCraft {
 
 	enum class BlockType
 	{
-		Air = 0, Water,
-		Grass, Stone
+		Air = 0,/*Water,*/
+		Bedrock, Bricks,
+		CoalOre, Cobblestone, CraftingTable,
+		DiamondOre, Dioryte, Dirt,
+		Furnace,
+		Granite, Grass, Gravel,
+		IronOre,
+		OakLog, OakPlanks,
+		Sand, Stone, StoneBrick,
+
+		LastElement // temporary
 	};
 
 	class Block
 	{
 	public:
-		BlockType m_BlockType = BlockType::Grass; // Temporary
+		BlockType m_BlockType = BlockType::Air;
 		//glm::vec3 m_Rotation{ 0.0f, 0.0f, 0.0f }; // TODO: Change to not use rotation matrix
 
 	};

@@ -49,11 +49,11 @@ namespace KuchCraft {
 		m_Yaw   += m_Sensitivity * dt * deltaPosition.x;
 		m_Pitch -= m_Sensitivity * dt * deltaPosition.y;
 
-		if (m_Pitch > glm::radians(90.0f))
-			m_Pitch = glm::radians(90.0f);
+		if (m_Pitch > glm::radians(89.0f))
+			m_Pitch = glm::radians(89.0f);
 
-		if (m_Pitch < glm::radians(-90.0f))
-			m_Pitch = glm::radians(-90.0f);
+		if (m_Pitch < glm::radians(-89.0f))
+			m_Pitch = glm::radians(-89.0f);
 
 		UpdateFront();
 		UpdateView(); 

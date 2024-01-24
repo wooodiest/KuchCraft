@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include <memory>
+#include <array>
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glad/glad.h>
@@ -34,12 +35,44 @@ namespace KuchCraft {
 		Vertex*  VertexBufferPtr = nullptr;
 		uint32_t IndexCount = 0;
 
-		uint32_t TextureSlots[MaxTextureSlots];
-		uint32_t TextureSlotIndex = 0;
+		std::array<uint32_t, MaxTextureSlots> TextureSlots;
+		uint32_t TextureSlotIndex = 1;
 
 		glm::vec4 VertexPositions[24];
 	};
 	static RendererData s_Data;
+
+	constexpr glm::vec2 texture_cords[] = {
+			{ 0.0f,  0.0f },
+			{ 0.25f, 0.0f },
+			{ 0.25f, 0.5f },
+			{ 0.0f,  0.5f },
+
+			{ 0.25f, 0.0f },
+			{ 0.5f,  0.0f },
+			{ 0.5f,  0.5f },
+			{ 0.25f, 0.5f },
+
+			{ 0.0f,  0.5f },
+			{ 0.25f, 0.5f },
+			{ 0.25f, 1.0f },
+			{ 0.0f,  1.0f },
+
+			{ 0.25f, 0.5f },
+			{ 0.5f,  0.5f },
+			{ 0.5f,  1.0f },
+			{ 0.25f, 1.0f },
+
+			{ 0.5f,  0.5f },
+			{ 0.75f, 0.5f },
+			{ 0.75f, 1.0f },
+			{ 0.5f,  1.0f },
+
+			{ 0.75f, 0.5f },
+			{ 1.0f,  0.5f },
+			{ 1.0f,  1.0f },
+			{ 0.75f, 1.0f },
+	};
 
 	Renderer::Renderer()
 	{
@@ -151,11 +184,11 @@ namespace KuchCraft {
 		glBindBuffer(GL_ARRAY_BUFFER, s_Data.QuadVertexBuffer);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, s_Data.VertexBufferBase);
 
-		// Bind textures : TODO
+		// Bind textures
 		s_Data.QuadShader.Bind();
-		glBindTextureUnit(0, m_BlockTextureAtlas[BlockType::Grass]);
-		glBindTextureUnit(1, m_BlockTextureAtlas[BlockType::Stone]);
-
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
+			glBindTextureUnit(i, s_Data.TextureSlots[i]);
+		
 		// Draw elements		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.QuadIndexBuffer);
 		glDrawElements(GL_TRIANGLES, s_Data.IndexCount, GL_UNSIGNED_INT, nullptr);
@@ -168,7 +201,7 @@ namespace KuchCraft {
 	{
 		s_Data.IndexCount = 0;
 		s_Data.VertexBufferPtr = s_Data.VertexBufferBase;
-		s_Data.TextureSlotIndex = 0;
+		s_Data.TextureSlotIndex = 1;
 	}
 
 	void Renderer::NextBatch()
@@ -201,49 +234,32 @@ namespace KuchCraft {
 
 		// Check textures : TODO
 		float textureIndex = 0.0f;
-		if (block.m_BlockType == BlockType::Grass)
-			textureIndex = 0.0f;
-		else
-			textureIndex = 1.0f;
+		uint32_t block_texture = GetTexture(block);
+		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+		{
+			if (s_Data.TextureSlots[i] == block_texture)
+			{
+				textureIndex = (float)i;
+				break;
+			}
+		}
+		if (textureIndex == 0.0f)
+		{
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
+				NextBatch();
+
+			textureIndex = (float)s_Data.TextureSlotIndex;
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = block_texture;
+			s_Data.TextureSlotIndex++;
+		}
 
 		constexpr size_t vertexCount = 24;
-		constexpr glm::vec2 textureCords[] = {
-			{ 0.0f,  0.0f },
-			{ 0.25f, 0.0f },
-			{ 0.25f, 0.5f },
-			{ 0.0f,  0.5f },
-
-			{ 0.25f, 0.0f },
-			{ 0.5f,  0.0f },
-			{ 0.5f,  0.5f },
-			{ 0.25f, 0.5f },
-
-			{ 0.0f,  0.5f },
-			{ 0.25f, 0.5f },
-			{ 0.25f, 1.0f },
-			{ 0.0f,  1.0f },
-
-			{ 0.25f, 0.5f },
-			{ 0.5f,  0.5f },
-			{ 0.5f,  1.0f },
-			{ 0.25f, 1.0f },
-
-			{ 0.5f,  0.5f },
-			{ 0.75f, 0.5f },
-			{ 0.75f, 1.0f },
-			{ 0.5f,  1.0f },
-
-			{ 0.75f, 0.5f },
-			{ 1.0f,  0.5f },
-			{ 1.0f,  1.0f },
-			{ 0.75f, 1.0f },
-		};
-
+		
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 		for (size_t i = 0; i < vertexCount; i++)
 		{
 			s_Data.VertexBufferPtr->Position = transform * s_Data.VertexPositions[i];
-			s_Data.VertexBufferPtr->TexCoord = textureCords[i];
+			s_Data.VertexBufferPtr->TexCoord = texture_cords[i];
 			s_Data.VertexBufferPtr->TexIndex = textureIndex;
 
 			s_Data.VertexBufferPtr++;
@@ -272,13 +288,29 @@ namespace KuchCraft {
 
 	void Renderer::LoadTextureAtlas()
 	{
-		m_BlockTexturePathsAtlas[BlockType::Grass] = "grass.png";
-		m_BlockTexturePathsAtlas[BlockType::Stone] = "stone.png";
+		m_BlockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
+		m_BlockTexturePathsAtlas[BlockType::Bricks]        = "bricks";
+		m_BlockTexturePathsAtlas[BlockType::CoalOre]       = "coal_ore";
+		m_BlockTexturePathsAtlas[BlockType::Cobblestone]   = "cobblestone";
+		m_BlockTexturePathsAtlas[BlockType::CraftingTable] = "crafting_table";
+		m_BlockTexturePathsAtlas[BlockType::DiamondOre]    = "diamond_ore";
+		m_BlockTexturePathsAtlas[BlockType::Dioryte]       = "dioryte";
+		m_BlockTexturePathsAtlas[BlockType::Dirt]          = "dirt";
+		m_BlockTexturePathsAtlas[BlockType::Furnace]       = "furnace";
+		m_BlockTexturePathsAtlas[BlockType::Granite]       = "granite";
+		m_BlockTexturePathsAtlas[BlockType::Grass]         = "grass";
+		m_BlockTexturePathsAtlas[BlockType::Gravel]        = "gravel";
+		m_BlockTexturePathsAtlas[BlockType::IronOre]       = "iron_ore";
+		m_BlockTexturePathsAtlas[BlockType::OakLog]        = "oak_log";
+		m_BlockTexturePathsAtlas[BlockType::OakPlanks]     = "oak_planks";
+		m_BlockTexturePathsAtlas[BlockType::Sand]          = "sand";
+		m_BlockTexturePathsAtlas[BlockType::Stone]         = "stone";
+		m_BlockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
 
 		std::string mainPath = "assets/textures/";
 		for (const auto& texture : m_BlockTexturePathsAtlas)
 		{
-			std::string path = mainPath + texture.second;
+			std::string path = mainPath + texture.second + ".png";
 			m_BlockTextureAtlas[texture.first] = LoadTexture(path);
 		}
 	}
