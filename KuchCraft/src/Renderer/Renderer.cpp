@@ -12,6 +12,7 @@ namespace KuchCraft {
 
 	Renderer* Renderer::s_Instance = nullptr;
 
+	// Cube vertex
 	struct Vertex
 	{
 		glm::vec3 Position;
@@ -19,17 +20,70 @@ namespace KuchCraft {
 		float     TexIndex;
 	};
 
+	// Cube vertex data
+	constexpr size_t cube_vertex_count  = 24;
+	constexpr size_t cube_indices_count = 36;
+	constexpr size_t cube_triangles     = 12;
+	constexpr glm::vec4 cube_vertex_positions[cube_vertex_count] =
+	{
+		// Top
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 0.0f, 1.0f },
+		// Bottom
+		{ 0.0f, 1.0f, 1.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		// Front
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 1.0f },
+		// Right
+		{ 1.0f, 0.0f, 1.0f, 1.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 1.0f, 1.0f },
+		// Behind
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 1.0f, 1.0f, 0.0f, 1.0f },
+		// Left
+		{ 0.0f, 0.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 1.0f, 1.0f, 1.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f }
+	};
+	constexpr glm::vec2 cube_texture_coordinates[cube_vertex_count] = {
+		// Top
+		{ 0.0f,  0.0f }, { 0.25f, 0.0f }, { 0.25f, 0.5f }, { 0.0f,  0.5f },
+		// Bottom
+		{ 0.25f, 0.0f }, { 0.5f,  0.0f }, { 0.5f,  0.5f }, { 0.25f, 0.5f },
+		// Front
+		{ 0.0f,  0.5f }, { 0.25f, 0.5f }, { 0.25f, 1.0f }, { 0.0f,  1.0f },
+		// Right
+		{ 0.25f, 0.5f }, { 0.5f,  0.5f }, { 0.5f,  1.0f }, { 0.25f, 1.0f },
+		// Behind
+		{ 0.5f,  0.5f }, { 0.75f, 0.5f }, { 0.75f, 1.0f }, { 0.5f,  1.0f },
+		// Left
+		{ 0.75f, 0.5f }, { 1.0f,  0.5f }, { 1.0f,  1.0f }, { 0.75f, 1.0f },
+	};
+
+	// Renderer data
 	struct RendererData
 	{
-		static const uint32_t MaxQuads = 20004; // % 6 == 0
-		static const uint32_t MaxVertices = MaxQuads * 4;
-		static const uint32_t MaxIndices = MaxQuads * 6;
+		static const uint32_t MaxQuads        = 20004; // % 6 == 0
+		static const uint32_t MaxVertices     = MaxQuads * 4;
+		static const uint32_t MaxIndices      = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 48;
 
-		uint32_t QuadVertexArray;
-		uint32_t QuadVertexBuffer;
-		uint32_t QuadIndexBuffer;
-		Shader   QuadShader;
+		uint32_t VertexArray;
+		uint32_t VertexBuffer;
+		uint32_t IndexBuffer;
+		Shader   Shader;
 
 		Vertex*  VertexBufferBase = nullptr;
 		Vertex*  VertexBufferPtr = nullptr;
@@ -37,57 +91,26 @@ namespace KuchCraft {
 
 		std::array<uint32_t, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1;
-
-		glm::vec4 VertexPositions[24];
 	};
 	static RendererData s_Data;
 
-	constexpr glm::vec2 texture_cords[] = {
-			{ 0.0f,  0.0f },
-			{ 0.25f, 0.0f },
-			{ 0.25f, 0.5f },
-			{ 0.0f,  0.5f },
-
-			{ 0.25f, 0.0f },
-			{ 0.5f,  0.0f },
-			{ 0.5f,  0.5f },
-			{ 0.25f, 0.5f },
-
-			{ 0.0f,  0.5f },
-			{ 0.25f, 0.5f },
-			{ 0.25f, 1.0f },
-			{ 0.0f,  1.0f },
-
-			{ 0.25f, 0.5f },
-			{ 0.5f,  0.5f },
-			{ 0.5f,  1.0f },
-			{ 0.25f, 1.0f },
-
-			{ 0.5f,  0.5f },
-			{ 0.75f, 0.5f },
-			{ 0.75f, 1.0f },
-			{ 0.5f,  1.0f },
-
-			{ 0.75f, 0.5f },
-			{ 1.0f,  0.5f },
-			{ 1.0f,  1.0f },
-			{ 0.75f, 1.0f },
-	};
-
+	// Declarations
 	Renderer::Renderer()
 	{
 		s_Instance = this;
 
+		// Setup viewport
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
 
-		// Cube vertex array and buffer
-		glGenVertexArrays(1, &s_Data.QuadVertexArray);
-		glBindVertexArray(s_Data.QuadVertexArray);
+		// Create vertex array
+		glGenVertexArrays(1, &s_Data.VertexArray);
+		glBindVertexArray(s_Data.VertexArray);
 
-		glGenBuffers(1, &s_Data.QuadVertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_Data.QuadVertexBuffer);
+		// Create vertex buffer and layout setup
+		glGenBuffers(1, &s_Data.VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, s_Data.MaxVertices * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -97,41 +120,9 @@ namespace KuchCraft {
 		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 
-		// Cube vertices
-		//  Bottom
-		s_Data.VertexPositions[0]  = { 0.0f, 0.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[1]  = { 1.0f, 0.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[2]  = { 1.0f, 0.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[3]  = { 0.0f, 0.0f, 0.0f, 1.0f };
-		//  Top
-		s_Data.VertexPositions[4]  = { 0.0f, 1.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[5]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[6]  = { 1.0f, 1.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[7]  = { 0.0f, 1.0f, 0.0f, 1.0f };
-		//  Front
-		s_Data.VertexPositions[8]  = { 0.0f, 0.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[9]  = { 1.0f, 0.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[10] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[11] = { 0.0f, 1.0f, 1.0f, 1.0f };
-		//  Right
-		s_Data.VertexPositions[12] = { 1.0f, 0.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[13] = { 1.0f, 0.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[14] = { 1.0f, 1.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[15] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		//  Behind
-		s_Data.VertexPositions[16] = { 1.0f, 0.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[17] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[18] = { 0.0f, 1.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[19] = { 1.0f, 1.0f, 0.0f, 1.0f };
-		//  Left
-		s_Data.VertexPositions[20] = { 0.0f, 0.0f, 0.0f, 1.0f };
-		s_Data.VertexPositions[21] = { 0.0f, 0.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[22] = { 0.0f, 1.0f, 1.0f, 1.0f };
-		s_Data.VertexPositions[23] = { 0.0f, 1.0f, 0.0f, 1.0f };
-
 		s_Data.VertexBufferBase = new Vertex[s_Data.MaxVertices];
 
-		// Cube index buffer
+		// Index buffer
 		uint32_t* indices = new uint32_t[s_Data.MaxIndices];
 		uint32_t  offset = 0;
 		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
@@ -139,28 +130,26 @@ namespace KuchCraft {
 			indices[i + 0] = offset + 0;
 			indices[i + 1] = offset + 1;
 			indices[i + 2] = offset + 2;
-
 			indices[i + 3] = offset + 2;
 			indices[i + 4] = offset + 3;
 			indices[i + 5] = offset + 0;
 
 			offset += 4;
 		}
-
-		glGenBuffers(1, &s_Data.QuadIndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.QuadIndexBuffer);
+		glGenBuffers(1, &s_Data.IndexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_Data.MaxIndices * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 		delete[] indices;
 
 		// Shader
-		s_Data.QuadShader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
-		s_Data.QuadShader.Bind();
+		s_Data.Shader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
+		s_Data.Shader.Bind();
 
 		// Textures
 		int samplers[s_Data.MaxTextureSlots];
 		for (int i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
-		s_Data.QuadShader.SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+		s_Data.Shader.SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
 		LoadTextureAtlas();
 	}
@@ -175,22 +164,19 @@ namespace KuchCraft {
 		if (s_Data.IndexCount == 0) // Nothing to draw
 			return;
 
-		// Check size of elements
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.VertexBufferPtr - (uint8_t*)s_Data.VertexBufferBase);	
-
 		// Upload data
-		glBindVertexArray(s_Data.QuadVertexArray);
-
-		glBindBuffer(GL_ARRAY_BUFFER, s_Data.QuadVertexBuffer);
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.VertexBufferPtr - (uint8_t*)s_Data.VertexBufferBase);
+		glBindVertexArray(s_Data.VertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, s_Data.VertexBufferBase);
 
 		// Bind textures
-		s_Data.QuadShader.Bind();
+		s_Data.Shader.Bind();
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 			glBindTextureUnit(i, s_Data.TextureSlots[i]);
 		
 		// Draw elements		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.QuadIndexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
 		glDrawElements(GL_TRIANGLES, s_Data.IndexCount, GL_UNSIGNED_INT, nullptr);
 
 		// Update stats
@@ -199,6 +185,7 @@ namespace KuchCraft {
 
 	void Renderer::StartBatch()
 	{
+		// Reset current data
 		s_Data.IndexCount = 0;
 		s_Data.VertexBufferPtr = s_Data.VertexBufferBase;
 		s_Data.TextureSlotIndex = 1;
@@ -206,22 +193,27 @@ namespace KuchCraft {
 
 	void Renderer::NextBatch()
 	{
+		// Draw and reset
 		Flush();
 		StartBatch();
 	}
 
 	void Renderer::BeginScene(Camera& camera)
 	{
-		s_Data.QuadShader.Bind();
-		s_Data.QuadShader.SetMat4("u_ViewProjection", camera.GetViewProjection());
+		// Set uniform: view-projection matrix
+		s_Data.Shader.Bind();
+		s_Data.Shader.SetMat4("u_ViewProjection", camera.GetViewProjection());
 
+		// Start collecting data to draw
 		StartBatch();
 	}
 
 	void Renderer::EndScene()
 	{
+		// Render remaining data
 		Flush();
 
+		// Reset and print stats
 		std::cout << "Draw calls: " << m_Stats.DrawCalls << ", Triangles: " << m_Stats.Triangles << std::endl;
 		m_Stats.DrawCalls = 0;
 		m_Stats.Triangles = 0;
@@ -229,10 +221,11 @@ namespace KuchCraft {
 
 	void Renderer::DrawCube(const glm::vec3& position, const Block& block)
 	{
+		// If currently we store too many data to draw. Draw what we have and start collecting data again. 
 		if (s_Data.IndexCount >= s_Data.MaxIndices)
 			NextBatch();
 
-		// Check textures : TODO
+		// Checking what texture slot to use
 		float textureIndex = 0.0f;
 		uint32_t block_texture = GetTexture(block);
 		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
@@ -243,7 +236,7 @@ namespace KuchCraft {
 				break;
 			}
 		}
-		if (textureIndex == 0.0f)
+		if (textureIndex == 0.0f) // If still 0: Is every slot occupied or we have new texture
 		{
 			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
 				NextBatch();
@@ -253,32 +246,30 @@ namespace KuchCraft {
 			s_Data.TextureSlotIndex++;
 		}
 
-		constexpr size_t vertexCount = 24;
-		
+		// Applying transform to all vertices  
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-		for (size_t i = 0; i < vertexCount; i++)
+		for (size_t i = 0; i < cube_vertex_count; i++)
 		{
-			s_Data.VertexBufferPtr->Position = transform * s_Data.VertexPositions[i];
-			s_Data.VertexBufferPtr->TexCoord = texture_cords[i];
+			s_Data.VertexBufferPtr->Position = transform * cube_vertex_positions[i];
+			s_Data.VertexBufferPtr->TexCoord = cube_texture_coordinates[i];
 			s_Data.VertexBufferPtr->TexIndex = textureIndex;
 
 			s_Data.VertexBufferPtr++;
 		}
-		s_Data.IndexCount += 36;
+		s_Data.IndexCount += cube_indices_count;
 
 		// Update stats
-		m_Stats.Triangles += 12;
+		m_Stats.Triangles += cube_triangles;
 	}
 
 	void Renderer::ShutDown()
 	{
+		// free memmory
 		delete[] s_Data.VertexBufferBase;
 
-		glDeleteBuffers(1, &s_Data.QuadIndexBuffer);
-		glDeleteBuffers(1, &s_Data.QuadVertexBuffer);
-		glDeleteVertexArrays(1, &s_Data.QuadVertexArray);
-			
-		glDeleteTextures(1, &m_Texture);
+		glDeleteBuffers(1, &s_Data.IndexBuffer);
+		glDeleteBuffers(1, &s_Data.VertexBuffer);
+		glDeleteVertexArrays(1, &s_Data.VertexArray);
 	}
 
 	uint32_t Renderer::GetTexture(const Block& block)
@@ -288,6 +279,7 @@ namespace KuchCraft {
 
 	void Renderer::LoadTextureAtlas()
 	{
+		// Pair blocktype with texture
 		m_BlockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
 		m_BlockTexturePathsAtlas[BlockType::Bricks]        = "bricks";
 		m_BlockTexturePathsAtlas[BlockType::CoalOre]       = "coal_ore";
@@ -307,6 +299,7 @@ namespace KuchCraft {
 		m_BlockTexturePathsAtlas[BlockType::Stone]         = "stone";
 		m_BlockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
 
+		// Load all textures to gpu
 		std::string mainPath = "assets/textures/";
 		for (const auto& texture : m_BlockTexturePathsAtlas)
 		{

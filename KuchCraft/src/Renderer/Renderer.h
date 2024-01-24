@@ -44,7 +44,6 @@ namespace KuchCraft {
 		RendererStatistics m_Stats;
 
 	private:
-		unsigned int m_Texture;
 		std::unordered_map<BlockType, unsigned int> m_BlockTextureAtlas;
 		std::unordered_map<BlockType, std::string> m_BlockTexturePathsAtlas;
 
