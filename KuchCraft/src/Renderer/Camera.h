@@ -26,14 +26,14 @@ namespace KuchCraft {
 		glm::mat4 m_Projection{ 1.0f };
 		glm::mat4 m_View{ 1.0f };
 
-		glm::vec3 m_Position{ -3.0f, 0.0f, -5.0f };
+		glm::vec3 m_Position{ -5.0f, 0.0f, -5.0f };
 		glm::vec3 m_Front   { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Up      { 0.0f, 1.0f, 0.0f };
 
 		glm::vec2 m_PrevMousePosition{ 0.0f, 0.0f };
 
-		float m_Pitch = glm::radians(0.0f);
-		float m_Yaw   = glm::radians(-90.0f);
+		float m_Pitch = glm::radians(20.0f);
+		float m_Yaw   = glm::radians(45.0f);
 		float m_Fov   = glm::radians(45.0f);
 
 		float m_Near        = 0.01f;

@@ -5,6 +5,8 @@
 #include "World/World.h"
 #include "Shader.h"
 
+#include <unordered_map>
+
 namespace KuchCraft {
 
 	struct RendererStatistics
@@ -25,6 +27,9 @@ namespace KuchCraft {
 		void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
 		void ShutDown();
+
+		uint32_t GetTexture(const Block& block);
+		void LoadTextureAtlas();
 		uint32_t LoadTexture(const std::string& path);
 
 		void Flush();
@@ -40,6 +45,8 @@ namespace KuchCraft {
 
 	private:
 		unsigned int m_Texture;
+		std::unordered_map<BlockType, unsigned int> m_BlockTextureAtlas;
+		std::unordered_map<BlockType, std::string> m_BlockTexturePathsAtlas;
 
 	private:
 		static Renderer* s_Instance;

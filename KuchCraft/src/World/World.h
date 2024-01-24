@@ -8,7 +8,7 @@ namespace KuchCraft {
 	enum class BlockType
 	{
 		Air = 0, Water,
-		Grass
+		Grass, Stone
 	};
 
 	class Block

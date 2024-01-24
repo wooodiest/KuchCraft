@@ -37,7 +37,7 @@ namespace KuchCraft {
 				{
 					if (y > 45)
 					{
-						ch->m_Blocks[x][y][z].m_BlockType = BlockType::Air;
+						ch->m_Blocks[x][y][z].m_BlockType = BlockType::Stone;
 					}
 				}
 			}

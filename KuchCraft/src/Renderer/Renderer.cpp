@@ -48,7 +48,6 @@ namespace KuchCraft {
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		// Cube vertex array and buffer
 		glGenVertexArrays(1, &s_Data.QuadVertexArray);
@@ -117,7 +116,7 @@ namespace KuchCraft {
 
 		glGenBuffers(1, &s_Data.QuadIndexBuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.QuadIndexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_Data.MaxIndices * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 		delete[] indices;
 
 		// Shader
@@ -130,7 +129,7 @@ namespace KuchCraft {
 			samplers[i] = i;
 		s_Data.QuadShader.SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
-		m_Texture = LoadTexture("assets/textures/grass.png");
+		LoadTextureAtlas();
 	}
 
 	Renderer::~Renderer()
@@ -144,12 +143,7 @@ namespace KuchCraft {
 			return;
 
 		// Check size of elements
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.VertexBufferPtr - (uint8_t*)s_Data.VertexBufferBase);
-		
-		for (int i = 0; i < 36; i++)
-		{
-			std::cout << s_Data.VertexBufferBase[i].Position.x << " " << s_Data.VertexBufferBase[i].Position.y << " " << s_Data.VertexBufferBase[i].Position.z << std::endl;
-		}
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.VertexBufferPtr - (uint8_t*)s_Data.VertexBufferBase);	
 
 		// Upload data
 		glBindVertexArray(s_Data.QuadVertexArray);
@@ -159,7 +153,8 @@ namespace KuchCraft {
 
 		// Bind textures : TODO
 		s_Data.QuadShader.Bind();
-		glBindTextureUnit(0, m_Texture);
+		glBindTextureUnit(0, m_BlockTextureAtlas[BlockType::Grass]);
+		glBindTextureUnit(1, m_BlockTextureAtlas[BlockType::Stone]);
 
 		// Draw elements		
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.QuadIndexBuffer);
@@ -206,6 +201,10 @@ namespace KuchCraft {
 
 		// Check textures : TODO
 		float textureIndex = 0.0f;
+		if (block.m_BlockType == BlockType::Grass)
+			textureIndex = 0.0f;
+		else
+			textureIndex = 1.0f;
 
 		constexpr size_t vertexCount = 24;
 		constexpr glm::vec2 textureCords[] = {
@@ -246,7 +245,7 @@ namespace KuchCraft {
 			s_Data.VertexBufferPtr->Position = transform * s_Data.VertexPositions[i];
 			s_Data.VertexBufferPtr->TexCoord = textureCords[i];
 			s_Data.VertexBufferPtr->TexIndex = textureIndex;
-			
+
 			s_Data.VertexBufferPtr++;
 		}
 		s_Data.IndexCount += 36;
@@ -264,6 +263,24 @@ namespace KuchCraft {
 		glDeleteVertexArrays(1, &s_Data.QuadVertexArray);
 			
 		glDeleteTextures(1, &m_Texture);
+	}
+
+	uint32_t Renderer::GetTexture(const Block& block)
+	{
+		return m_BlockTextureAtlas[block.m_BlockType];
+	}
+
+	void Renderer::LoadTextureAtlas()
+	{
+		m_BlockTexturePathsAtlas[BlockType::Grass] = "grass.png";
+		m_BlockTexturePathsAtlas[BlockType::Stone] = "stone.png";
+
+		std::string mainPath = "assets/textures/";
+		for (const auto& texture : m_BlockTexturePathsAtlas)
+		{
+			std::string path = mainPath + texture.second;
+			m_BlockTextureAtlas[texture.first] = LoadTexture(path);
+		}
 	}
 
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
@@ -289,5 +306,6 @@ namespace KuchCraft {
 
 		return texture;
 	}
+
 
 }
