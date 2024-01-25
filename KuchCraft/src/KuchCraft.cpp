@@ -7,12 +7,13 @@
 #include "Core/Application.h"
 #include "Renderer/Renderer.h"
 #include <iostream>
+#include "Core/Random.h"
 
 namespace KuchCraft {
 
 	KuchCraft::KuchCraft()
 	{
-#if 1 // Show all blocks
+#if 0 // Show all blocks
 		auto ch = m_World.GetChunk({ 0.0f, 0.0f,0.0f });
 		int count = (int)BlockType::LastElement - 1;
 		for (int x = 0; x < 16; x++)
@@ -32,6 +33,22 @@ namespace KuchCraft {
 				}
 			}
 		}
+#endif
+
+#if 1 // Chunk of random blocks
+		auto ch = m_World.GetChunk({ 0.0f, 0.0f,0.0f });
+		int count = (int)BlockType::LastElement - 1;
+		for (int x = 0; x < 16; x++)
+		{
+			for (int y = 0; y < 128; y++)
+			{
+				for (int z = 0; z < 16; z++)
+				{	
+					ch->m_Blocks[x][y][z].m_BlockType = static_cast<BlockType>(Random::Int(0, count));		
+				}
+			}
+		}
+
 #endif
 
 	}

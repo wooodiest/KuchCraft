@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Core/Input.h"
+#include "Core/Random.h"
 
 namespace KuchCraft {
 
@@ -11,6 +12,8 @@ namespace KuchCraft {
 	Application::Application()
 	{
 		s_Instance = this;
+
+		Random::Init();
 
 		m_Window = new Window("KuchCraft", 1600, 900, true);
 
