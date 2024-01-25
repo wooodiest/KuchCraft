@@ -16,11 +16,11 @@ namespace KuchCraft {
 #if 0 // Show all blocks
 		auto ch = m_World.GetChunk({ 0.0f, 0.0f,0.0f });
 		int count = (int)BlockType::LastElement - 1;
-		for (int x = 0; x < 16; x++)
+		for (int x = 0; x < chunk_size_X; x++)
 		{
-			for (int y = 0; y < 128; y++)
+			for (int y = 0; y < chunk_size_Y; y++)
 			{
-				for (int z = 0; z < 16; z++)
+				for (int z = 0; z < chunk_size_Z; z++)
 				{
 					if (x % 2 == 0 && y % 2 == 0 && z % 2 == 0)
 					{
@@ -38,11 +38,11 @@ namespace KuchCraft {
 #if 1 // Chunk of random blocks
 		auto ch = m_World.GetChunk({ 0.0f, 0.0f,0.0f });
 		int count = (int)BlockType::LastElement - 1;
-		for (int x = 0; x < 16; x++)
+		for (int x = 0; x < chunk_size_X; x++)
 		{
-			for (int y = 0; y < 128; y++)
+			for (int y = 0; y < chunk_size_Y; y++)
 			{
-				for (int z = 0; z < 16; z++)
+				for (int z = 0; z < chunk_size_Z; z++)
 				{	
 					ch->m_Blocks[x][y][z].m_BlockType = static_cast<BlockType>(Random::Int(0, count));		
 				}

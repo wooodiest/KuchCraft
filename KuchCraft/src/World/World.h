@@ -5,6 +5,11 @@
 
 namespace KuchCraft {
 
+	constexpr int chunk_amount = 8;
+	constexpr int chunk_size_X = 16;
+	constexpr int chunk_size_Y = 128;
+	constexpr int chunk_size_Z = 16;
+
 	enum class BlockType
 	{
 		Air = 0,/*Water,*/
@@ -33,7 +38,7 @@ namespace KuchCraft {
 	public:
 		Chunk(const glm::vec3& position);
 
-		Block m_Blocks[16][128][16];
+		Block m_Blocks[chunk_size_X][chunk_size_Y][chunk_size_Z];
 		glm::vec3 m_Position;
 		void Render();
 

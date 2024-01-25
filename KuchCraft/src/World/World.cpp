@@ -6,13 +6,11 @@
 
 namespace KuchCraft {
 
-	static const int max_chunk_size = 8;
-
 	World::World()
 	{
-		for (int x = 0; x < max_chunk_size; x++)
+		for (int x = 0; x < chunk_amount; x++)
 		{
-			for (int z = 0; z < max_chunk_size; z++)
+			for (int z = 0; z < chunk_amount; z++)
 			{
 				m_Chunks.emplace_back(new Chunk({x * 16.0f, 0.0f, z * 16.0f}));
 			}
@@ -30,9 +28,9 @@ namespace KuchCraft {
 		int position_X = static_cast<int>(position.x / 16.0f);
 		int position_Z = static_cast<int>(position.z / 16.0f);
 
-		if (position_X >= 0 && position_X < max_chunk_size &&
-			position_Z >= 0 && position_Z < max_chunk_size)
-			return m_Chunks[position_Z * max_chunk_size + position_X];
+		if (position_X >= 0 && position_X < chunk_amount &&
+			position_Z >= 0 && position_Z < chunk_amount)
+			return m_Chunks[position_Z * chunk_amount + position_X];
 		else
 			return nullptr;
 		
@@ -45,14 +43,14 @@ namespace KuchCraft {
 
 	void Chunk::Render()
 	{
-		for (int x = 0; x < 16; x++)
+		for (int x = 0; x < chunk_size_X; x++)
 		{
-			for (int y = 0; y < 128; y++) 
+			for (int y = 0; y < chunk_size_Y; y++)
 			{
-				for (int z = 0; z < 16; z++)
+				for (int z = 0; z < chunk_size_Z; z++)
 				{
 					// Always render border blocks
-					if (x == 0 || y == 0 || z == 0 || x == 15 || y == 127 || z == 15 )
+					if (x == 0 || y == 0 || z == 0 || x == chunk_size_X - 1 || y == chunk_size_Y - 1 || z == chunk_size_Z - 1)
 					{
 						if (m_Blocks[x][y][z].m_BlockType != BlockType::Air)
 							Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
