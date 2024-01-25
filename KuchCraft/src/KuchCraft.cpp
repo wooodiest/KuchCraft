@@ -8,6 +8,7 @@
 #include "Renderer/Renderer.h"
 #include <iostream>
 #include "Core/Random.h"
+#include "Renderer/Renderer.h"
 
 namespace KuchCraft {
 
@@ -55,28 +56,30 @@ namespace KuchCraft {
 
 	KuchCraft::~KuchCraft()
 	{
-
+		Renderer::ShutDown();
 	}
 
 	void KuchCraft::Init()
 	{
-
+		Renderer::Init();
 	}
 
 	void KuchCraft::OnUpdate(float dt)
 	{
 		m_Player.OnUpdate(dt);
 
-		m_Renderer.BeginScene(m_Player.GetCamera());
+		Renderer::ResetStats();
+		Renderer::BeginScene(m_Player.GetCamera());
 
 		m_World.GetChunk({ 0.0f, 0.0f,0.0f })->Render();
 
-		m_Renderer.EndScene();
+		Renderer::EndScene();
+		std::cout << "Draw calls: " << Renderer::GetStats().DrawCalls << std::endl;
 	}
 
 	void KuchCraft::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
-		Renderer::Get().OnViewportSizeChanged(width, height);
+		Renderer::OnViewportSizeChanged(width, height);
 	}
 
 }

@@ -53,7 +53,7 @@ namespace KuchCraft {
 					if (x == 0 || y == 0 || z == 0 || x == chunk_size_X - 1 || y == chunk_size_Y - 1 || z == chunk_size_Z - 1)
 					{
 						if (m_Blocks[x][y][z].m_BlockType != BlockType::Air)
-							Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
+							Renderer::DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
 						continue;
 					}
 
@@ -64,34 +64,34 @@ namespace KuchCraft {
 					// TODO: we do not have to check all blocks every time
 					if (m_Blocks[x - 1][y][z].m_BlockType == BlockType::Air)
 					{
-						Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
+						Renderer::DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
 						continue;
 					}
 					if (m_Blocks[x + 1][y][z].m_BlockType == BlockType::Air)
 					{
-						Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
+						Renderer::DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
 						continue;
 					}
 					
 					if (m_Blocks[x][y - 1][z].m_BlockType == BlockType::Air)
 					{
-						Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
+						Renderer::DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
 						continue;
 					}
 					if (m_Blocks[x][y + 1][z].m_BlockType == BlockType::Air)
 					{
-						Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
+						Renderer::DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
 						continue;
 					}
 
 					if (m_Blocks[x][y][z - 1].m_BlockType == BlockType::Air)
 					{
-						Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
+						Renderer::DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
 						continue;
 					}
 					if (m_Blocks[x][y][z + 1].m_BlockType == BlockType::Air)
 					{
-						Renderer::Get().DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
+						Renderer::DrawCube(glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z), m_Blocks[x][y][z]);
 						continue;
 					}
 				}

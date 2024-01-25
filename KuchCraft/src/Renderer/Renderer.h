@@ -18,37 +18,33 @@ namespace KuchCraft {
 	class Renderer
 	{
 	public:
-		Renderer();
-		~Renderer();
+		static void Init();
+		static void ShutDown();
 
-		inline static Renderer& Get() { return *s_Instance; }
-		inline RendererStatistics& GetStats() { return m_Stats; }
+		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
-		void OnViewportSizeChanged(uint32_t width, uint32_t height);
+		static uint32_t GetTexture(const Block& block);
+		static void     LoadTextureAtlas();
+		static uint32_t LoadTextureToAtals(const std::string& path);
 
-		void ShutDown();
+		static void Flush();
+		static void StartBatch();
+		static void NextBatch();
 
-		uint32_t GetTexture(const Block& block);
-		void LoadTextureAtlas();
-		uint32_t LoadTexture(const std::string& path);
+		static void BeginScene(const Camera& camera);
+		static void EndScene();
 
-		void Flush();
-		void StartBatch();
-		void NextBatch();
+		static void ResetStats();
+		static RendererStatistics& GetStats() { return s_Stats; }
 
-		void BeginScene(const Camera& camera);
-		void EndScene();
-
-		void DrawCube(const glm::vec3& position, const Block& block);
-
-		RendererStatistics m_Stats;
+		static void DrawCube(const glm::vec3& position, const Block& block);
 
 	private:
-		std::unordered_map<BlockType, unsigned int> m_BlockTextureAtlas;
-		std::unordered_map<BlockType, std::string> m_BlockTexturePathsAtlas;
+		Renderer() = default;
 
-	private:
-		static Renderer* s_Instance;
+		static RendererStatistics s_Stats;
+		static std::unordered_map<BlockType, unsigned int> s_BlockTextureAtlas;
+		static std::unordered_map<BlockType, std::string>  s_BlockTexturePathsAtlas;
 
 	};
 

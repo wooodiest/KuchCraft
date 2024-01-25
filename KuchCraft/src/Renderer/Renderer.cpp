@@ -10,7 +10,9 @@
 
 namespace KuchCraft {
 
-	Renderer* Renderer::s_Instance = nullptr;
+	RendererStatistics Renderer::s_Stats;
+	std::unordered_map<BlockType, unsigned int> Renderer::s_BlockTextureAtlas;
+	std::unordered_map<BlockType, std::string>  Renderer::s_BlockTexturePathsAtlas;
 
 	// Cube vertex
 	struct Vertex
@@ -78,7 +80,7 @@ namespace KuchCraft {
 		static const uint32_t MaxQuads        = 20004; // % 6 == 0
 		static const uint32_t MaxVertices     = MaxQuads * 4;
 		static const uint32_t MaxIndices      = MaxQuads * 6;
-		static const uint32_t MaxTextureSlots = 48;
+		static const uint32_t MaxTextureSlots = 32;
 
 		uint32_t VertexArray;
 		uint32_t VertexBuffer;
@@ -95,10 +97,112 @@ namespace KuchCraft {
 	static RendererData s_Data;
 
 	// Declarations
-	Renderer::Renderer()
+	void Renderer::Flush()
 	{
-		s_Instance = this;
+		if (s_Data.IndexCount == 0) // Nothing to draw
+			return;
 
+		// Upload data
+		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.VertexBufferPtr - (uint8_t*)s_Data.VertexBufferBase);
+		glBindVertexArray(s_Data.VertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, s_Data.VertexBufferBase);
+
+		// Bind textures
+		s_Data.Shader.Bind();
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
+			glBindTextureUnit(i, s_Data.TextureSlots[i]);
+		
+		// Draw elements		
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
+		glDrawElements(GL_TRIANGLES, s_Data.IndexCount, GL_UNSIGNED_INT, nullptr);
+
+		// Update stats
+		Renderer::s_Stats.DrawCalls++;
+	}
+
+	void Renderer::StartBatch()
+	{
+		// Reset current data
+		s_Data.IndexCount = 0;
+		s_Data.VertexBufferPtr = s_Data.VertexBufferBase;
+		s_Data.TextureSlotIndex = 1;
+	}
+
+	void Renderer::NextBatch()
+	{
+		// Draw and reset
+		Flush();
+		StartBatch();
+	}
+
+	void Renderer::BeginScene(const Camera& camera)
+	{
+		// Set uniform: view-projection matrix
+		s_Data.Shader.Bind();
+		s_Data.Shader.SetMat4("u_ViewProjection", camera.GetViewProjection());
+
+		// Start collecting data to draw
+		StartBatch();
+	}
+
+	void Renderer::EndScene()
+	{
+		// Render remaining data
+		Flush();
+	}
+
+	void Renderer::ResetStats()
+	{
+		s_Stats.DrawCalls = 0;
+		s_Stats.Triangles = 0;
+	}
+
+	void Renderer::DrawCube(const glm::vec3& position, const Block& block)
+	{
+		// If currently we store too many data to draw. Draw what we have and start collecting data again. 
+		if (s_Data.IndexCount >= s_Data.MaxIndices)
+			NextBatch();
+
+		// Checking what texture slot to use
+		float textureIndex = 0.0f;
+		uint32_t block_texture = GetTexture(block);
+		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+		{
+			if (s_Data.TextureSlots[i] == block_texture)
+			{
+				textureIndex = (float)i;
+				break;
+			}
+		}
+		if (textureIndex == 0.0f) // If still 0: Is every slot occupied or we have new texture
+		{
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
+				NextBatch();
+
+			textureIndex = (float)s_Data.TextureSlotIndex;
+			s_Data.TextureSlots[s_Data.TextureSlotIndex] = block_texture;
+			s_Data.TextureSlotIndex++;
+		}
+
+		// Applying transform to all vertices  
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
+		for (size_t i = 0; i < cube_vertex_count; i++)
+		{
+			s_Data.VertexBufferPtr->Position = transform * cube_vertex_positions[i];
+			s_Data.VertexBufferPtr->TexCoord = cube_texture_coordinates[i];
+			s_Data.VertexBufferPtr->TexIndex = textureIndex;
+
+			s_Data.VertexBufferPtr++;
+		}
+		s_Data.IndexCount += cube_indices_count;
+
+		// Update stats
+		s_Stats.Triangles += cube_triangles;
+	}
+
+	void Renderer::Init()
+	{
 		// Setup viewport
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
@@ -160,114 +264,6 @@ namespace KuchCraft {
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
-	Renderer::~Renderer()
-	{
-		ShutDown();
-	}
-
-	void Renderer::Flush()
-	{
-		if (s_Data.IndexCount == 0) // Nothing to draw
-			return;
-
-		// Upload data
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.VertexBufferPtr - (uint8_t*)s_Data.VertexBufferBase);
-		glBindVertexArray(s_Data.VertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, s_Data.VertexBufferBase);
-
-		// Bind textures
-		s_Data.Shader.Bind();
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-			glBindTextureUnit(i, s_Data.TextureSlots[i]);
-		
-		// Draw elements		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
-		glDrawElements(GL_TRIANGLES, s_Data.IndexCount, GL_UNSIGNED_INT, nullptr);
-
-		// Update stats
-		m_Stats.DrawCalls++;
-	}
-
-	void Renderer::StartBatch()
-	{
-		// Reset current data
-		s_Data.IndexCount = 0;
-		s_Data.VertexBufferPtr = s_Data.VertexBufferBase;
-		s_Data.TextureSlotIndex = 1;
-	}
-
-	void Renderer::NextBatch()
-	{
-		// Draw and reset
-		Flush();
-		StartBatch();
-	}
-
-	void Renderer::BeginScene(const Camera& camera)
-	{
-		// Set uniform: view-projection matrix
-		s_Data.Shader.Bind();
-		s_Data.Shader.SetMat4("u_ViewProjection", camera.GetViewProjection());
-
-		// Start collecting data to draw
-		StartBatch();
-	}
-
-	void Renderer::EndScene()
-	{
-		// Render remaining data
-		Flush();
-
-		// Reset and print stats
-		std::cout << "Draw calls: " << m_Stats.DrawCalls << ", Triangles: " << m_Stats.Triangles << std::endl;
-		m_Stats.DrawCalls = 0;
-		m_Stats.Triangles = 0;
-	}
-
-	void Renderer::DrawCube(const glm::vec3& position, const Block& block)
-	{
-		// If currently we store too many data to draw. Draw what we have and start collecting data again. 
-		if (s_Data.IndexCount >= s_Data.MaxIndices)
-			NextBatch();
-
-		// Checking what texture slot to use
-		float textureIndex = 0.0f;
-		uint32_t block_texture = GetTexture(block);
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-		{
-			if (s_Data.TextureSlots[i] == block_texture)
-			{
-				textureIndex = (float)i;
-				break;
-			}
-		}
-		if (textureIndex == 0.0f) // If still 0: Is every slot occupied or we have new texture
-		{
-			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
-				NextBatch();
-
-			textureIndex = (float)s_Data.TextureSlotIndex;
-			s_Data.TextureSlots[s_Data.TextureSlotIndex] = block_texture;
-			s_Data.TextureSlotIndex++;
-		}
-
-		// Applying transform to all vertices  
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-		for (size_t i = 0; i < cube_vertex_count; i++)
-		{
-			s_Data.VertexBufferPtr->Position = transform * cube_vertex_positions[i];
-			s_Data.VertexBufferPtr->TexCoord = cube_texture_coordinates[i];
-			s_Data.VertexBufferPtr->TexIndex = textureIndex;
-
-			s_Data.VertexBufferPtr++;
-		}
-		s_Data.IndexCount += cube_indices_count;
-
-		// Update stats
-		m_Stats.Triangles += cube_triangles;
-	}
-
 	void Renderer::ShutDown()
 	{
 		// free memmory
@@ -280,37 +276,37 @@ namespace KuchCraft {
 
 	uint32_t Renderer::GetTexture(const Block& block)
 	{
-		return m_BlockTextureAtlas[block.m_BlockType];
+		return s_BlockTextureAtlas[block.m_BlockType];
 	}
 
 	void Renderer::LoadTextureAtlas()
 	{
 		// Pair blocktype with texture
-		m_BlockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
-		m_BlockTexturePathsAtlas[BlockType::Bricks]        = "bricks";
-		m_BlockTexturePathsAtlas[BlockType::CoalOre]       = "coal_ore";
-		m_BlockTexturePathsAtlas[BlockType::Cobblestone]   = "cobblestone";
-		m_BlockTexturePathsAtlas[BlockType::CraftingTable] = "crafting_table";
-		m_BlockTexturePathsAtlas[BlockType::DiamondOre]    = "diamond_ore";
-		m_BlockTexturePathsAtlas[BlockType::Dioryte]       = "dioryte";
-		m_BlockTexturePathsAtlas[BlockType::Dirt]          = "dirt";
-		m_BlockTexturePathsAtlas[BlockType::Furnace]       = "furnace";
-		m_BlockTexturePathsAtlas[BlockType::Granite]       = "granite";
-		m_BlockTexturePathsAtlas[BlockType::Grass]         = "grass";
-		m_BlockTexturePathsAtlas[BlockType::Gravel]        = "gravel";
-		m_BlockTexturePathsAtlas[BlockType::IronOre]       = "iron_ore";
-		m_BlockTexturePathsAtlas[BlockType::OakLog]        = "oak_log";
-		m_BlockTexturePathsAtlas[BlockType::OakPlanks]     = "oak_planks";
-		m_BlockTexturePathsAtlas[BlockType::Sand]          = "sand";
-		m_BlockTexturePathsAtlas[BlockType::Stone]         = "stone";
-		m_BlockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
+		s_BlockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
+		s_BlockTexturePathsAtlas[BlockType::Bricks]        = "bricks";
+		s_BlockTexturePathsAtlas[BlockType::CoalOre]       = "coal_ore";
+		s_BlockTexturePathsAtlas[BlockType::Cobblestone]   = "cobblestone";
+		s_BlockTexturePathsAtlas[BlockType::CraftingTable] = "crafting_table";
+		s_BlockTexturePathsAtlas[BlockType::DiamondOre]    = "diamond_ore";
+		s_BlockTexturePathsAtlas[BlockType::Dioryte]       = "dioryte";
+		s_BlockTexturePathsAtlas[BlockType::Dirt]          = "dirt";
+		s_BlockTexturePathsAtlas[BlockType::Furnace]       = "furnace";
+		s_BlockTexturePathsAtlas[BlockType::Granite]       = "granite";
+		s_BlockTexturePathsAtlas[BlockType::Grass]         = "grass";
+		s_BlockTexturePathsAtlas[BlockType::Gravel]        = "gravel";
+		s_BlockTexturePathsAtlas[BlockType::IronOre]       = "iron_ore";
+		s_BlockTexturePathsAtlas[BlockType::OakLog]        = "oak_log";
+		s_BlockTexturePathsAtlas[BlockType::OakPlanks]     = "oak_planks";
+		s_BlockTexturePathsAtlas[BlockType::Sand]          = "sand";
+		s_BlockTexturePathsAtlas[BlockType::Stone]         = "stone";
+		s_BlockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
 
 		// Load all textures to gpu
 		std::string mainPath = "assets/textures/";
-		for (const auto& texture : m_BlockTexturePathsAtlas)
+		for (const auto& texture : s_BlockTexturePathsAtlas)
 		{
 			std::string path = mainPath + texture.second + ".png";
-			m_BlockTextureAtlas[texture.first] = LoadTexture(path);
+			s_BlockTextureAtlas[texture.first] = LoadTextureToAtals(path);
 		}
 	}
 
@@ -319,7 +315,7 @@ namespace KuchCraft {
 		glViewport(0, 0, width, height);
 	}
 
-	uint32_t Renderer::LoadTexture(const std::string& path)
+	uint32_t Renderer::LoadTextureToAtals(const std::string& path)
 	{
 		uint32_t texture = 0;
 		glGenTextures(1, &texture);
