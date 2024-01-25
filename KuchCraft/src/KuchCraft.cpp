@@ -65,9 +65,9 @@ namespace KuchCraft {
 
 	void KuchCraft::OnUpdate(float dt)
 	{
-		m_Camera.OnUpdate(dt);
+		m_Player.OnUpdate(dt);
 
-		m_Renderer.BeginScene(m_Camera);
+		m_Renderer.BeginScene(m_Player.GetCamera());
 
 		m_World.GetChunk({ 0.0f, 0.0f,0.0f })->Render();
 

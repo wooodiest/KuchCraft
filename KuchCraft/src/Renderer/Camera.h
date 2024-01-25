@@ -4,13 +4,27 @@
 
 namespace KuchCraft {
 
+	enum class KeyboardMovement
+	{
+		Forward = 0,Backward,
+		Left, Right,
+		Up, Down
+	};
+
 	class Camera
 	{
 	public:
 		Camera();
 		~Camera();
 
-		void OnUpdate(float dt);
+		void OnUpdate();
+		void OnKeyboardMovement(KeyboardMovement m, bool sprint = false);
+		void OnMouseMovement();
+
+		void SetData(const glm::vec3& position, const glm::vec2& rotation, float speed, float sprintSpeed, float dt) {
+			m_Position = position; m_Pitch = rotation.y;
+			m_Yaw = rotation.x; m_Speed = speed; m_SprintSpeed = sprintSpeed; m_DeltaTime = dt;
+		}
 
 		void UpdateProjection();
 		void UpdateView();
@@ -21,6 +35,7 @@ namespace KuchCraft {
 		const glm::mat4& GetViewProjection() const { return m_Projection * m_View; }
 
 		const glm::vec3& GetPosition()       const { return m_Position; }
+		const glm::vec2& GetRotation()       const { return glm::vec2(m_Yaw, m_Pitch); }
 
 	private:
 		glm::mat4 m_Projection{ 1.0f };
@@ -40,8 +55,10 @@ namespace KuchCraft {
 		float m_Far         = 1000.0f;
 		float m_AspectRatio = 16.0f / 9.0f;
 
-		float m_Speed       = 5.5f;
+		float m_Speed       = 4.0f;
+		float m_SprintSpeed = 6.0f;
 		float m_Sensitivity = 0.075f;
+		float m_DeltaTime   = 0.0f;
 
 	};
 

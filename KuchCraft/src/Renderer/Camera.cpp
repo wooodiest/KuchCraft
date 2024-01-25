@@ -22,43 +22,41 @@ namespace KuchCraft {
 	{
 	}
 
-	void Camera::OnUpdate(float dt)
+	void Camera::OnUpdate()
 	{
-		float speed = Input::IsKeyPressed(KeyCode::LeftShift) ? m_Speed * 2.0f : m_Speed;
-
-		if (Input::IsKeyPressed(KeyCode::W))
-			m_Position += speed * dt * m_Front;
-		if (Input::IsKeyPressed(KeyCode::S))
-			m_Position -= speed * dt * m_Front;
-
-		if (Input::IsKeyPressed(KeyCode::A))
-			m_Position -= glm::normalize(glm::cross(m_Front, m_Up)) * speed * dt;
-		if (Input::IsKeyPressed(KeyCode::D))
-			m_Position += glm::normalize(glm::cross(m_Front, m_Up)) * speed * dt;
-
-		if (Input::IsKeyPressed(KeyCode::Space))
-			m_Position.y += m_Speed * dt;
-		if (Input::IsKeyPressed(KeyCode::LeftControl))
-			m_Position.y -= m_Speed * dt;
-
-
-		glm::vec2 position = Input::GetMousePosition();
-		glm::vec2 deltaPosition = position - m_PrevMousePosition;
-		m_PrevMousePosition = position;
-
-		m_Yaw   += m_Sensitivity * dt * deltaPosition.x;
-		m_Pitch -= m_Sensitivity * dt * deltaPosition.y;
-
-		if (m_Pitch > glm::radians(89.0f))
-			m_Pitch = glm::radians(89.0f);
-
-		if (m_Pitch < glm::radians(-89.0f))
-			m_Pitch = glm::radians(-89.0f);
-
 		UpdateFront();
 		UpdateView(); 
+	}
 
-		//std::cout << "Position: (" << m_Position.x << ", " << m_Position.y << ", " << m_Position.z << ")" << std::endl;
+	void Camera::OnKeyboardMovement(KeyboardMovement m, bool sprint)
+	{
+		float speed = sprint ? m_SprintSpeed : m_Speed;
+		switch (m)
+		{
+			case KuchCraft::KeyboardMovement::Forward:  m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
+			case KuchCraft::KeyboardMovement::Backward: m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
+			case KuchCraft::KeyboardMovement::Left:     m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
+			case KuchCraft::KeyboardMovement::Right:    m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
+			case KuchCraft::KeyboardMovement::Up:       m_Position.y += speed * m_DeltaTime;                                                               break;
+			case KuchCraft::KeyboardMovement::Down:     m_Position.y -= speed * m_DeltaTime;                                                               break;
+			default: break;
+		}
+	}
+
+	void Camera::OnMouseMovement()
+	{
+		glm::vec2 position      = Input::GetMousePosition();
+		glm::vec2 deltaPosition = position - m_PrevMousePosition;
+		m_PrevMousePosition     = position;
+
+		m_Yaw   += m_Sensitivity * m_DeltaTime * deltaPosition.x;
+		m_Pitch -= m_Sensitivity * m_DeltaTime * deltaPosition.y;
+
+		if (m_Pitch > glm::radians(89.9f))
+			m_Pitch = glm::radians(89.9f);
+
+		if (m_Pitch < glm::radians(-89.9f))
+			m_Pitch = glm::radians(-89.9f);
 	}
 
 	void Camera::UpdateProjection()

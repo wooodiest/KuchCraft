@@ -36,7 +36,7 @@ namespace KuchCraft {
 		void StartBatch();
 		void NextBatch();
 
-		void BeginScene(Camera& camera);
+		void BeginScene(const Camera& camera);
 		void EndScene();
 
 		void DrawCube(const glm::vec3& position, const Block& block);

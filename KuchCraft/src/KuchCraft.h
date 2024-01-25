@@ -2,7 +2,7 @@
 
 #include "Renderer/Renderer.h"
 #include "Renderer/Shader.h"
-#include "Renderer/Camera.h"
+#include "Game/Player.h"
 #include "World/World.h"
 
 namespace KuchCraft {
@@ -21,7 +21,7 @@ namespace KuchCraft {
 	private:
 		Renderer m_Renderer;
 		World m_World;
-		Camera m_Camera;
+		Player m_Player;
 
 	};
 

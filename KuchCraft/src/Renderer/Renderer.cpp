@@ -204,7 +204,7 @@ namespace KuchCraft {
 		StartBatch();
 	}
 
-	void Renderer::BeginScene(Camera& camera)
+	void Renderer::BeginScene(const Camera& camera)
 	{
 		// Set uniform: view-projection matrix
 		s_Data.Shader.Bind();
