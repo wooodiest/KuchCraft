@@ -19,6 +19,12 @@ namespace KuchCraft {
 		}
 	}
 
+	World::~World()
+	{
+		for (auto& v : m_Chunks)
+			delete v;
+	}
+
 	Chunk* World::GetChunk(const glm::vec3& position)
 	{
 		int position_X = static_cast<int>(position.x / 16.0f);

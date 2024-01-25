@@ -43,6 +43,7 @@ namespace KuchCraft {
 	{
 	public:
 		World();
+		~World();
 		Chunk* GetChunk(const glm::vec3& position);
 
 	private:

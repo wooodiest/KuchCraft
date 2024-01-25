@@ -23,15 +23,15 @@ namespace KuchCraft {
 	// Cube vertex data
 	constexpr size_t cube_vertex_count  = 24;
 	constexpr size_t cube_indices_count = 36;
-	constexpr size_t cube_triangles     = 12;
+	constexpr size_t cube_triangles     = 12 / 2; // Face culling
 	constexpr glm::vec4 cube_vertex_positions[cube_vertex_count] =
 	{
-		// Top
-		{ 0.0f, 0.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 0.0f, 1.0f },
-		{ 0.0f, 0.0f, 0.0f, 1.0f },
 		// Bottom
+		{ 1.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f },
+		{ 0.0f, 0.0f, 0.0f, 1.0f },
+		{ 1.0f, 0.0f, 0.0f, 1.0f },
+		// Top
 		{ 0.0f, 1.0f, 1.0f, 1.0f },
 		{ 1.0f, 1.0f, 1.0f, 1.0f },
 		{ 1.0f, 1.0f, 0.0f, 1.0f },
@@ -58,9 +58,9 @@ namespace KuchCraft {
 		{ 0.0f, 1.0f, 0.0f, 1.0f }
 	};
 	constexpr glm::vec2 cube_texture_coordinates[cube_vertex_count] = {
-		// Top
-		{ 0.0f,  0.0f }, { 0.25f, 0.0f }, { 0.25f, 0.5f }, { 0.0f,  0.5f },
 		// Bottom
+		{ 0.25f, 0.0f }, { 0.0f,  0.0f }, { 0.0f,  0.5f }, { 0.25f, 0.5f },
+		// Top
 		{ 0.25f, 0.0f }, { 0.5f,  0.0f }, { 0.5f,  0.5f }, { 0.25f, 0.5f },
 		// Front
 		{ 0.0f,  0.5f }, { 0.25f, 0.5f }, { 0.25f, 1.0f }, { 0.0f,  1.0f },
@@ -103,6 +103,10 @@ namespace KuchCraft {
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
+		// Face culling (to check)
+		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CCW);
+		glCullFace(GL_BACK);
 
 		// Create vertex array
 		glGenVertexArrays(1, &s_Data.VertexArray);
@@ -152,6 +156,8 @@ namespace KuchCraft {
 		s_Data.Shader.SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
 		LoadTextureAtlas();
+
+		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	Renderer::~Renderer()
