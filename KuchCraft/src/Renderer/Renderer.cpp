@@ -1,12 +1,13 @@
 #include "Renderer.h"
 
-#include <memory>
 #include <array>
 #include <iostream>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glad/glad.h>
 #include <stb_image.h>
+
+#include "Shader.h"
 #include "Core/Application.h"
+#include "World/World.h"
 
 namespace KuchCraft {
 
@@ -14,70 +15,10 @@ namespace KuchCraft {
 	std::unordered_map<BlockType, unsigned int> Renderer::s_BlockTextureAtlas;
 	std::unordered_map<BlockType, std::string>  Renderer::s_BlockTexturePathsAtlas;
 
-	// Cube vertex
-	struct Vertex
-	{
-		glm::vec3 Position;
-		glm::vec2 TexCoord;
-		float     TexIndex;
-	};
-
-	// Cube vertex data
-	constexpr size_t cube_vertex_count  = 24;
-	constexpr size_t cube_indices_count = 36;
-	constexpr size_t cube_triangles     = 12 / 2; // Face culling
-	constexpr glm::vec4 cube_vertex_positions[cube_vertex_count] =
-	{
-		// Bottom
-		{ 1.0f, 0.0f, 1.0f, 1.0f },
-		{ 0.0f, 0.0f, 1.0f, 1.0f },
-		{ 0.0f, 0.0f, 0.0f, 1.0f },
-		{ 1.0f, 0.0f, 0.0f, 1.0f },
-		// Top
-		{ 0.0f, 1.0f, 1.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f },
-		{ 1.0f, 1.0f, 0.0f, 1.0f },
-		{ 0.0f, 1.0f, 0.0f, 1.0f },
-		// Front
-		{ 0.0f, 0.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 1.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f },
-		{ 0.0f, 1.0f, 1.0f, 1.0f },
-		// Right
-		{ 1.0f, 0.0f, 1.0f, 1.0f },
-		{ 1.0f, 0.0f, 0.0f, 1.0f },
-		{ 1.0f, 1.0f, 0.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f, 1.0f },
-		// Behind
-		{ 1.0f, 0.0f, 0.0f, 1.0f },
-		{ 0.0f, 0.0f, 0.0f, 1.0f },
-		{ 0.0f, 1.0f, 0.0f, 1.0f },
-		{ 1.0f, 1.0f, 0.0f, 1.0f },
-		// Left
-		{ 0.0f, 0.0f, 0.0f, 1.0f },
-		{ 0.0f, 0.0f, 1.0f, 1.0f },
-		{ 0.0f, 1.0f, 1.0f, 1.0f },
-		{ 0.0f, 1.0f, 0.0f, 1.0f }
-	};
-	constexpr glm::vec2 cube_texture_coordinates[cube_vertex_count] = {
-		// Bottom
-		{ 0.25f, 0.0f }, { 0.0f,  0.0f }, { 0.0f,  0.5f }, { 0.25f, 0.5f },
-		// Top
-		{ 0.25f, 0.0f }, { 0.5f,  0.0f }, { 0.5f,  0.5f }, { 0.25f, 0.5f },
-		// Front
-		{ 0.0f,  0.5f }, { 0.25f, 0.5f }, { 0.25f, 1.0f }, { 0.0f,  1.0f },
-		// Right
-		{ 0.25f, 0.5f }, { 0.5f,  0.5f }, { 0.5f,  1.0f }, { 0.25f, 1.0f },
-		// Behind
-		{ 0.5f,  0.5f }, { 0.75f, 0.5f }, { 0.75f, 1.0f }, { 0.5f,  1.0f },
-		// Left
-		{ 0.75f, 0.5f }, { 1.0f,  0.5f }, { 1.0f,  1.0f }, { 0.75f, 1.0f },
-	};
-
 	// Renderer data
 	struct RendererData
 	{
-		static const uint32_t MaxQuads        = 20004; // % 6 == 0
+		static const uint32_t MaxQuads        = 20000; // 44004
 		static const uint32_t MaxVertices     = MaxQuads * 4;
 		static const uint32_t MaxIndices      = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32;
@@ -155,50 +96,50 @@ namespace KuchCraft {
 	void Renderer::ResetStats()
 	{
 		s_Stats.DrawCalls = 0;
-		s_Stats.Triangles = 0;
+		s_Stats.Quads = 0;
 	}
 
-	void Renderer::DrawCube(const glm::vec3& position, const Block& block)
+	void Renderer::DrawList(std::vector<Vertex>& vertices, const std::vector<BlockType>& textures)
 	{
-		// If currently we store too many data to draw. Draw what we have and start collecting data again. 
-		if (s_Data.IndexCount >= s_Data.MaxIndices)
-			NextBatch();
-
-		// Checking what texture slot to use
-		float textureIndex = 0.0f;
-		uint32_t block_texture = GetTexture(block);
-		for (uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
+		for (int i = 0; i < vertices.size(); i += 4)
 		{
-			if (s_Data.TextureSlots[i] == block_texture)
-			{
-				textureIndex = (float)i;
-				break;
-			}
-		}
-		if (textureIndex == 0.0f) // If still 0: Is every slot occupied or we have new texture
-		{
-			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
+			// If currently we store too many data to draw. Draw what we have and start collecting data again. 
+			if (s_Data.IndexCount >= s_Data.MaxIndices)
 				NextBatch();
 
-			textureIndex = (float)s_Data.TextureSlotIndex;
-			s_Data.TextureSlots[s_Data.TextureSlotIndex] = block_texture;
-			s_Data.TextureSlotIndex++;
+			float textureIndex = 0.0f;
+			uint32_t texture = GetTexture(textures[i / 4]); // 4 vertices has one texture
+
+			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
+			{
+				if (j < s_Data.TextureSlotIndex && s_Data.TextureSlots[j] == texture)
+				{
+					textureIndex = (float)j;
+					break;
+				}
+			}
+
+			if (textureIndex == 0.0f) // Is every slot occupied or we have new texture ?
+			{
+				if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
+					NextBatch();
+
+				textureIndex = (float)s_Data.TextureSlotIndex;
+				s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
+				s_Data.TextureSlotIndex++;
+			}
+
+			for (int j = 0; j < 4; j++)
+			{
+				s_Data.VertexBufferPtr->Position = vertices[i + j].Position;
+				s_Data.VertexBufferPtr->TexCoord = vertices[i + j].TexCoord;
+				s_Data.VertexBufferPtr->TexIndex = textureIndex;
+
+				s_Data.VertexBufferPtr++;
+			}
+			s_Data.IndexCount += quad_index_count;
+			s_Stats.Quads++;
 		}
-
-		// Applying transform to all vertices  
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-		for (size_t i = 0; i < cube_vertex_count; i++)
-		{
-			s_Data.VertexBufferPtr->Position = transform * cube_vertex_positions[i];
-			s_Data.VertexBufferPtr->TexCoord = cube_texture_coordinates[i];
-			s_Data.VertexBufferPtr->TexIndex = textureIndex;
-
-			s_Data.VertexBufferPtr++;
-		}
-		s_Data.IndexCount += cube_indices_count;
-
-		// Update stats
-		s_Stats.Triangles += cube_triangles;
 	}
 
 	void Renderer::Init()
@@ -207,10 +148,6 @@ namespace KuchCraft {
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
-		// Face culling (to check)
-		glEnable(GL_CULL_FACE);
-		glFrontFace(GL_CCW);
-		glCullFace(GL_BACK);
 
 		// Create vertex array
 		glGenVertexArrays(1, &s_Data.VertexArray);
@@ -261,7 +198,7 @@ namespace KuchCraft {
 
 		LoadTextureAtlas();
 
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	void Renderer::ShutDown()
@@ -274,9 +211,9 @@ namespace KuchCraft {
 		glDeleteVertexArrays(1, &s_Data.VertexArray);
 	}
 
-	uint32_t Renderer::GetTexture(const Block& block)
+	uint32_t Renderer::GetTexture(const BlockType& type)
 	{
-		return s_BlockTextureAtlas[block.m_BlockType];
+		return s_BlockTextureAtlas[type];
 	}
 
 	void Renderer::LoadTextureAtlas()
