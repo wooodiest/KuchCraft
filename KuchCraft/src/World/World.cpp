@@ -13,15 +13,7 @@ namespace KuchCraft {
 
 	void World::Init()
 	{
-		s_Chunks.reserve(world_chunk_size * world_chunk_size);
-
-		for (int z = 0; z < world_chunk_size; z++)
-		{
-			for (int x = 0; x < world_chunk_size; x++)
-			{
-				s_Chunks.emplace_back(new Chunk({ x * chunk_size_XZ, 0.0f, z * chunk_size_XZ }));
-			}
-		}
+		s_Chunks.resize(world_chunk_size * world_chunk_size);
 	}
 
 	void World::Shutdown()
@@ -88,20 +80,21 @@ namespace KuchCraft {
 
 		if (index >= 0 && index < s_Chunks.size())
 		{
-			Chunk* chunk = s_Chunks[index];
-
-			if (chunk == nullptr)
-			{
-				// create chunk
-			}
-
-			if (chunk->NeedToBuild())
-				chunk->Build();
-
+			if (s_Chunks[index] == nullptr)
+				s_Chunks[index] = new Chunk(World::CalculateChunkAbsolutePosition(position));
+			
+			if (s_Chunks[index]->NeedToBuild())
+				s_Chunks[index]->Build();
+			
 			return s_Chunks[index];
 		}
 		
 		return nullptr;
+	}
+
+	const glm::vec3& World::CalculateChunkAbsolutePosition(const glm::vec3& position)
+	{
+		return { position.x - std::fmod(position.x, chunk_size_XZ), 0.0f, position.z - std::fmod(position.z, chunk_size_XZ) };
 	}
 
 	Chunk::Chunk(const glm::vec3& position)

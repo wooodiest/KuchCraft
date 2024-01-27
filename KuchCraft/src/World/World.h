@@ -87,6 +87,8 @@ namespace KuchCraft {
 		static std::vector<Chunk*>& GetChunks()       { return s_Chunks; }
 		static std::vector<Chunk*>& GetChunksToDraw() { return s_ChunksToDraw; }
 
+		static const glm::vec3& CalculateChunkAbsolutePosition(const glm::vec3& position);
+
 	private:
 		static uint32_t            s_RenderDistance;
 		static std::vector<Chunk*> s_Chunks;
