@@ -31,6 +31,7 @@ namespace KuchCraft {
 	{
 	public:
 		BlockType blockType = BlockType::Air;
+		static bool IsTranspaent(const Block& block);
 
 		operator BlockType()                     const { return  blockType;                    }
 		bool operator ==(const Block& other)     const { return  blockType == other.blockType; }

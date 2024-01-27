@@ -118,44 +118,44 @@ namespace KuchCraft {
 					if (x == 0)
 					{
 						checkLeft = false;
-						if (leftChunk && leftChunk->blocks[chunk_size_X - 1][y][z] == BlockType::Air)
+						if (leftChunk && Block::IsTranspaent(leftChunk->blocks[chunk_size_X - 1][y][z]))
 							AddToDrawList(transform, vertices_left, x, y, z);
 					}
 					else if (x == chunk_size_X - 1)
 					{
 						checkRight = false;
-						if (rightChunk && rightChunk->blocks[0][y][z] == BlockType::Air)
+						if (rightChunk && Block::IsTranspaent(rightChunk->blocks[0][y][z]))
 							AddToDrawList(transform, vertices_right, x, y, z);
 					}
 					if (z == 0)
 					{
 						checkBehind = false;
-						if (behindChunk && behindChunk->blocks[x][y][chunk_size_Z - 1] == BlockType::Air)
+						if (behindChunk && Block::IsTranspaent(behindChunk->blocks[x][y][chunk_size_Z - 1]))
 							AddToDrawList(transform, vertices_behind, x, y, z);
 					}
 					else if (z == chunk_size_Z - 1)
 					{
 						checkFront = false;
-						if (frontChunk && frontChunk->blocks[x][y][0] == BlockType::Air)
+						if (frontChunk && Block::IsTranspaent(frontChunk->blocks[x][y][0]))
 							AddToDrawList(transform, vertices_front, x, y, z);
 					}
 					// Rest of bloks
-					if (checkBottom && blocks[x][y - 1][z] == BlockType::Air) 
+					if (checkBottom && Block::IsTranspaent(blocks[x][y - 1][z]))
 						AddToDrawList(transform, vertices_bottom, x, y, z);
 								
-					if (checkTop    && blocks[x][y + 1][z] == BlockType::Air)
+					if (checkTop    && Block::IsTranspaent(blocks[x][y + 1][z]))
 						AddToDrawList(transform, vertices_top, x, y, z);
 					
-					if (checkFront  && blocks[x][y][z + 1] == BlockType::Air)
+					if (checkFront  && Block::IsTranspaent(blocks[x][y][z + 1]))
 						AddToDrawList(transform, vertices_front, x, y, z);
 					
-					if (checkRight  && blocks[x + 1][y][z] == BlockType::Air)
+					if (checkRight  && Block::IsTranspaent(blocks[x + 1][y][z]))
 						AddToDrawList(transform, vertices_right, x, y, z);
 					
-					if (checkBehind && blocks[x][y][z - 1] == BlockType::Air)
+					if (checkBehind && Block::IsTranspaent(blocks[x][y][z - 1]))
 						AddToDrawList(transform, vertices_behind, x, y, z);
 					
-					if (checkLeft   && blocks[x - 1][y][z] == BlockType::Air)
+					if (checkLeft   && Block::IsTranspaent(blocks[x - 1][y][z]))
 						AddToDrawList(transform, vertices_left, x, y, z);
 								
 				}
@@ -190,9 +190,15 @@ namespace KuchCraft {
 						blocks[x][y][z].blockType = BlockType::Bedrock;
 					else
 					{
-						if (y < 30)
+						if (y == 60)
+							blocks[x][y][z].blockType = BlockType::Grass;
+						else if (y < 60)
 						{
-							blocks[x][y][z].blockType = static_cast<BlockType>(Random::Int(0, count));
+							int number = Random::Int(1, 1000);
+							if (number == 50)
+								blocks[x][y][z].blockType = BlockType::Air;
+							else
+								blocks[x][y][z].blockType = static_cast<BlockType>(Random::Int(1, count));
 						}
 						else
 							blocks[x][y][z].blockType = BlockType::Air;
@@ -231,6 +237,15 @@ namespace KuchCraft {
 				}
 			}
 		}
+	}
+
+	bool Block::IsTranspaent(const Block& block)
+	{
+		switch (block.blockType)
+		{
+			case BlockType::Air : return true;
+		}
+		return false;
 	}
 
 }
