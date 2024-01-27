@@ -22,7 +22,6 @@ namespace KuchCraft {
 	void KuchCraft::OnUpdate(float dt)
 	{
 		m_Player.OnUpdate(dt);
-
 		World::OnUpdate(dt, m_Player.GetPosition());
 
 		Renderer::ResetStats();

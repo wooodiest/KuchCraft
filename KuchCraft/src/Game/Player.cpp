@@ -1,6 +1,5 @@
 #include "Player.h"
 
-#include "Core/Input.h"
 #include "Core/Random.h"
 #include "World/World.h"
 
@@ -46,14 +45,14 @@ namespace KuchCraft {
 		m_Rotation = m_Camera.GetRotation();	
 
 		// Test
-		if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
+		m_LeftMouseButtonClick.OnUpdate(dt);
+		if (m_LeftMouseButtonClick.PerformAction())
 		{
 			glm::vec3 position = { m_Position.x + 2.0f, m_Position.y, m_Position.z + 2.0f };
 			Block block;
 			block.blockType = static_cast<BlockType>(Random::Int(1, (int)BlockType::LastElement - 1));
 			World::SetBlock(position, block);
 		}
-
 	}
 
 }

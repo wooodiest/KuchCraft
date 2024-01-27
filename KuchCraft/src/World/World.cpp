@@ -91,6 +91,7 @@ namespace KuchCraft {
 
 	void World::ReloadChunk(const glm::vec3& position)
 	{
+		// If needed, OnUpdate will build and recreate it
 		int index = GetChunkIndex(position);
 		if (s_Chunks[index])
 		{

@@ -2,6 +2,7 @@
 
 #include "glm/glm.hpp"
 #include "Renderer/Camera.h"
+#include "Core/Input.h"
 
 namespace KuchCraft {
 
@@ -27,6 +28,7 @@ namespace KuchCraft {
 
 		Camera m_Camera;
 
+		InputMouseHandler m_LeftMouseButtonClick{ MouseCode::ButtonLeft, true, 0.5f };
 	};
 
 }
