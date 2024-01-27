@@ -4,10 +4,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Core/Random.h"
+#include "Core/Input.h"
 
 namespace KuchCraft {
 
 	uint32_t            World::s_RenderDistance = 10;
+	uint32_t            World::s_MaxChunksToRecreatePerFrame = 3;
 	std::vector<Chunk*> World::s_Chunks;
 	std::vector<Chunk*> World::s_ChunksToDraw;
 
@@ -18,12 +20,22 @@ namespace KuchCraft {
 
 	void World::Shutdown()
 	{
-		for (auto& v : s_Chunks)
-			delete v;
+		for (int i = 0; i < s_Chunks.size(); i++)
+		{
+			if (s_Chunks[i])
+			{
+				delete s_Chunks[i];
+				s_Chunks[i] = nullptr;
+			}
+		}
+		s_ChunksToDraw.clear();
 	}
 
 	void World::OnUpdate(float dt, const glm::vec3& position)
 	{
+		if (Input::IsKeyPressed(KeyCode::R))
+			Reload();
+
 		// Find chunks to draw
 		s_ChunksToDraw.clear();
 		s_ChunksToDraw.reserve((2 * s_RenderDistance + 1) * (2 * s_RenderDistance + 1));
@@ -44,12 +56,17 @@ namespace KuchCraft {
 				c->Build();		
 		}
 		// If needed recreate
+		int maxChunksToRecreate = s_MaxChunksToRecreatePerFrame;
 		for (auto& c : s_ChunksToDraw)
 		{
 			if (c->NeedToRecreate()) // Recreate if distance{player -> chunk} is greater than something
-				c->Recreate();		
+			{		
+				c->Recreate();
+				maxChunksToRecreate--;
+				if (maxChunksToRecreate == 0)
+					break;
+			}
 		}
-
 	}
 
 	void World::Render()
@@ -60,23 +77,73 @@ namespace KuchCraft {
 		}
 	}
 
-	glm::vec2 World::GetChunkIndex(const glm::vec3& position)
+	void World::Reload()
+	{
+		for (int i = 0; i < s_Chunks.size(); i++)
+		{
+			if (s_Chunks[i])
+			{
+				delete s_Chunks[i];
+				s_Chunks[i] = nullptr;
+			}
+		}
+	}
+
+	void World::ReloadChunk(const glm::vec3& position)
+	{
+		int index = GetChunkIndex(position);
+		if (s_Chunks[index])
+		{
+			delete s_Chunks[index];
+			s_Chunks[index] = nullptr;
+		}
+	}
+
+	void World::RebuildChunk(const glm::vec3& position)
+	{
+		int index = GetChunkIndex(position);
+		if (s_Chunks[index])
+		{
+			s_Chunks[index]->SetRebuildStatus(true);
+		}
+	}
+
+	void World::RecreateChunk(const glm::vec3& position)
+	{
+		int index = GetChunkIndex(position);
+		if (s_Chunks[index])
+		{
+			s_Chunks[index]->SetRecreateStatus(true);
+		}
+	}
+
+	void World::SetBlock(const glm::vec3& position, const Block& block)
+	{
+		Chunk* chunk = GetChunk(position);
+		if (chunk)
+		{
+			int x = std::fmod(position.x, chunk_size_XZ);
+			int y = std::fmod(position.y, chunk_size_Y);
+			int z = std::fmod(position.z, chunk_size_XZ);
+			chunk->blocks[x][y][z] = block;
+			chunk->Recreate();
+		}
+	}
+
+	int World::GetChunkIndex(const glm::vec3& position)
 	{
 		if (position.x < 0 || position.z < 0)
-			return { -1.0f, -1.0f };
+			return -1.0f;
 
 		int index_X = static_cast<int>(position.x / chunk_size_XZ);
 		int index_Z = static_cast<int>(position.z / chunk_size_XZ);
 
-
-		return { index_X, index_Z };
+		return index_X + index_Z * world_chunk_size;
 	}
 
 	Chunk* World::GetChunk(const glm::vec3& position)
 	{
-		glm::vec2 chunkIndex = GetChunkIndex(position);
-
-		int index = chunkIndex.x + chunkIndex.y * world_chunk_size;
+		int index = GetChunkIndex(position);
 
 		if (index >= 0 && index < s_Chunks.size())
 		{
@@ -100,6 +167,12 @@ namespace KuchCraft {
 	Chunk::Chunk(const glm::vec3& position)
 		: m_Position(position)
 	{
+	}
+
+	Chunk::~Chunk()
+	{
+		m_DrawList.clear();
+		m_DrawListTextures.clear();
 	}
 
 	void Chunk::Recreate()
@@ -192,10 +265,11 @@ namespace KuchCraft {
 
 	void Chunk::Build()
 	{
+		// Try read from file. If cannot build by yourself
 		FillWithRandomBlocks();
 
 		m_NeedToBuild    = false;
-		m_NeedToRecreate = true; // just in case
+		m_NeedToRecreate = true;
 	}
 
 	void Chunk::AddToDrawList(const glm::mat4& model, const Vertex vertices[4], int x, int y, int z)
