@@ -19,7 +19,7 @@ namespace KuchCraft {
 		{
 			for (int x = 0; x < world_chunk_size; x++)
 			{
-				s_Chunks.emplace_back(new Chunk({ x * chunk_size_X, 0.0f, z * chunk_size_Z }));
+				s_Chunks.emplace_back(new Chunk({ x * chunk_size_XZ, 0.0f, z * chunk_size_XZ }));
 			}
 		}
 	}
@@ -36,9 +36,9 @@ namespace KuchCraft {
 		s_ChunksToDraw.clear();
 		s_ChunksToDraw.reserve((2 * s_RenderDistance + 1) * (2 * s_RenderDistance + 1));
 
-		for (float x = position.x - s_RenderDistance * chunk_size_X; x <= position.x + s_RenderDistance * chunk_size_X; x += chunk_size_X)
+		for (float x = position.x - s_RenderDistance * chunk_size_XZ; x <= position.x + s_RenderDistance * chunk_size_XZ; x += chunk_size_XZ)
 		{
-			for (float z = position.z - s_RenderDistance * chunk_size_Z; z <= position.z + s_RenderDistance * chunk_size_Z; z += chunk_size_Z)
+			for (float z = position.z - s_RenderDistance * chunk_size_XZ; z <= position.z + s_RenderDistance * chunk_size_XZ; z += chunk_size_XZ)
 			{
 				auto chunk = World::GetChunk({ x, position.y, z });
 				if (chunk)
@@ -49,15 +49,13 @@ namespace KuchCraft {
 		for (auto& c : s_ChunksToDraw)
 		{
 			if (c->NeedToBuild())
-				c->Build();
-			
+				c->Build();		
 		}
 		// If needed recreate
 		for (auto& c : s_ChunksToDraw)
 		{
-			if (c->NeedToRecreate())
-				c->Recreate();
-			
+			if (c->NeedToRecreate()) // Recreate if distance{player -> chunk} is greater than something
+				c->Recreate();		
 		}
 
 	}
@@ -75,8 +73,8 @@ namespace KuchCraft {
 		if (position.x < 0 || position.z < 0)
 			return { -1.0f, -1.0f };
 
-		int index_X = static_cast<int>(position.x / chunk_size_X);
-		int index_Z = static_cast<int>(position.z / chunk_size_Z);
+		int index_X = static_cast<int>(position.x / chunk_size_XZ);
+		int index_Z = static_cast<int>(position.z / chunk_size_XZ);
 
 
 		return { index_X, index_Z };
@@ -89,22 +87,20 @@ namespace KuchCraft {
 		int index = chunkIndex.x + chunkIndex.y * world_chunk_size;
 
 		if (index >= 0 && index < s_Chunks.size())
-			return s_Chunks[index];
-		
-		return nullptr;
-	}
-
-	Chunk* World::GetChunkToRecreate(const glm::vec3& position)
-	{
-		glm::vec2 chunkIndex = GetChunkIndex(position);
-
-		int index = chunkIndex.x + chunkIndex.y * world_chunk_size;
-
-		if (index >= 0 && index < s_Chunks.size())
 		{
-			if (s_Chunks[index]->NeedToBuild() == false)
-				return s_Chunks[index];
+			Chunk* chunk = s_Chunks[index];
+
+			if (chunk == nullptr)
+			{
+				// create chunk
+			}
+
+			if (chunk->NeedToBuild())
+				chunk->Build();
+
+			return s_Chunks[index];
 		}
+		
 		return nullptr;
 	}
 
@@ -116,20 +112,20 @@ namespace KuchCraft {
 	void Chunk::Recreate()
 	{
 		m_DrawList.clear();
-		m_DrawList.reserve(chunk_size_X * chunk_size_Y * chunk_size_Z * cube_vertex_count);
+		m_DrawList.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count);
 		m_DrawListTextures.clear();
-		m_DrawListTextures.reserve(chunk_size_X * chunk_size_Y * chunk_size_Z * cube_vertex_count / 4); // quad has 4 vertices
+		m_DrawListTextures.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count / 4); // quad has 4 vertices
 
-		Chunk* leftChunk   = World::GetChunkToRecreate({ m_Position.x - chunk_size_X, m_Position.y, m_Position.z });
-		Chunk* rightChunk  = World::GetChunkToRecreate({ m_Position.x + chunk_size_X, m_Position.y, m_Position.z });
-		Chunk* frontChunk  = World::GetChunkToRecreate({ m_Position.x, m_Position.y, m_Position.z + chunk_size_Z });
-		Chunk* behindChunk = World::GetChunkToRecreate({ m_Position.x, m_Position.y, m_Position.z - chunk_size_Z });
+		Chunk* leftChunk   = World::GetChunk({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z });
+		Chunk* rightChunk  = World::GetChunk({ m_Position.x + chunk_size_XZ, m_Position.y, m_Position.z });
+		Chunk* frontChunk  = World::GetChunk({ m_Position.x, m_Position.y, m_Position.z + chunk_size_XZ });
+		Chunk* behindChunk = World::GetChunk({ m_Position.x, m_Position.y, m_Position.z - chunk_size_XZ });
 
-		for (int x = 0; x < chunk_size_X; x++)
+		for (int x = 0; x < chunk_size_XZ; x++)
 		{
 			for (int y = 0; y < chunk_size_Y; y++)
 			{
-				for (int z = 0; z < chunk_size_Z; z++)
+				for (int z = 0; z < chunk_size_XZ; z++)
 				{
 					if (blocks[x][y][z] == BlockType::Air)
 						continue;
@@ -154,10 +150,10 @@ namespace KuchCraft {
 					if (x == 0)
 					{
 						checkLeft = false;
-						if (leftChunk && Block::IsTranspaent(leftChunk->blocks[chunk_size_X - 1][y][z]))
+						if (leftChunk && Block::IsTranspaent(leftChunk->blocks[chunk_size_XZ - 1][y][z]))
 							AddToDrawList(transform, vertices_left, x, y, z);
 					}
-					else if (x == chunk_size_X - 1)
+					else if (x == chunk_size_XZ - 1)
 					{
 						checkRight = false;
 						if (rightChunk && Block::IsTranspaent(rightChunk->blocks[0][y][z]))
@@ -166,10 +162,10 @@ namespace KuchCraft {
 					if (z == 0)
 					{
 						checkBehind = false;
-						if (behindChunk && Block::IsTranspaent(behindChunk->blocks[x][y][chunk_size_Z - 1]))
+						if (behindChunk && Block::IsTranspaent(behindChunk->blocks[x][y][chunk_size_XZ - 1]))
 							AddToDrawList(transform, vertices_behind, x, y, z);
 					}
-					else if (z == chunk_size_Z - 1)
+					else if (z == chunk_size_XZ - 1)
 					{
 						checkFront = false;
 						if (frontChunk && Block::IsTranspaent(frontChunk->blocks[x][y][0]))
@@ -205,7 +201,7 @@ namespace KuchCraft {
 	{
 		FillWithRandomBlocks();
 
-		m_NeedToBuild = false;
+		m_NeedToBuild    = false;
 		m_NeedToRecreate = true; // just in case
 	}
 
@@ -225,11 +221,11 @@ namespace KuchCraft {
 	{
 		int count = (int)BlockType::LastElement - 1;
 		BlockType top = static_cast<BlockType>(Random::Int(1, count));
-		for (int x = 0; x < chunk_size_X; x++)
+		for (int x = 0; x < chunk_size_XZ; x++)
 		{
 			for (int y = 0; y < chunk_size_Y; y++)
 			{
-				for (int z = 0; z < chunk_size_Z; z++)
+				for (int z = 0; z < chunk_size_XZ; z++)
 				{
 					if (y == 0)
 						blocks[x][y][z].blockType = BlockType::Bedrock;
@@ -258,11 +254,11 @@ namespace KuchCraft {
 		int count = (int)BlockType::LastElement - 1;
 		int block = Random::Int(1, count);
 
-		for (int x = 0; x < chunk_size_X; x++)
+		for (int x = 0; x < chunk_size_XZ; x++)
 		{
 			for (int y = 0; y < chunk_size_Y; y++)
 			{
-				for (int z = 0; z < chunk_size_Z; z++)
+				for (int z = 0; z < chunk_size_XZ; z++)
 				{
 					if (y == 0)
 						blocks[x][y][z].blockType = BlockType::Bedrock;

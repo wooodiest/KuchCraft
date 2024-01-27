@@ -8,9 +8,8 @@
 namespace KuchCraft {
 
 	constexpr int world_chunk_size = 100; // square: world_chunk_size x world_chunk_size
-	constexpr int chunk_size_X	   = 16;
+	constexpr int chunk_size_XZ	   = 16;
 	constexpr int chunk_size_Y	   = 128;
-	constexpr int chunk_size_Z	   = 16;
 
 	enum class BlockType
 	{
@@ -45,7 +44,7 @@ namespace KuchCraft {
 	public:
 		Chunk(const glm::vec3& position);
 
-		Block blocks[chunk_size_X][chunk_size_Y][chunk_size_Z];
+		Block blocks[chunk_size_XZ][chunk_size_Y][chunk_size_XZ];
 
 		void Render();
 		void Recreate();
@@ -85,7 +84,6 @@ namespace KuchCraft {
 
 		static glm::vec2 GetChunkIndex(const glm::vec3& position);
 		static Chunk*    GetChunk(const glm::vec3& position);
-		static Chunk*    GetChunkToRecreate(const glm::vec3& position);
 		static std::vector<Chunk*>& GetChunks()       { return s_Chunks; }
 		static std::vector<Chunk*>& GetChunksToDraw() { return s_ChunksToDraw; }
 
