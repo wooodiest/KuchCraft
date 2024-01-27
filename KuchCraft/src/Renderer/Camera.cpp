@@ -16,6 +16,7 @@ namespace KuchCraft {
 		UpdateProjection();
 		UpdateFront();
 		UpdateView();
+		CalculateHorizontalFov();
 	}
 
 	Camera::~Camera()
@@ -57,6 +58,11 @@ namespace KuchCraft {
 
 		if (m_Pitch < glm::radians(-89.9f))
 			m_Pitch = glm::radians(-89.9f);
+	}
+
+	void Camera::CalculateHorizontalFov()
+	{
+		m_HFov = 2 * glm::atan(glm::tan(m_Fov / 2.0f) * m_AspectRatio);
 	}
 
 	void Camera::UpdateProjection()

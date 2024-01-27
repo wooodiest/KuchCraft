@@ -7,46 +7,64 @@
 
 namespace KuchCraft {
 
-	std::vector<Chunk*> World::m_Chunks;
-	std::vector<Chunk*> World::m_ChunksToDraw;
+	uint32_t            World::s_RenderDistance = 10;
+	std::vector<Chunk*> World::s_Chunks;
+	std::vector<Chunk*> World::s_ChunksToDraw;
 
 	void World::Init()
 	{
-		m_Chunks.reserve(world_chunk_size * world_chunk_size);
+		s_Chunks.reserve(world_chunk_size * world_chunk_size);
 
 		for (int z = 0; z < world_chunk_size; z++)
 		{
 			for (int x = 0; x < world_chunk_size; x++)
 			{
-				m_Chunks.emplace_back(new Chunk({ x * chunk_size_X, 0.0f, z * chunk_size_Z }));
-
-				// temporary
-				auto chunk = World::GetChunk({ x * chunk_size_X, 0.0f, z * chunk_size_Z });
-				chunk->FillWithRandomBlocks();
-				m_ChunksToDraw.push_back(chunk);
+				s_Chunks.emplace_back(new Chunk({ x * chunk_size_X, 0.0f, z * chunk_size_Z }));
 			}
 		}
 	}
 
 	void World::Shutdown()
 	{
-		for (auto& v : m_Chunks)
+		for (auto& v : s_Chunks)
 			delete v;
 	}
 
-	void World::OnUpdate(float dt)
+	void World::OnUpdate(float dt, const glm::vec3& position)
 	{
-		// if change in chunk, recrete (FUTURE: if block is border block recreate also chunk next to)
-		for (auto& c : m_ChunksToDraw)
+		// Find chunks to draw
+		s_ChunksToDraw.clear();
+		s_ChunksToDraw.reserve((2 * s_RenderDistance + 1) * (2 * s_RenderDistance + 1));
+
+		for (float x = position.x - s_RenderDistance * chunk_size_X; x <= position.x + s_RenderDistance * chunk_size_X; x += chunk_size_X)
+		{
+			for (float z = position.z - s_RenderDistance * chunk_size_Z; z <= position.z + s_RenderDistance * chunk_size_Z; z += chunk_size_Z)
+			{
+				auto chunk = World::GetChunk({ x, position.y, z });
+				if (chunk)
+					s_ChunksToDraw.push_back(chunk);
+			}
+		}
+		// If needed build
+		for (auto& c : s_ChunksToDraw)
+		{
+			if (c->NeedToBuild())
+				c->Build();
+			
+		}
+		// If needed recreate
+		for (auto& c : s_ChunksToDraw)
 		{
 			if (c->NeedToRecreate())
-				c->Recreate();					
-		}		
+				c->Recreate();
+			
+		}
+
 	}
 
-	void World::Render(const glm::vec3& position, const glm::vec2& rotation, float viewAngle)
+	void World::Render()
 	{
-		for (auto& c : m_ChunksToDraw)
+		for (auto& c : s_ChunksToDraw)
 		{
 			Renderer::DrawList(c->GetDrawList(), c->GetTextureList());
 		}
@@ -54,8 +72,12 @@ namespace KuchCraft {
 
 	glm::vec2 World::GetChunkIndex(const glm::vec3& position)
 	{
+		if (position.x < 0 || position.z < 0)
+			return { -1.0f, -1.0f };
+
 		int index_X = static_cast<int>(position.x / chunk_size_X);
 		int index_Z = static_cast<int>(position.z / chunk_size_Z);
+
 
 		return { index_X, index_Z };
 	}
@@ -66,9 +88,23 @@ namespace KuchCraft {
 
 		int index = chunkIndex.x + chunkIndex.y * world_chunk_size;
 
-		if (index >= 0 && index < m_Chunks.size())
-			return m_Chunks[index];
+		if (index >= 0 && index < s_Chunks.size())
+			return s_Chunks[index];
+		
+		return nullptr;
+	}
 
+	Chunk* World::GetChunkToRecreate(const glm::vec3& position)
+	{
+		glm::vec2 chunkIndex = GetChunkIndex(position);
+
+		int index = chunkIndex.x + chunkIndex.y * world_chunk_size;
+
+		if (index >= 0 && index < s_Chunks.size())
+		{
+			if (s_Chunks[index]->NeedToBuild() == false)
+				return s_Chunks[index];
+		}
 		return nullptr;
 	}
 
@@ -84,10 +120,10 @@ namespace KuchCraft {
 		m_DrawListTextures.clear();
 		m_DrawListTextures.reserve(chunk_size_X * chunk_size_Y * chunk_size_Z * cube_vertex_count / 4); // quad has 4 vertices
 
-		Chunk* leftChunk   = World::GetChunk({ m_Position.x - chunk_size_X, m_Position.y, m_Position.z });
-		Chunk* rightChunk  = World::GetChunk({ m_Position.x + chunk_size_X, m_Position.y, m_Position.z });
-		Chunk* frontChunk  = World::GetChunk({ m_Position.x, m_Position.y, m_Position.z + chunk_size_Z });
-		Chunk* behindChunk = World::GetChunk({ m_Position.x, m_Position.y, m_Position.z - chunk_size_Z });
+		Chunk* leftChunk   = World::GetChunkToRecreate({ m_Position.x - chunk_size_X, m_Position.y, m_Position.z });
+		Chunk* rightChunk  = World::GetChunkToRecreate({ m_Position.x + chunk_size_X, m_Position.y, m_Position.z });
+		Chunk* frontChunk  = World::GetChunkToRecreate({ m_Position.x, m_Position.y, m_Position.z + chunk_size_Z });
+		Chunk* behindChunk = World::GetChunkToRecreate({ m_Position.x, m_Position.y, m_Position.z - chunk_size_Z });
 
 		for (int x = 0; x < chunk_size_X; x++)
 		{
@@ -165,6 +201,14 @@ namespace KuchCraft {
 		m_NeedToRecreate = false;
 	}
 
+	void Chunk::Build()
+	{
+		FillWithRandomBlocks();
+
+		m_NeedToBuild = false;
+		m_NeedToRecreate = true; // just in case
+	}
+
 	void Chunk::AddToDrawList(const glm::mat4& model, const Vertex vertices[4], int x, int y, int z)
 	{
 		for (int i = 0; i < 4; i++)
@@ -180,6 +224,7 @@ namespace KuchCraft {
 	void Chunk::FillWithRandomBlocks()
 	{
 		int count = (int)BlockType::LastElement - 1;
+		BlockType top = static_cast<BlockType>(Random::Int(1, count));
 		for (int x = 0; x < chunk_size_X; x++)
 		{
 			for (int y = 0; y < chunk_size_Y; y++)
@@ -191,7 +236,7 @@ namespace KuchCraft {
 					else
 					{
 						if (y == 60)
-							blocks[x][y][z].blockType = BlockType::Grass;
+							blocks[x][y][z].blockType = top;
 						else if (y < 60)
 						{
 							int number = Random::Int(1, 1000);

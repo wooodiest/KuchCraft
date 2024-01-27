@@ -7,7 +7,7 @@
 
 namespace KuchCraft {
 
-	constexpr int world_chunk_size = 20; // square: world_chunk_size x world_chunk_size
+	constexpr int world_chunk_size = 100; // square: world_chunk_size x world_chunk_size
 	constexpr int chunk_size_X	   = 16;
 	constexpr int chunk_size_Y	   = 128;
 	constexpr int chunk_size_Z	   = 16;
@@ -49,8 +49,10 @@ namespace KuchCraft {
 
 		void Render();
 		void Recreate();
+		void Build();
 
 		bool NeedToRecreate() const { return m_NeedToRecreate; }
+		bool NeedToBuild()    const { return m_NeedToBuild;    }
 
 		const glm::vec3&              GetPosition()    const { return m_Position;         }
 		const std::vector<BlockType>& GetTextureList() const { return m_DrawListTextures; }
@@ -62,6 +64,7 @@ namespace KuchCraft {
 
 	private:
 		bool m_NeedToRecreate = true;
+		bool m_NeedToBuild    = true;
 		glm::vec3 m_Position;
 
 		std::vector<Vertex>    m_DrawList;
@@ -77,17 +80,19 @@ namespace KuchCraft {
 		static void Init();
 		static void Shutdown();
 
-		static void OnUpdate(float dt);
-		static void Render(const glm::vec3& position, const glm::vec2& rotation, float viewAngle);
+		static void OnUpdate(float dt, const glm::vec3& position);
+		static void Render();
 
 		static glm::vec2 GetChunkIndex(const glm::vec3& position);
 		static Chunk*    GetChunk(const glm::vec3& position);
-		static std::vector<Chunk*>& GetChunks()       { return m_Chunks; }
-		static std::vector<Chunk*>& GetChunksToDraw() { return m_ChunksToDraw; }
+		static Chunk*    GetChunkToRecreate(const glm::vec3& position);
+		static std::vector<Chunk*>& GetChunks()       { return s_Chunks; }
+		static std::vector<Chunk*>& GetChunksToDraw() { return s_ChunksToDraw; }
 
 	private:
-		static std::vector<Chunk*> m_Chunks;
-		static std::vector<Chunk*> m_ChunksToDraw;
+		static uint32_t            s_RenderDistance;
+		static std::vector<Chunk*> s_Chunks;
+		static std::vector<Chunk*> s_ChunksToDraw;
 
 		World() = default;
 	};

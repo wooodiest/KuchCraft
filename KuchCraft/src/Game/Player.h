@@ -18,7 +18,7 @@ namespace KuchCraft {
 		const glm::vec2& GetRotation() const { return m_Rotation; }
 
 	private:
-		glm::vec3 m_Position{ 150.0f, 70.0f, 150.0f };
+		glm::vec3 m_Position{ 200.0f, 70.0f, 200.0f };
 		glm::vec2 m_Rotation{ glm::radians(45.0f), glm::radians(-20.0f)}; // yaw, pitch
 
 		float m_MovementSpeed       = 10.0f;

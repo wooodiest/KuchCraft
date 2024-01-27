@@ -3,6 +3,8 @@
 #include "World/World.h"
 #include "Renderer/Renderer.h"
 
+#include <iostream>
+
 namespace KuchCraft {
 
 	KuchCraft::KuchCraft()
@@ -20,11 +22,11 @@ namespace KuchCraft {
 	void KuchCraft::OnUpdate(float dt)
 	{
 		m_Player.OnUpdate(dt);
-		World::OnUpdate(dt);
+		World::OnUpdate(dt, m_Player.GetPosition());
 
 		Renderer::ResetStats();
 		Renderer::BeginScene(m_Player.GetCamera());	
-		World::Render(m_Player.GetPosition(), m_Player.GetRotation(), 0.0f); // TODO: Get
+		World::Render(); 
 		Renderer::EndScene();
 	}
 
