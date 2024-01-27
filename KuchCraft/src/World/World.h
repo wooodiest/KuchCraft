@@ -7,10 +7,10 @@
 
 namespace KuchCraft {
 
-	constexpr int chunk_amount = 10;
-	constexpr int chunk_size_X = 16;
-	constexpr int chunk_size_Y = 128;
-	constexpr int chunk_size_Z = 16;
+	constexpr int world_chunk_size = 20; // square: world_chunk_size x world_chunk_size
+	constexpr int chunk_size_X	   = 16;
+	constexpr int chunk_size_Y	   = 128;
+	constexpr int chunk_size_Z	   = 16;
 
 	enum class BlockType
 	{

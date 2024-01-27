@@ -41,8 +41,8 @@ namespace KuchCraft {
 
 		auto& pos = m_Camera.GetPosition();
 		m_Position = { pos.x, pos.y - m_PlayerHeight, pos.z };
-		m_Rotation = m_Camera.GetRotation();
-		
+		m_Rotation = m_Camera.GetRotation();		
+
 	}
 
 }

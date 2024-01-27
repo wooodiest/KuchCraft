@@ -18,12 +18,12 @@ namespace KuchCraft {
 		const glm::vec2& GetRotation() const { return m_Rotation; }
 
 	private:
-		glm::vec3 m_Position{ 0.0f, 70.0f, 0.0f };
-		glm::vec2 m_Rotation{ 0.0f, 0.0f }; // yaw, pitch
+		glm::vec3 m_Position{ 150.0f, 50.0f, 150.0f };
+		glm::vec2 m_Rotation{ glm::radians(45.0f), glm::radians(-20.0f)}; // yaw, pitch
 
-		float m_MovementSpeed = 10.0f;
+		float m_MovementSpeed       = 10.0f;
 		float m_MovementSprintSpeed = 20.0f;
-		float m_PlayerHeight = 1.5f;
+		float m_PlayerHeight        = 1.5f;
 
 		Camera m_Camera;
 

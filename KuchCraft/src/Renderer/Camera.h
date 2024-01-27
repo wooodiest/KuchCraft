@@ -34,21 +34,21 @@ namespace KuchCraft {
 		const glm::mat4& GetView()           const { return m_View;                }
 		const glm::mat4& GetViewProjection() const { return m_Projection * m_View; }
 
-		const glm::vec3& GetPosition()       const { return m_Position; }
+		const glm::vec3& GetPosition()       const { return m_Position;                }
 		const glm::vec2& GetRotation()       const { return glm::vec2(m_Yaw, m_Pitch); }
 
 	private:
 		glm::mat4 m_Projection{ 1.0f };
 		glm::mat4 m_View{ 1.0f };
 
-		glm::vec3 m_Position{ -5.0f, 0.0f, -5.0f };
+		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Front   { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Up      { 0.0f, 1.0f, 0.0f };
 
 		glm::vec2 m_PrevMousePosition{ 0.0f, 0.0f };
 
-		float m_Pitch = glm::radians(20.0f);
-		float m_Yaw   = glm::radians(45.0f);
+		float m_Pitch = glm::radians(0.0f);
+		float m_Yaw   = glm::radians(0.0f);
 		float m_Fov   = glm::radians(45.0f);
 
 		float m_Near        = 0.01f;

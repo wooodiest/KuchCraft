@@ -12,11 +12,11 @@ namespace KuchCraft {
 
 	void World::Init()
 	{
-		m_Chunks.reserve(chunk_amount * chunk_amount);
+		m_Chunks.reserve(world_chunk_size * world_chunk_size);
 
-		for (int z = 0; z < chunk_amount; z++)
+		for (int z = 0; z < world_chunk_size; z++)
 		{
-			for (int x = 0; x < chunk_amount; x++)
+			for (int x = 0; x < world_chunk_size; x++)
 			{
 				m_Chunks.emplace_back(new Chunk({ x * chunk_size_X, 0.0f, z * chunk_size_Z }));
 
@@ -64,7 +64,7 @@ namespace KuchCraft {
 	{
 		glm::vec2 chunkIndex = GetChunkIndex(position);
 
-		int index = chunkIndex.x + chunkIndex.y * chunk_amount;
+		int index = chunkIndex.x + chunkIndex.y * world_chunk_size;
 
 		if (index >= 0 && index < m_Chunks.size())
 			return m_Chunks[index];
