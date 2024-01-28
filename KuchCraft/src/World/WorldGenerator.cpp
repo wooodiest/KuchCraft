@@ -6,14 +6,14 @@ namespace KuchCraft {
 
 	uint64_t WorldGenerator::s_Seed = 0;
 
-	void WorldGenerator::Init()
-	{
-
-	}
-
-	void WorldGenerator::SetSeed(uint64_t seed)
+	void WorldGenerator::Init(uint64_t seed)
 	{
 		s_Seed = seed;
+	}
+
+	void WorldGenerator::ShutDown()
+	{
+		// Clear 
 	}
 
 	void WorldGenerator::FillWithRandomBlocks(Chunk* chunk)

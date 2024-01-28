@@ -50,7 +50,7 @@ namespace KuchCraft {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, s_Data.VertexBufferBase);
 
 		// Bind textures
-		s_Data.Shader.Bind();
+		// s_Data.Shader.Bind();
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 			glBindTextureUnit(i, s_Data.TextureSlots[i]);
 		
@@ -96,7 +96,7 @@ namespace KuchCraft {
 	void Renderer::ResetStats()
 	{
 		s_Stats.DrawCalls = 0;
-		s_Stats.Quads = 0;
+		s_Stats.Quads     = 0;
 	}
 
 	void Renderer::DrawList(std::vector<Vertex>& vertices, const std::vector<BlockType>& textures)
@@ -108,7 +108,7 @@ namespace KuchCraft {
 				NextBatch();
 
 			float textureIndex = 0.0f;
-			uint32_t texture = GetTexture(textures[i / 4]); // 4 vertices has one texture
+			uint32_t texture   = GetTexture(textures[i / 4]); // 4 vertices has one texture
 
 			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
 			{
@@ -239,10 +239,11 @@ namespace KuchCraft {
 		s_BlockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
 
 		// Load all textures to gpu
-		std::string mainPath = "assets/textures/";
+		const std::string mainPath  = "assets/textures/";
+		const std::string extension = ".png";
 		for (const auto& texture : s_BlockTexturePathsAtlas)
 		{
-			std::string path = mainPath + texture.second + ".png";
+			std::string path = mainPath + texture.second + extension;
 			s_BlockTextureAtlas[texture.first] = LoadTextureToAtals(path);
 		}
 	}

@@ -7,8 +7,8 @@ namespace KuchCraft {
 	class WorldGenerator
 	{
 	public:
-		static void Init();
-		static void SetSeed(uint64_t seed);
+		static void Init(uint64_t seed);
+		static void ShutDown();
 
 		static void FillWithRandomBlocks(Chunk* chunk);
 
