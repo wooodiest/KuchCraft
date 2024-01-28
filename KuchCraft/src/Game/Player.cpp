@@ -3,11 +3,6 @@
 #include "Core/Random.h"
 #include "World/World.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-
-
 namespace KuchCraft {
 
 	Player::Player()
@@ -25,7 +20,10 @@ namespace KuchCraft {
 		if (Input::IsKeyPressed(KeyCode::LeftShift))
 			sprint = true;
 
-		m_Camera.SetData({m_Position.x, m_Position.y + m_PlayerHeight, m_Position.z}, m_Rotation, m_MovementSpeed, m_MovementSprintSpeed,  dt);
+		m_Camera.SetData({ m_Position.x, m_Position.y + m_PlayerMovementSettings.Height, m_Position.z },
+						   m_Rotation,
+						   m_PlayerMovementSettings.Speed, m_PlayerMovementSettings.SprintSpeed, 
+						   dt);
 
 		if (Input::IsKeyPressed(KeyCode::W))
 			m_Camera.OnKeyboardMovement(KeyboardMovement::Forward, sprint);
@@ -45,17 +43,17 @@ namespace KuchCraft {
 		m_Camera.OnMouseMovement();
 		m_Camera.OnUpdate();
 
-		auto& pos = m_Camera.GetPosition();
-		m_Position = { pos.x, pos.y - m_PlayerHeight, pos.z };
+		auto& pos  = m_Camera.GetPosition();
+		m_Position = { pos.x, pos.y - m_PlayerMovementSettings.Height, pos.z };
 		m_Rotation = m_Camera.GetRotation();	
 
-		// Actions
+		// Actions - temporary
 		m_LeftMouseButtonClick.OnUpdate(dt);
 		if (m_LeftMouseButtonClick.PerformAction())
 		{
 			Block block;
 			block.blockType = static_cast<BlockType>(Random::Int(1, (int)BlockType::None - 1));
-			World::SetBlock({m_Position.x + 2.0f, m_Position.y + 2.0f, m_Position.z + 2.0f}, block);
+			World::Get().SetBlock({m_Position.x + 2.0f, m_Position.y + 2.0f, m_Position.z + 2.0f}, block);
 		}
 	}
 

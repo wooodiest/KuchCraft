@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Game/Player.h"
+#include "World/World.h"
+#include <string>
 
 namespace KuchCraft {
 
@@ -13,10 +14,12 @@ namespace KuchCraft {
 		void OnUpdate(float dt);
 
 		void OnViewportSizeChanged(uint32_t width, uint32_t height);
+		
+		void LoadWorld(const std::string& path);
 
 	private:
-		Player m_Player;
-
+		World* m_World = nullptr;
+		
 	};
 
 }

@@ -2,8 +2,10 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
 
 #include "Renderer/Renderer.h"
+#include "Game/Player.h"
 
 namespace KuchCraft {
 
@@ -13,7 +15,7 @@ namespace KuchCraft {
 
 	enum class BlockType
 	{
-		Air = 0, /*Water,*/
+		Air = 0,
 		Bedrock, Bricks,
 		CoalOre, Cobblestone, CraftingTable,
 		DiamondOre, Dioryte, Dirt,
@@ -23,7 +25,7 @@ namespace KuchCraft {
 		OakLog, OakPlanks,
 		Sand, Stone, StoneBrick,
 
-		None // No element and last element
+		None // No element and/or last element
 	};
 
 	class Block
@@ -33,7 +35,7 @@ namespace KuchCraft {
 		Block(const BlockType& type);
 		~Block() = default;
 
-		BlockType blockType = BlockType::None;
+		BlockType blockType = BlockType::Air;
 		static bool IsTranspaent(const Block& block);
 
 		operator BlockType()                     const { return  blockType;                    }
@@ -46,10 +48,11 @@ namespace KuchCraft {
 	class Chunk
 	{
 	public:
+		Block Blocks[chunk_size_XZ][chunk_size_Y][chunk_size_XZ];
+
+	public:
 		Chunk(const glm::vec3& position);
 		~Chunk();
-
-		Block blocks[chunk_size_XZ][chunk_size_Y][chunk_size_XZ];
 
 		void Render();
 		void Recreate();
@@ -66,13 +69,14 @@ namespace KuchCraft {
 		std::vector<Vertex>&          GetDrawList()          { return m_DrawList;         }
 
 	private:
+		glm::vec3 m_Position;
 		bool m_NeedToRecreate = true;
 		bool m_NeedToBuild    = true;
-		glm::vec3 m_Position;
 
 		std::vector<Vertex>    m_DrawList;
 		std::vector<BlockType> m_DrawListTextures;
 
+	private:
 		void AddToDrawList(const glm::mat4& model, const Vertex vertices[4], int x, int y, int z);
 
 	};
@@ -80,41 +84,43 @@ namespace KuchCraft {
 	class World
 	{
 	public:	
-		static void Init();
-		static void Shutdown();
+		World(const std::string& path);
+		~World();
 
-		static void OnUpdate(float dt, const glm::vec3& position);
-		static void Render();
+		void Shutdown();
+		inline static World& Get() { return *s_Instance; }
 
-		static void Reload();
-		static void ReloadChunk(const glm::vec3& position);
-		static void RebuildChunk(const glm::vec3& position);
-		static void RecreateChunk(const glm::vec3& position);
+		void OnUpdate(float dt);
+		void Render();
 
-		static void SetBlock(const glm::vec3& position, const Block& block);
-		static Block GetBlock(const glm::vec3& position);
+		void  SetBlock(const glm::vec3& position, const Block& block);
+		Block GetBlock(const glm::vec3& position);
 
-		static void SetRenderDistance(uint32_t distance);
-		static void SetKeptInMemoryChunksDistance(uint32_t distance);
+		const Camera& GetCamera() const { return m_Player.GetCamera(); }
+		bool GetQuitStatus()      const { return m_QuitStatus;         }
 
-		static int GetChunkIndex(const glm::vec3& position);
-		static Chunk* GetChunk(const glm::vec3& position);
-		static Chunk* GetChunkToRecreate(const glm::vec3& position);
-		static std::vector<Chunk*>& GetChunks()       { return s_Chunks; }
-		static std::vector<Chunk*>& GetChunksToDraw() { return s_ChunksToDraw; }
+		int    GetChunkIndex(const glm::vec3& position);
+		Chunk* GetChunk(const glm::vec3& position);
+		Chunk* GetChunkToRecreate(const glm::vec3& position);
 
-		static const glm::vec3& CalculateChunkAbsolutePosition(const glm::vec3& position);
+		std::vector<Chunk*>& GetChunks()       { return m_Chunks;       }
+		std::vector<Chunk*>& GetChunksToDraw() { return m_ChunksToDraw; }
+
+		const glm::vec3& CalculateChunkAbsolutePosition(const glm::vec3& position);
 
 	private:
-		static uint32_t            s_RenderDistance;
-		static uint32_t            s_ChunksKeptInMemoryDistance;
-		static uint32_t			   s_MaxChunksToRecreatePerFrame;
-		static std::vector<Chunk*> s_Chunks;
-		static std::vector<Chunk*> s_ChunksToDraw;
+		std::string filePath;
+		bool m_QuitStatus = false;
+		Player m_Player;
+		std::vector<Chunk*> m_Chunks;
+		std::vector<Chunk*> m_ChunksToDraw;
 
-		static void DeleteUnusedChunks(const glm::vec3& position);
+	private:
+		void DeleteUnusedChunks(const glm::vec3& position);
 
-		World() = default;
+	private:
+		static World* s_Instance;
+
 	};
 
 }

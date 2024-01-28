@@ -17,6 +17,7 @@ namespace KuchCraft {
 	};
 
 	constexpr size_t quad_index_count = 6;
+	constexpr size_t quad_vertex_count = 4;
 	constexpr size_t cube_vertex_count = 24;
 
 	constexpr Vertex vertices_bottom[4]

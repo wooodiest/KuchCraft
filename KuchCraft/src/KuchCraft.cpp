@@ -1,6 +1,5 @@
 #include "KuchCraft.h"
 
-#include "World/World.h"
 #include "World/WorldGenerator.h"
 #include "Renderer/Renderer.h"
 
@@ -12,29 +11,50 @@ namespace KuchCraft {
 	{
 		Renderer::Init();
 		WorldGenerator::Init();
-		World::Init();
+		LoadWorld("Example");
 	}
 
 	KuchCraft::~KuchCraft()
 	{
-		World::Shutdown();
+		if (m_World)
+			delete m_World;
+		
 		Renderer::ShutDown();
 	}
 
 	void KuchCraft::OnUpdate(float dt)
 	{
-		m_Player.OnUpdate(dt);
-		World::OnUpdate(dt, m_Player.GetPosition());
-
 		Renderer::ResetStats();
-		Renderer::BeginScene(m_Player.GetCamera());	
-		World::Render(); 
-		Renderer::EndScene();
+		if (m_World)
+		{
+			m_World->OnUpdate(dt);
+
+			Renderer::BeginScene(m_World->GetCamera());
+			m_World->Render();
+			Renderer::EndScene();
+
+			// Check to safety exit from world
+			if (m_World->GetQuitStatus())
+			{
+				delete m_World;
+				m_World = nullptr;
+			}
+		}
 	}
 
 	void KuchCraft::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		Renderer::OnViewportSizeChanged(width, height);
+	}
+
+	void KuchCraft::LoadWorld(const std::string& path)
+	{
+		if (m_World)
+		{
+			delete m_World;
+			m_World = nullptr;
+		}
+		m_World = new World(path);	
 	}
 
 }
