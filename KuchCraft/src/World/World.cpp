@@ -5,10 +5,12 @@
 
 #include "Core/Random.h"
 #include "Core/Input.h"
+#include "WorldGenerator.h"
 
 namespace KuchCraft {
 
 	uint32_t            World::s_RenderDistance = 10;
+	uint32_t            World::s_ChunksKeptInMemoryDistance = 20; // += s_RenderDistance
 	uint32_t            World::s_MaxChunksToRecreatePerFrame = 3;
 	std::vector<Chunk*> World::s_Chunks;
 	std::vector<Chunk*> World::s_ChunksToDraw;
@@ -59,7 +61,7 @@ namespace KuchCraft {
 		int maxChunksToRecreate = s_MaxChunksToRecreatePerFrame;
 		for (auto& c : s_ChunksToDraw)
 		{
-			if (c->NeedToRecreate()) // Recreate if distance{player -> chunk} is greater than something
+			if (c->NeedToRecreate()) 
 			{		
 				c->Recreate();
 				maxChunksToRecreate--;
@@ -67,6 +69,8 @@ namespace KuchCraft {
 					break;
 			}
 		}
+		// Delete from memory chunks that are far away
+		DeleteUnusedChunks(position);
 	}
 
 	void World::Render()
@@ -131,6 +135,29 @@ namespace KuchCraft {
 		}
 	}
 
+	Block World::GetBlock(const glm::vec3& position)
+	{
+		Chunk* chunk = GetChunk(position);
+		if (chunk)
+		{
+			int x = std::fmod(position.x, chunk_size_XZ);
+			int y = std::fmod(position.y, chunk_size_Y);
+			int z = std::fmod(position.z, chunk_size_XZ);
+			return chunk->blocks[x][y][z];
+		}
+		return Block();	
+	}
+
+	void World::SetRenderDistance(uint32_t distance)
+	{
+		s_RenderDistance = distance;
+	}
+
+	void World::SetKeptInMemoryChunksDistance(uint32_t distance)
+	{
+		s_ChunksKeptInMemoryDistance = distance;
+	}
+
 	int World::GetChunkIndex(const glm::vec3& position)
 	{
 		if (position.x < 0 || position.z < 0)
@@ -160,9 +187,68 @@ namespace KuchCraft {
 		return nullptr;
 	}
 
+	Chunk* World::GetChunkToRecreate(const glm::vec3& position)
+	{
+		int index = GetChunkIndex(position);
+
+		if (index >= 0 && index < s_Chunks.size())
+		{
+			if (s_Chunks[index] == nullptr)
+				return nullptr;
+
+			return s_Chunks[index];
+		}
+
+		return nullptr;
+	}
+
 	const glm::vec3& World::CalculateChunkAbsolutePosition(const glm::vec3& position)
 	{
 		return { position.x - std::fmod(position.x, chunk_size_XZ), 0.0f, position.z - std::fmod(position.z, chunk_size_XZ) };
+	}
+
+	void World::DeleteUnusedChunks(const glm::vec3& position)
+	{
+		const float distance_minus_x = position.x - (s_RenderDistance + s_ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
+		const float distance_plus_x = position.x + (s_RenderDistance + s_ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
+		const float distance_minus_z = position.z - (s_RenderDistance + s_ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
+		const float distance_plus_z = position.z + (s_RenderDistance + s_ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
+		for (float z = distance_minus_z; z <= distance_plus_z; z += chunk_size_XZ)
+		{
+			int index = GetChunkIndex({ distance_minus_x, position.y, z });
+			if (index >= 0 && index < s_Chunks.size() && s_Chunks[index])
+			{
+				delete s_Chunks[index];
+				s_Chunks[index] = nullptr;
+			}
+		}
+		for (float z = distance_minus_z; z <= distance_plus_z; z += chunk_size_XZ)
+		{
+			int index = GetChunkIndex({ distance_plus_x, position.y, z });
+			if (index >= 0 && index < s_Chunks.size() && s_Chunks[index])
+			{
+				delete s_Chunks[index];
+				s_Chunks[index] = nullptr;
+			}
+		}
+		for (float x = distance_minus_x; x <= distance_plus_x; x += chunk_size_XZ)
+		{
+			int index = GetChunkIndex({ x, position.y, distance_minus_z });
+			if (index >= 0 && index < s_Chunks.size() && s_Chunks[index])
+			{
+				delete s_Chunks[index];
+				s_Chunks[index] = nullptr;
+			}
+		}
+		for (float x = distance_minus_x; x <= distance_plus_x; x += chunk_size_XZ)
+		{
+			int index = GetChunkIndex({ x, position.y, distance_plus_z });
+			if (index >= 0 && index < s_Chunks.size() && s_Chunks[index])
+			{
+				delete s_Chunks[index];
+				s_Chunks[index] = nullptr;
+			}
+		}
 	}
 
 	Chunk::Chunk(const glm::vec3& position)
@@ -183,10 +269,10 @@ namespace KuchCraft {
 		m_DrawListTextures.clear();
 		m_DrawListTextures.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count / 4); // quad has 4 vertices
 
-		Chunk* leftChunk   = World::GetChunk({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z });
-		Chunk* rightChunk  = World::GetChunk({ m_Position.x + chunk_size_XZ, m_Position.y, m_Position.z });
-		Chunk* frontChunk  = World::GetChunk({ m_Position.x, m_Position.y, m_Position.z + chunk_size_XZ });
-		Chunk* behindChunk = World::GetChunk({ m_Position.x, m_Position.y, m_Position.z - chunk_size_XZ });
+		Chunk* leftChunk   = World::GetChunkToRecreate({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z });
+		Chunk* rightChunk  = World::GetChunkToRecreate({ m_Position.x + chunk_size_XZ, m_Position.y, m_Position.z });
+		Chunk* frontChunk  = World::GetChunkToRecreate({ m_Position.x, m_Position.y, m_Position.z + chunk_size_XZ });
+		Chunk* behindChunk = World::GetChunkToRecreate({ m_Position.x, m_Position.y, m_Position.z - chunk_size_XZ });
 
 		for (int x = 0; x < chunk_size_XZ; x++)
 		{
@@ -266,8 +352,12 @@ namespace KuchCraft {
 
 	void Chunk::Build()
 	{
-		// Try read from file. If cannot build by yourself
-		FillWithRandomBlocks();
+		// Check in file
+		bool needToGenerate = true; // World::LoadChunk(this);
+		// Else
+		if(needToGenerate)
+			WorldGenerator::FillWithRandomBlocks(this);
+			// Save to file
 
 		m_NeedToBuild    = false;
 		m_NeedToRecreate = true;
@@ -285,67 +375,9 @@ namespace KuchCraft {
 		m_DrawListTextures.push_back(blocks[x][y][z]);
 	}
 
-	void Chunk::FillWithRandomBlocks()
+	Block::Block(const BlockType& type)
+		: blockType(type)
 	{
-		int count = (int)BlockType::LastElement - 1;
-		BlockType top = static_cast<BlockType>(Random::Int(1, count));
-		for (int x = 0; x < chunk_size_XZ; x++)
-		{
-			for (int y = 0; y < chunk_size_Y; y++)
-			{
-				for (int z = 0; z < chunk_size_XZ; z++)
-				{
-					if (y == 0)
-						blocks[x][y][z].blockType = BlockType::Bedrock;
-					else
-					{
-						if (y == 60)
-							blocks[x][y][z].blockType = top;
-						else if (y < 60)
-						{
-							int number = Random::Int(1, 1000);
-							if (number == 50)
-								blocks[x][y][z].blockType = BlockType::Air;
-							else
-								blocks[x][y][z].blockType = static_cast<BlockType>(Random::Int(1, count));
-						}
-						else
-							blocks[x][y][z].blockType = BlockType::Air;
-					}
-				}
-			}
-		}
-	}
-
-	void Chunk::FillWithOneBlock()
-	{
-		int count = (int)BlockType::LastElement - 1;
-		int block = Random::Int(1, count);
-
-		for (int x = 0; x < chunk_size_XZ; x++)
-		{
-			for (int y = 0; y < chunk_size_Y; y++)
-			{
-				for (int z = 0; z < chunk_size_XZ; z++)
-				{
-					if (y == 0)
-						blocks[x][y][z].blockType = BlockType::Bedrock;
-					else
-					{
-						if (y < 60)
-						{
-							if (Random::Int(0, 250) == 0)
-								blocks[x][y][z].blockType = BlockType::Air;
-							else
-								blocks[x][y][z].blockType = static_cast<BlockType>(block);
-						}
-						else
-							blocks[x][y][z].blockType = BlockType::Air;
-					}
-					
-				}
-			}
-		}
 	}
 
 	bool Block::IsTranspaent(const Block& block)
@@ -353,6 +385,7 @@ namespace KuchCraft {
 		switch (block.blockType)
 		{
 			case BlockType::Air : return true;
+			case BlockType::None: return true;
 		}
 		return false;
 	}

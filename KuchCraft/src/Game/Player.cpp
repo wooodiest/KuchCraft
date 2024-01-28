@@ -3,6 +3,11 @@
 #include "Core/Random.h"
 #include "World/World.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+
+
 namespace KuchCraft {
 
 	Player::Player()
@@ -44,14 +49,13 @@ namespace KuchCraft {
 		m_Position = { pos.x, pos.y - m_PlayerHeight, pos.z };
 		m_Rotation = m_Camera.GetRotation();	
 
-		// Test
+		// Actions
 		m_LeftMouseButtonClick.OnUpdate(dt);
 		if (m_LeftMouseButtonClick.PerformAction())
 		{
-			glm::vec3 position = { m_Position.x + 2.0f, m_Position.y, m_Position.z + 2.0f };
 			Block block;
-			block.blockType = static_cast<BlockType>(Random::Int(1, (int)BlockType::LastElement - 1));
-			World::SetBlock(position, block);
+			block.blockType = static_cast<BlockType>(Random::Int(1, (int)BlockType::None - 1));
+			World::SetBlock({m_Position.x + 2.0f, m_Position.y + 2.0f, m_Position.z + 2.0f}, block);
 		}
 	}
 

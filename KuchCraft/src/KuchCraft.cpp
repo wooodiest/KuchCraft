@@ -1,6 +1,7 @@
 #include "KuchCraft.h"
 
 #include "World/World.h"
+#include "World/WorldGenerator.h"
 #include "Renderer/Renderer.h"
 
 #include <iostream>
@@ -10,6 +11,7 @@ namespace KuchCraft {
 	KuchCraft::KuchCraft()
 	{
 		Renderer::Init();
+		WorldGenerator::Init();
 		World::Init();
 	}
 

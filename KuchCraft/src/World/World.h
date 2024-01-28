@@ -7,7 +7,7 @@
 
 namespace KuchCraft {
 
-	constexpr int world_chunk_size     = 100; // square: world_chunk_size x world_chunk_size
+	constexpr int world_chunk_size     = 1000; // square: world_chunk_size x world_chunk_size
 	constexpr int chunk_size_XZ	       = 16;
 	constexpr int chunk_size_Y	       = 128;
 
@@ -23,13 +23,17 @@ namespace KuchCraft {
 		OakLog, OakPlanks,
 		Sand, Stone, StoneBrick,
 
-		LastElement // temporary
+		None // No element and last element
 	};
 
 	class Block
 	{
 	public:
-		BlockType blockType = BlockType::Air;
+		Block()  = default;
+		Block(const BlockType& type);
+		~Block() = default;
+
+		BlockType blockType = BlockType::None;
 		static bool IsTranspaent(const Block& block);
 
 		operator BlockType()                     const { return  blockType;                    }
@@ -61,10 +65,6 @@ namespace KuchCraft {
 		const std::vector<BlockType>& GetTextureList() const { return m_DrawListTextures; }
 		std::vector<Vertex>&          GetDrawList()          { return m_DrawList;         }
 
-		// Temporary
-		void FillWithRandomBlocks();
-		void FillWithOneBlock(); 
-
 	private:
 		bool m_NeedToRecreate = true;
 		bool m_NeedToBuild    = true;
@@ -92,9 +92,14 @@ namespace KuchCraft {
 		static void RecreateChunk(const glm::vec3& position);
 
 		static void SetBlock(const glm::vec3& position, const Block& block);
+		static Block GetBlock(const glm::vec3& position);
+
+		static void SetRenderDistance(uint32_t distance);
+		static void SetKeptInMemoryChunksDistance(uint32_t distance);
 
 		static int GetChunkIndex(const glm::vec3& position);
-		static Chunk*    GetChunk(const glm::vec3& position);
+		static Chunk* GetChunk(const glm::vec3& position);
+		static Chunk* GetChunkToRecreate(const glm::vec3& position);
 		static std::vector<Chunk*>& GetChunks()       { return s_Chunks; }
 		static std::vector<Chunk*>& GetChunksToDraw() { return s_ChunksToDraw; }
 
@@ -102,9 +107,12 @@ namespace KuchCraft {
 
 	private:
 		static uint32_t            s_RenderDistance;
+		static uint32_t            s_ChunksKeptInMemoryDistance;
 		static uint32_t			   s_MaxChunksToRecreatePerFrame;
 		static std::vector<Chunk*> s_Chunks;
 		static std::vector<Chunk*> s_ChunksToDraw;
+
+		static void DeleteUnusedChunks(const glm::vec3& position);
 
 		World() = default;
 	};

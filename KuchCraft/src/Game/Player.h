@@ -25,6 +25,7 @@ namespace KuchCraft {
 		float m_MovementSpeed       = 10.0f;
 		float m_MovementSprintSpeed = 20.0f;
 		float m_PlayerHeight        = 1.5f;
+		float m_PlayerHandRange     = 3.0f;
 
 		Camera m_Camera;
 
