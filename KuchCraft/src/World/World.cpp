@@ -336,9 +336,9 @@ namespace KuchCraft {
 		m_NeedToRecreate = true;
 	}
 
-	void Chunk::AddToDrawList(const glm::mat4& model, const Vertex vertices[4], int x, int y, int z)
+	void Chunk::AddToDrawList(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z)
 	{
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < quad_vertex_count; i++)
 		{
 			m_DrawList.emplace_back(Vertex{
 				glm::vec3(model * glm::vec4(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z, 1.0f)),

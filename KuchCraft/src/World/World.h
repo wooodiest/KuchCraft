@@ -77,7 +77,7 @@ namespace KuchCraft {
 		std::vector<BlockType> m_DrawListTextures;
 
 	private:
-		void AddToDrawList(const glm::mat4& model, const Vertex vertices[4], int x, int y, int z);
+		void AddToDrawList(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
 
 	};
 
