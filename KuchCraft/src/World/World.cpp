@@ -72,12 +72,7 @@ namespace KuchCraft {
 					m_ChunksToDraw.push_back(chunk);
 			}
 		}
-		// If needed build chunks
-		for (auto& c : m_ChunksToDraw)
-		{
-			if (c->NeedToBuild())
-				c->Build();		
-		}
+
 		// If needed recreate chunks
 		int maxChunksToRecreate = playerGraphicalSettings.MaxChunksToRecreatePerFrame;
 		for (auto& c : m_ChunksToDraw)

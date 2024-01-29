@@ -129,7 +129,7 @@ namespace KuchCraft {
 				s_Data.TextureSlotIndex++;
 			}
 
-			for (int j = 0; j < 4; j++)
+			for (int j = 0; j < quad_vertex_count; j++)
 			{
 				s_Data.VertexBufferPtr->Position = vertices[i + j].Position;
 				s_Data.VertexBufferPtr->TexCoord = vertices[i + j].TexCoord;
@@ -148,6 +148,9 @@ namespace KuchCraft {
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_CULL_FACE);
+		//glFrontFace(GL_CCW);
+		//glCullFace(GL_BACK);
 
 		// Create vertex array
 		glGenVertexArrays(1, &s_Data.VertexArray);
