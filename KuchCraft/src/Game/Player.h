@@ -8,14 +8,14 @@ namespace KuchCraft {
 
 	struct PlayerGraphicalSettings
 	{
-		uint32_t RenderDistance              = 10;
+		uint32_t RenderDistance              = 12;
 		uint32_t ChunksKeptInMemoryDistance  = 20;
 	};
 
 	struct PlayerMovementSettings
 	{
 		float Speed       = 10.0f;
-		float SprintSpeed = 20.0f;
+		float SprintSpeed = 30.0f;
 		float Height      = 1.5f;
 		float HandRange   = 3.0f;
 	};

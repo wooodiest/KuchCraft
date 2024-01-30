@@ -3,6 +3,8 @@
 #include "Core/Random.h"
 #include "World/World.h"
 
+#include <iostream>
+
 namespace KuchCraft {
 
 	Player::Player()
@@ -47,14 +49,6 @@ namespace KuchCraft {
 		m_Position = { pos.x, pos.y - m_PlayerMovementSettings.Height, pos.z };
 		m_Rotation = m_Camera.GetRotation();	
 
-		// Actions - temporary
-		m_LeftMouseButtonClick.OnUpdate(dt);
-		if (m_LeftMouseButtonClick.PerformAction())
-		{
-			Block block;
-			block.blockType = static_cast<BlockType>(Random::Int(1, (int)BlockType::None - 1));
-			World::Get().SetBlock({m_Position.x + 2.0f, m_Position.y + 2.0f, m_Position.z + 2.0f}, block);
-		}
 	}
 
 }

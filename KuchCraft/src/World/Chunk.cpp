@@ -26,10 +26,10 @@ namespace KuchCraft {
 		m_DrawList.        reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count                    );
 		m_DrawListTextures.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count / quad_vertex_count);
 
-		Chunk* leftChunk   = World::Get().GetChunkToRecreate({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z                 });
-		Chunk* rightChunk  = World::Get().GetChunkToRecreate({ m_Position.x + chunk_size_XZ, m_Position.y, m_Position.z                 });
-		Chunk* frontChunk  = World::Get().GetChunkToRecreate({ m_Position.x                , m_Position.y, m_Position.z + chunk_size_XZ });
-		Chunk* behindChunk = World::Get().GetChunkToRecreate({ m_Position.x                , m_Position.y, m_Position.z - chunk_size_XZ });
+		Chunk* leftChunk   = World::Get().GetChunk({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z                 });
+		Chunk* rightChunk  = World::Get().GetChunk({ m_Position.x + chunk_size_XZ, m_Position.y, m_Position.z                 });
+		Chunk* frontChunk  = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z + chunk_size_XZ });
+		Chunk* behindChunk = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z - chunk_size_XZ });
 
 		// Go through all the blocks and corresponding blocks of chunk next to it
 		// If a block is not air, check if the blocks surrounding it are transparant
@@ -116,7 +116,7 @@ namespace KuchCraft {
 		bool needToGenerate = true; // World::LoadChunk(this);
 		// Else
 		if (needToGenerate)
-			WorldGenerator::FillWithRandomBlocks(this);
+			WorldGenerator::Generate(this);
 		// Save to file
 
 		m_NeedToBuild    = false;
