@@ -44,6 +44,15 @@ namespace KuchCraft {
 						continue;
 
 					glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z));
+
+					if (Blocks[x][y][z] == BlockType::Water && y != chunk_size_Y - 1)
+					{
+						if (Blocks[x][y + 1][z] == BlockType::Air)
+							AddToDrawList(transform, vertices_top, x, y, z);
+
+						continue;
+					}
+
 					bool checkBottom = true, checkTop    = true;
 					bool checkFront  = true, checkBehind = true;
 					bool checkRight  = true, checkLeft   = true;

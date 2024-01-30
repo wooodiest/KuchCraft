@@ -16,7 +16,7 @@ namespace KuchCraft {
 		// Load data
 
 		// Set data
-		WorldGenerator::Init(0);
+		WorldGenerator::Init(4206999);
 		m_Chunks.resize(world_chunk_size * world_chunk_size);
 	}
 

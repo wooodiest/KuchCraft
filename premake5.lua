@@ -33,6 +33,7 @@ project "KuchCraft"
         "%{wks.location}/KuchCraft/vendor/glm/glm/**.inl",
         "%{wks.location}/KuchCraft/vendor/stb_image/**.h",
 		"%{wks.location}/KuchCraft/vendor/stb_image/**.cpp",
+        "%{wks.location}/KuchCraft/vendor/perlin_noise/**.hpp"
 	}
 
     includedirs
@@ -41,6 +42,7 @@ project "KuchCraft"
         "%{wks.location}/KuchCraft/vendor/glfw/include",
         "%{wks.location}/KuchCraft/vendor/Glad/include",
         "%{wks.location}/KuchCraft/vendor/glm",
+        "%{wks.location}/KuchCraft/vendor/perlin_noise",
         "%{wks.location}/KuchCraft/vendor/stb_image",
     }
 

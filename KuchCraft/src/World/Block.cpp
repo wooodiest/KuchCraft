@@ -11,8 +11,9 @@ namespace KuchCraft {
 	{
 		switch (block.blockType)
 		{
-			case BlockType::Air:  return true;
-			case BlockType::None: return true;
+			case BlockType::Air:    return true;
+			case BlockType::Water:  return true;
+			case BlockType::None:   return true;
 		}
 		return false;
 	}

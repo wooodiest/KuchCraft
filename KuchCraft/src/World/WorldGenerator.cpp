@@ -1,10 +1,14 @@
 #include "WorldGenerator.h"
 
 #include "Core/Random.h"
+#include <iostream>
+
+#include "perlin_noise.hpp"
 
 namespace KuchCraft {
 
 	uint64_t WorldGenerator::s_Seed = 0;
+	static uint32_t s_SeeLevel = 60;
 
 	void WorldGenerator::Init(uint64_t seed)
 	{
@@ -49,45 +53,102 @@ namespace KuchCraft {
 
 	void WorldGenerator::Generate(Chunk* chunk)
 	{
-		const int terainLevel = 60;
-
-		// Fill bottom with bedrock
+		siv::PerlinNoise::seed_type seed = s_Seed;
+		siv::PerlinNoise perlin{ seed };
+		auto& position = chunk->GetPosition();
+		 
+		double A = 0.005;
+		double B = 0.02;
 		for (int x = 0; x < chunk_size_XZ; x++)
 		{
 			for (int z = 0; z < chunk_size_XZ; z++)
 			{
-				chunk->Blocks[x][0][z] = Block(BlockType::Bedrock);
+				double octaves = 1 + 5 * perlin.noise2D_01((position.x + x) * 0.01, (position.z + z) * 0.01);
+				double H = 50 * perlin.octave2D((position.x + x) * B, (position.z + z) * B, octaves);
+
+				int height = 5 + s_SeeLevel + H * perlin.octave2D((position.x + x) * A, (position.z + z) * A, 4);
+				for (int y = 0; y < chunk_size_Y; y++)
+				{
+					if (y < height)
+						chunk->Blocks[x][y][z] = Block(BlockType::Grass);
+				}
+			}
+		}
+		for (int x = 0; x < chunk_size_XZ; x++)
+		{
+			for (int z = 0; z < chunk_size_XZ; z++)
+			{
+				for (int y = 0; y < chunk_size_Y - 1; y++)
+				{
+					if (y == 0)
+						chunk->Blocks[x][y][z] = Block(BlockType::Bedrock);
+					else if (y < s_SeeLevel - 1)
+					{
+						if (chunk->Blocks[x][y + 1][z].blockType == BlockType::Air)
+						{
+							chunk->Blocks[x][y + 1][z] = Block(BlockType::Water);
+						}
+					}
+				}
 			}
 		}
 
-		auto& position = chunk->GetPosition();
-
-		float frequency1 = 0.1f;
-		float frequency2 = 0.15f;
-		float frequency3 = 0.069f;
-		float amplitude1 = 5.0f;
-		float amplitude2 = 5.0f;
-		float amplitude3 = 3.0f;
-		for (int x = 0; x < chunk_size_XZ; x++)
+		for (int x = 2; x < chunk_size_XZ - 2; x++)
 		{
-			for (int z = 0; z < chunk_size_XZ; z++)
+			for (int z = 2; z < chunk_size_XZ - 2; z++)
 			{
-				float xOffset  = glm::sin((position.x + x) * frequency1) * amplitude1 + glm::sin((position.x + x) * frequency2) + (glm::cos(position.x + x) * frequency3 * amplitude3) * (glm::cos(position.x + x) * frequency3 * amplitude3);
-				float zOffset  = glm::sin((position.z + z) * frequency1) * amplitude1 + glm::sin((position.z + z) * frequency2) + (glm::cos(position.z + z) * frequency3 * amplitude3) * (glm::cos(position.z + z) * frequency3 * amplitude3);
-				float surfaceY = terainLevel + xOffset + zOffset;
-				for (int y = 1; y < chunk_size_Y; y++)
+				for (int y = 1; y < chunk_size_Y - 8; y++)
 				{
-					if (y <= surfaceY)
+					double H = perlin.octave2D((position.x + x), (position.z + z), 5);
+					if (y < 70 && 
+						chunk->Blocks[x][y - 1][z].blockType == BlockType::Grass
+						&& chunk->Blocks[x][y + 1][z].blockType == BlockType::Air
+						&& chunk->Blocks[x][y    ][z].blockType != BlockType::Water
+						&& chunk->Blocks[x][y + 2][z].blockType != BlockType::Water
+						&& chunk->Blocks[x][y + 3][z].blockType != BlockType::Water
+						&& chunk->Blocks[x][y + 4][z].blockType != BlockType::Water
+						&& chunk->Blocks[x][y + 5][z].blockType != BlockType::Water
+						&& chunk->Blocks[x][y + 6][z].blockType != BlockType::Water
+						&& H > 0.65)
 					{
-						chunk->Blocks[x][y][z] = Block(BlockType::Grass);
-					}
+						chunk->Blocks[x][y][z] = Block(BlockType::OakLog);
+						chunk->Blocks[x][y + 1][z] = Block(BlockType::OakLog);
+						chunk->Blocks[x][y + 2][z] = Block(BlockType::OakLog);
+						chunk->Blocks[x][y + 3][z] = Block(BlockType::OakLog);
 
+						chunk->Blocks[x][y + 4][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 4][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 4][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 4][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 4][z + 1] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z + 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x - 2][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 2][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z - 2] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z + 2] = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 5][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 5][z + 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 5][z + 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 5][z - 1] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x][y + 6][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 6][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 6][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 6][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 6][z + 1] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x][y + 7][z] = Block(BlockType::Leaves);
+					}
 				}
-			}	
+			}
 		}
 
 	}
-
-
 
 }

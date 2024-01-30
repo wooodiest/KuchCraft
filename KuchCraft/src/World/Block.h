@@ -4,7 +4,7 @@ namespace KuchCraft {
 
 	enum class BlockType
 	{
-		Air = 0,
+		Air = 0, Water,
 		Bedrock, Bricks,
 		CoalOre, Cobblestone, CraftingTable,
 		DiamondOre, Dioryte, Dirt,
@@ -13,6 +13,7 @@ namespace KuchCraft {
 		IronOre,
 		OakLog, OakPlanks,
 		Sand, Stone, StoneBrick,
+		Leaves,
 
 		None // No element and/or last element
 	};

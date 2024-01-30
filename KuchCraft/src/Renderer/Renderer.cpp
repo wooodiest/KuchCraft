@@ -148,9 +148,11 @@ namespace KuchCraft {
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
-		//glFrontFace(GL_CCW);
-		//glCullFace(GL_BACK);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CCW);
+		glCullFace(GL_BACK);
 
 		// Create vertex array
 		glGenVertexArrays(1, &s_Data.VertexArray);
@@ -240,6 +242,8 @@ namespace KuchCraft {
 		s_BlockTexturePathsAtlas[BlockType::Sand]          = "sand";
 		s_BlockTexturePathsAtlas[BlockType::Stone]         = "stone";
 		s_BlockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
+		s_BlockTexturePathsAtlas[BlockType::Water]         = "water";
+		s_BlockTexturePathsAtlas[BlockType::Leaves]        = "leaves";
 
 		// Load all textures to gpu
 		const std::string mainPath  = "assets/textures/";
