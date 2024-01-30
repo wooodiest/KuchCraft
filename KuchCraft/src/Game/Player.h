@@ -10,7 +10,6 @@ namespace KuchCraft {
 	{
 		uint32_t RenderDistance              = 10;
 		uint32_t ChunksKeptInMemoryDistance  = 20;
-		uint32_t MaxChunksToRecreatePerFrame = 2;
 	};
 
 	struct PlayerMovementSettings

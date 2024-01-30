@@ -32,6 +32,7 @@ namespace KuchCraft {
 		int    GetChunkIndex(const glm::vec3& position);
 		Chunk* GetChunk(const glm::vec3& position);
 		Chunk* GetChunkToRecreate(const glm::vec3& position);
+		Chunk* GetOrCreateChunk(const glm::vec3& position);
 
 		std::vector<Chunk*>& GetChunks()       { return m_Chunks;       }
 		std::vector<Chunk*>& GetChunksToDraw() { return m_ChunksToDraw; }

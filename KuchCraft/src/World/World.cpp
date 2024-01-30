@@ -72,18 +72,19 @@ namespace KuchCraft {
 					m_ChunksToDraw.push_back(chunk);
 			}
 		}
-
-		// If needed recreate chunks
-		int maxChunksToRecreate = playerGraphicalSettings.MaxChunksToRecreatePerFrame;
+		// If needed build chunks
 		for (auto& c : m_ChunksToDraw)
 		{
-			if (c->NeedToRecreate()) 
-			{		
+			if (c->NeedToBuild())
+				c->Build();
+			
+		}
+		// If needed recreate chunks
+		for (auto& c : m_ChunksToDraw)
+		{
+			if (c->NeedToRecreate())
 				c->Recreate();
-				maxChunksToRecreate--;
-				if (maxChunksToRecreate == 0)
-					break;
-			}
+			
 		}
 		// Delete from memory chunks that are too far away
 		DeleteUnusedChunks(playerPosition);
@@ -92,14 +93,13 @@ namespace KuchCraft {
 	void World::Render()
 	{
 		for (auto& c : m_ChunksToDraw)
-		{
 			Renderer::DrawList(c->GetDrawList(), c->GetTextureList());
-		}
+		
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)
 	{
-		Chunk* chunk = GetChunk(position);
+		Chunk* chunk = GetOrCreateChunk(position);
 		if (chunk)
 		{
 			int x = static_cast<int>(std::fmod(position.x, chunk_size_XZ ));
@@ -112,7 +112,7 @@ namespace KuchCraft {
 
 	Block World::GetBlock(const glm::vec3& position)
 	{
-		Chunk* chunk = GetChunk(position);
+		Chunk* chunk = GetOrCreateChunk(position);
 		if (chunk)
 		{
 			int x = static_cast<int>(std::fmod(position.x, chunk_size_XZ));
@@ -142,10 +142,7 @@ namespace KuchCraft {
 		{
 			if (m_Chunks[index] == nullptr)
 				m_Chunks[index] = new Chunk(World::CalculateChunkAbsolutePosition(position));
-			
-			if (m_Chunks[index]->NeedToBuild())
-				m_Chunks[index]->Build();
-			
+					
 			return m_Chunks[index];
 		}
 		
@@ -156,9 +153,35 @@ namespace KuchCraft {
 	{
 		int index = GetChunkIndex(position);
 
-		if (index >= 0 && index < m_Chunks.size() && m_Chunks[index])
+		if (index >= 0 && index < m_Chunks.size())
+		{
+			if (m_Chunks[index] == nullptr)
+				return nullptr;
+
+			if (m_Chunks[index]->NeedToBuild())
+				return nullptr;
+
 			return m_Chunks[index];
-		
+		}
+
+		return nullptr;
+	}
+
+	Chunk* World::GetOrCreateChunk(const glm::vec3& position)
+	{
+		int index = GetChunkIndex(position);
+
+		if (index >= 0 && index < m_Chunks.size())
+		{
+			if (m_Chunks[index] == nullptr)
+				m_Chunks[index] = new Chunk(World::CalculateChunkAbsolutePosition(position));
+
+			if (m_Chunks[index]->NeedToBuild())
+				m_Chunks[index]->Build();
+
+			return m_Chunks[index];
+		}
+
 		return nullptr;
 	}
 
