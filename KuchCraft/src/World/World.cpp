@@ -123,6 +123,27 @@ namespace KuchCraft {
 			int z = static_cast<int>(std::fmod(position.z, chunk_size_XZ ));
 			chunk->Blocks[x][y][z] = block;
 			chunk->Recreate();
+
+			if (x == 0)
+			{
+				auto c = GetChunk({ position.x - chunk_size_XZ, position.y, position.z });
+				c->Recreate();
+			}
+			if (x == chunk_size_XZ - 1)
+			{
+				auto c = GetChunk({ position.x + chunk_size_XZ, position.y, position.z });
+				c->Recreate();
+			}
+			if (z == 0)
+			{
+				auto c = GetChunk({ position.x, position.y, position.z - chunk_size_XZ });
+				c->Recreate();
+			}
+			if (z == chunk_size_XZ - 1)
+			{
+				auto c = GetChunk({ position.x, position.y, position.z + chunk_size_XZ });
+				c->Recreate();
+			}
 		}
 	}
 
