@@ -15,7 +15,7 @@ namespace KuchCraft {
 
 		Random::Init();
 
-		m_Window = new Window("KuchCraft", 1600, 900, true);
+		m_Window = new Window("KuchCraft", 1920, 1080, false);
 		m_Game   = new KuchCraft();
 	}
 

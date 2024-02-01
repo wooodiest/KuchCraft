@@ -58,6 +58,8 @@ namespace KuchCraft {
 		// Find chunks to draw
 		m_ChunksToDraw.clear();
 		m_ChunksToDraw.reserve((2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1));
+		constexpr int max_to_Build = 5;
+		int totalBuilded = 0;
 
 		for (float x  = playerPosition.x - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
 				   x <= playerPosition.x + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
@@ -67,16 +69,38 @@ namespace KuchCraft {
 				       z <= playerPosition.z + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
 				       z += chunk_size_XZ)
 			{
-				Chunk* chunk = World::GetChunk({ x, playerPosition.y, z });
-				if (chunk)
-					m_ChunksToDraw.push_back(chunk);
+				int index = GetChunkIndex({ x, playerPosition.y, z });
+				if (index >= 0 && index < m_Chunks.size())
+				{
+					if (m_Chunks[index] == nullptr)
+						m_Chunks[index] = new Chunk(World::CalculateChunkAbsolutePosition({ x, playerPosition.y, z }));
+
+					if (m_Chunks[index]->NeedToBuild())
+					{
+						m_Chunks[index]->Build();
+						totalBuilded++;
+						if (totalBuilded == max_to_Build)
+							break;
+					}
+
+					m_ChunksToDraw.push_back(m_Chunks[index]);
+				}
 			}
+			if (totalBuilded == max_to_Build)
+				break;
 		}
 		// If needed recreate chunks
+		constexpr int max_to_recreate = 2;
+		int totalRecreated = 0;
 		for (auto& c : m_ChunksToDraw)
 		{
 			if (c->NeedToRecreate())
+			{
 				c->Recreate();
+				totalRecreated++;
+				if (totalRecreated == max_to_recreate)
+					break;
+			}
 			
 		}
 		// Delete from memory chunks that are too far away

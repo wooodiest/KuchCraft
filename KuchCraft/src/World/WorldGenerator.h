@@ -2,6 +2,8 @@
 
 #include "World.h"
 
+#include "perlin_noise.hpp"
+
 namespace KuchCraft {
 
 	class WorldGenerator
@@ -14,7 +16,8 @@ namespace KuchCraft {
 		static void Generate(Chunk* chunk);
 
 	private:
-		static uint64_t s_Seed;
+		static siv::PerlinNoise::seed_type s_Seed;
+		static siv::PerlinNoise s_Noise;
 	};
 
 
