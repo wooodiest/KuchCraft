@@ -112,8 +112,11 @@ namespace KuchCraft {
 		for (auto& c : m_ChunksToDraw)
 			Renderer::DrawChunk(c);
 
+
+		Renderer::SetBlending(true);
 		for (auto& c : m_ChunksToDraw)
 			Renderer::DrawChunkTransparent(c);
+		Renderer::SetBlending(false);
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)

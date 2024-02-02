@@ -172,9 +172,12 @@ namespace KuchCraft {
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+
+		glEnable(GL_CULL_FACE);	
 		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);
 
@@ -278,6 +281,15 @@ namespace KuchCraft {
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		glViewport(0, 0, width, height);
+	}
+
+	void Renderer::SetBlending(bool status)
+	{
+		if (status)
+			glEnable(GL_BLEND);
+		else
+			glDisable(GL_BLEND);
+		
 	}
 
 	uint32_t Renderer::LoadTextureToAtals(const std::string& path)

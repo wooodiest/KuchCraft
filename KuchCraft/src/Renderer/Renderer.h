@@ -95,6 +95,8 @@ namespace KuchCraft {
 		static void DrawChunkTransparent(Chunk* chunk);
 		static void FlushChunk(uint32_t& indexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
 
+		static void SetBlending(bool status);
+
 	private:
 		Renderer() = default;
 
