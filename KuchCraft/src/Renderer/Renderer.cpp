@@ -12,8 +12,6 @@
 namespace KuchCraft {
 
 	RendererStatistics Renderer::s_Stats;
-	std::unordered_map<BlockType, unsigned int> Renderer::s_BlockTextureAtlas;
-	std::unordered_map<BlockType, std::string>  Renderer::s_BlockTexturePathsAtlas;
 
 	// Renderer data
 	struct RendererData
@@ -31,7 +29,9 @@ namespace KuchCraft {
 		uint32_t VertexOffset = 0;
 
 		std::array<uint32_t, MaxTextureSlots> TextureSlots;
+		std::array<uint32_t, number_of_blocks> Textures;
 		uint32_t TextureSlotIndex = 1;
+
 	};
 	static RendererData s_Data;
 
@@ -55,10 +55,11 @@ namespace KuchCraft {
 		s_Stats.Quads     = 0;
 	}
 
-	void Renderer::FlushChunk(uint32_t& indexCount, uint32_t& vertexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices)
+	void Renderer::FlushChunk(uint32_t& indexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices)
 	{
 		if (indexCount != 0)
 		{
+			uint32_t vertexCount = (uint32_t)(indexCount / quad_index_count) * quad_vertex_count;
 			glBindVertexArray(s_Data.VertexArray);
 			glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), &vertices[s_Data.VertexOffset]);
@@ -79,7 +80,6 @@ namespace KuchCraft {
 		}
 		
 		indexCount    = 0;
-		vertexCount   = 0;
 		texturesIndex = 1;
 	}
 
@@ -88,18 +88,16 @@ namespace KuchCraft {
 		auto& vertices = chunk->GetDrawList();
 		auto& textures = chunk->GetTextureList();
 
-		uint32_t indexCount = 0;
-		uint32_t vertexCount = 0;
+		uint32_t indexCount       = 0;
 		uint32_t textureSlotIndex = 1;
 
 		for (int i = 0; i < vertices.size(); i += 4)
 		{
 			if (indexCount >= s_Data.MaxIndices)
-				FlushChunk(indexCount, vertexCount, textureSlotIndex, vertices);
+				FlushChunk(indexCount, textureSlotIndex, vertices);
 
 			float textureIndex = 0.0f;
-			uint32_t texture = GetTexture(textures[i / 4]); // 4 vertices has one texture
-
+			uint32_t texture =  s_Data.Textures[(int)textures[i >> 2]];
 			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
 			{
 				if (j < textureSlotIndex && s_Data.TextureSlots[j] == texture)
@@ -112,7 +110,7 @@ namespace KuchCraft {
 			if (textureIndex == 0.0f) // Is every slot occupied or we have new texture ?
 			{
 				if (textureSlotIndex >= s_Data.MaxTextureSlots)
-					FlushChunk(indexCount, vertexCount, textureSlotIndex, vertices);
+					FlushChunk(indexCount, textureSlotIndex, vertices);
 
 				textureIndex = (float)textureSlotIndex;
 				s_Data.TextureSlots[textureSlotIndex] = texture;
@@ -125,10 +123,9 @@ namespace KuchCraft {
 			vertices[i + 3].TexIndex = textureIndex;
 
 			indexCount  += quad_index_count;
-			vertexCount += quad_vertex_count;
 		}
 
-		FlushChunk(indexCount, vertexCount, textureSlotIndex, vertices);
+		FlushChunk(indexCount, textureSlotIndex, vertices);
 		s_Data.VertexOffset = 0;
 	}
 
@@ -202,42 +199,38 @@ namespace KuchCraft {
 		glDeleteVertexArrays(1, &s_Data.VertexArray);
 	}
 
-	uint32_t Renderer::GetTexture(const BlockType& type)
-	{
-		return s_BlockTextureAtlas[type];
-	}
-
 	void Renderer::LoadTextureAtlas()
 	{
 		// Pair blocktype with texture
-		s_BlockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
-		s_BlockTexturePathsAtlas[BlockType::Bricks]        = "bricks";
-		s_BlockTexturePathsAtlas[BlockType::CoalOre]       = "coal_ore";
-		s_BlockTexturePathsAtlas[BlockType::Cobblestone]   = "cobblestone";
-		s_BlockTexturePathsAtlas[BlockType::CraftingTable] = "crafting_table";
-		s_BlockTexturePathsAtlas[BlockType::DiamondOre]    = "diamond_ore";
-		s_BlockTexturePathsAtlas[BlockType::Dioryte]       = "dioryte";
-		s_BlockTexturePathsAtlas[BlockType::Dirt]          = "dirt";
-		s_BlockTexturePathsAtlas[BlockType::Furnace]       = "furnace";
-		s_BlockTexturePathsAtlas[BlockType::Granite]       = "granite";
-		s_BlockTexturePathsAtlas[BlockType::Grass]         = "grass";
-		s_BlockTexturePathsAtlas[BlockType::Gravel]        = "gravel";
-		s_BlockTexturePathsAtlas[BlockType::IronOre]       = "iron_ore";
-		s_BlockTexturePathsAtlas[BlockType::OakLog]        = "oak_log";
-		s_BlockTexturePathsAtlas[BlockType::OakPlanks]     = "oak_planks";
-		s_BlockTexturePathsAtlas[BlockType::Sand]          = "sand";
-		s_BlockTexturePathsAtlas[BlockType::Stone]         = "stone";
-		s_BlockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
-		s_BlockTexturePathsAtlas[BlockType::Water]         = "water";
-		s_BlockTexturePathsAtlas[BlockType::Leaves]        = "leaves";
+		std::unordered_map<BlockType, std::string>  blockTexturePathsAtlas;
+		blockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
+		blockTexturePathsAtlas[BlockType::Bricks]        = "bricks";
+		blockTexturePathsAtlas[BlockType::CoalOre]       = "coal_ore";
+		blockTexturePathsAtlas[BlockType::Cobblestone]   = "cobblestone";
+		blockTexturePathsAtlas[BlockType::CraftingTable] = "crafting_table";
+		blockTexturePathsAtlas[BlockType::DiamondOre]    = "diamond_ore";
+		blockTexturePathsAtlas[BlockType::Dioryte]       = "dioryte";
+		blockTexturePathsAtlas[BlockType::Dirt]          = "dirt";
+		blockTexturePathsAtlas[BlockType::Furnace]       = "furnace";
+		blockTexturePathsAtlas[BlockType::Granite]       = "granite";
+		blockTexturePathsAtlas[BlockType::Grass]         = "grass";
+		blockTexturePathsAtlas[BlockType::Gravel]        = "gravel";
+		blockTexturePathsAtlas[BlockType::IronOre]       = "iron_ore";
+		blockTexturePathsAtlas[BlockType::OakLog]        = "oak_log";
+		blockTexturePathsAtlas[BlockType::OakPlanks]     = "oak_planks";
+		blockTexturePathsAtlas[BlockType::Sand]          = "sand";
+		blockTexturePathsAtlas[BlockType::Stone]         = "stone";
+		blockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
+		blockTexturePathsAtlas[BlockType::Water]         = "water";
+		blockTexturePathsAtlas[BlockType::Leaves]        = "leaves";
 
 		// Load all textures to gpu
 		const std::string mainPath  = "assets/textures/";
 		const std::string extension = ".png";
-		for (const auto& texture : s_BlockTexturePathsAtlas)
+		for (const auto& texture : blockTexturePathsAtlas)
 		{
 			std::string path = mainPath + texture.second + extension;
-			s_BlockTextureAtlas[texture.first] = LoadTextureToAtals(path);
+			s_Data.Textures[(int)texture.first] = LoadTextureToAtals(path);
 		}
 	}
 

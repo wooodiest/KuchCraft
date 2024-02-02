@@ -82,7 +82,6 @@ namespace KuchCraft {
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
-		static uint32_t GetTexture(const BlockType& type);
 		static void     LoadTextureAtlas();
 		static uint32_t LoadTextureToAtals(const std::string& path);
 
@@ -93,14 +92,12 @@ namespace KuchCraft {
 		static RendererStatistics& GetStats() { return s_Stats; }
 
 		static void DrawChunk(Chunk* chunk);
-		static void FlushChunk(uint32_t& indexCount, uint32_t& vertexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
+		static void FlushChunk(uint32_t& indexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
 
 	private:
 		Renderer() = default;
 
 		static RendererStatistics s_Stats;
-		static std::unordered_map<BlockType, unsigned int> s_BlockTextureAtlas;
-		static std::unordered_map<BlockType, std::string>  s_BlockTexturePathsAtlas;
 
 	};
 

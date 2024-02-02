@@ -17,6 +17,7 @@ namespace KuchCraft {
 
 		None // No element and/or last element
 	};
+	constexpr int number_of_blocks = (int)BlockType::None - 1;;
 
 	class Block
 	{
