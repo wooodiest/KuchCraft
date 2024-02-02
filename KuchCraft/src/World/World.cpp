@@ -110,7 +110,7 @@ namespace KuchCraft {
 	void World::Render()
 	{
 		for (auto& c : m_ChunksToDraw)
-			Renderer::DrawList(c->GetDrawList(), c->GetTextureList());	
+			Renderer::DrawChunk(c);
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)

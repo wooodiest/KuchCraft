@@ -28,9 +28,7 @@ namespace KuchCraft {
 		uint32_t IndexBuffer;
 		Shader   Shader;
 
-		Vertex*  VertexBufferBase = nullptr;
-		Vertex*  VertexBufferPtr = nullptr;
-		uint32_t IndexCount = 0;
+		uint32_t VertexOffset = 0;
 
 		std::array<uint32_t, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1;
@@ -38,59 +36,17 @@ namespace KuchCraft {
 	static RendererData s_Data;
 
 	// Declarations
-	void Renderer::Flush()
-	{
-		if (s_Data.IndexCount == 0) // Nothing to draw
-			return;
-
-		// Upload data
-		uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.VertexBufferPtr - (uint8_t*)s_Data.VertexBufferBase);
-		glBindVertexArray(s_Data.VertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, s_Data.VertexBufferBase);
-
-		// Bind textures
-		// s_Data.Shader.Bind();
-		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
-			glBindTextureUnit(i, s_Data.TextureSlots[i]);
-		
-		// Draw elements		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
-		glDrawElements(GL_TRIANGLES, s_Data.IndexCount, GL_UNSIGNED_INT, nullptr);
-
-		// Update stats
-		Renderer::s_Stats.DrawCalls++;
-	}
-
-	void Renderer::StartBatch()
-	{
-		// Reset current data
-		s_Data.IndexCount = 0;
-		s_Data.VertexBufferPtr = s_Data.VertexBufferBase;
-		s_Data.TextureSlotIndex = 1;
-	}
-
-	void Renderer::NextBatch()
-	{
-		// Draw and reset
-		Flush();
-		StartBatch();
-	}
 
 	void Renderer::BeginScene(const Camera& camera)
 	{
 		// Set uniform: view-projection matrix
 		s_Data.Shader.Bind();
 		s_Data.Shader.SetMat4("u_ViewProjection", camera.GetViewProjection());
-
-		// Start collecting data to draw
-		StartBatch();
 	}
 
 	void Renderer::EndScene()
 	{
-		// Render remaining data
-		Flush();
+
 	}
 
 	void Renderer::ResetStats()
@@ -99,20 +55,54 @@ namespace KuchCraft {
 		s_Stats.Quads     = 0;
 	}
 
-	void Renderer::DrawList(std::vector<Vertex>& vertices, const std::vector<BlockType>& textures)
+	void Renderer::FlushChunk(uint32_t& indexCount, uint32_t& vertexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices)
 	{
+		if (indexCount != 0)
+		{
+			glBindVertexArray(s_Data.VertexArray);
+			glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), &vertices[s_Data.VertexOffset]);
+
+			s_Data.VertexOffset += vertexCount;
+			s_Stats.Quads += vertexCount / 4;
+			// Bind textures
+			// s_Data.Shader.Bind();
+			for (uint32_t i = 1; i < texturesIndex; i++)
+				glBindTextureUnit(i, s_Data.TextureSlots[i]);
+
+			// Draw elements		
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
+			glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
+			// Update stats
+			Renderer::s_Stats.DrawCalls++;
+		}
+		
+		indexCount    = 0;
+		vertexCount   = 0;
+		texturesIndex = 1;
+	}
+
+	void Renderer::DrawChunk(Chunk* chunk)
+	{
+		auto& vertices = chunk->GetDrawList();
+		auto& textures = chunk->GetTextureList();
+
+		uint32_t indexCount = 0;
+		uint32_t vertexCount = 0;
+		uint32_t textureSlotIndex = 1;
+
 		for (int i = 0; i < vertices.size(); i += 4)
 		{
-			// If currently we store too many data to draw. Draw what we have and start collecting data again. 
-			if (s_Data.IndexCount >= s_Data.MaxIndices)
-				NextBatch();
+			if (indexCount >= s_Data.MaxIndices)
+				FlushChunk(indexCount, vertexCount, textureSlotIndex, vertices);
 
 			float textureIndex = 0.0f;
-			uint32_t texture   = GetTexture(textures[i / 4]); // 4 vertices has one texture
+			uint32_t texture = GetTexture(textures[i / 4]); // 4 vertices has one texture
 
 			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
 			{
-				if (j < s_Data.TextureSlotIndex && s_Data.TextureSlots[j] == texture)
+				if (j < textureSlotIndex && s_Data.TextureSlots[j] == texture)
 				{
 					textureIndex = (float)j;
 					break;
@@ -121,25 +111,25 @@ namespace KuchCraft {
 
 			if (textureIndex == 0.0f) // Is every slot occupied or we have new texture ?
 			{
-				if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
-					NextBatch();
+				if (textureSlotIndex >= s_Data.MaxTextureSlots)
+					FlushChunk(indexCount, vertexCount, textureSlotIndex, vertices);
 
-				textureIndex = (float)s_Data.TextureSlotIndex;
-				s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
-				s_Data.TextureSlotIndex++;
+				textureIndex = (float)textureSlotIndex;
+				s_Data.TextureSlots[textureSlotIndex] = texture;
+				textureSlotIndex++;
 			}
 
-			for (int j = 0; j < quad_vertex_count; j++)
-			{
-				s_Data.VertexBufferPtr->Position = vertices[i + j].Position;
-				s_Data.VertexBufferPtr->TexCoord = vertices[i + j].TexCoord;
-				s_Data.VertexBufferPtr->TexIndex = textureIndex;
+			vertices[i + 0].TexIndex = textureIndex;
+			vertices[i + 1].TexIndex = textureIndex;
+			vertices[i + 2].TexIndex = textureIndex;
+			vertices[i + 3].TexIndex = textureIndex;
 
-				s_Data.VertexBufferPtr++;
-			}
-			s_Data.IndexCount += quad_index_count;
-			s_Stats.Quads++;
+			indexCount  += quad_index_count;
+			vertexCount += quad_vertex_count;
 		}
+
+		FlushChunk(indexCount, vertexCount, textureSlotIndex, vertices);
+		s_Data.VertexOffset = 0;
 	}
 
 	void Renderer::Init()
@@ -169,8 +159,6 @@ namespace KuchCraft {
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(float)));
 		glEnableVertexAttribArray(2);
-
-		s_Data.VertexBufferBase = new Vertex[s_Data.MaxVertices];
 
 		// Index buffer
 		uint32_t* indices = new uint32_t[s_Data.MaxIndices];
@@ -209,8 +197,6 @@ namespace KuchCraft {
 	void Renderer::ShutDown()
 	{
 		// free memmory
-		delete[] s_Data.VertexBufferBase;
-
 		glDeleteBuffers(1, &s_Data.IndexBuffer);
 		glDeleteBuffers(1, &s_Data.VertexBuffer);
 		glDeleteVertexArrays(1, &s_Data.VertexArray);

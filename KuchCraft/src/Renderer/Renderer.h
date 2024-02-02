@@ -16,6 +16,8 @@ namespace KuchCraft {
 
 	};
 
+	class Chunk;
+
 	constexpr size_t quad_index_count = 6;
 	constexpr size_t quad_vertex_count = 4;
 	constexpr size_t cube_vertex_count = 24;
@@ -84,17 +86,14 @@ namespace KuchCraft {
 		static void     LoadTextureAtlas();
 		static uint32_t LoadTextureToAtals(const std::string& path);
 
-		static void Flush();
-		static void StartBatch();
-		static void NextBatch();
-
 		static void BeginScene(const Camera& camera);
 		static void EndScene();
 
 		static void ResetStats();
 		static RendererStatistics& GetStats() { return s_Stats; }
 
-		static void DrawList(std::vector<Vertex>& vertices, const std::vector<BlockType>& textures);
+		static void DrawChunk(Chunk* chunk);
+		static void FlushChunk(uint32_t& indexCount, uint32_t& vertexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
 
 	private:
 		Renderer() = default;
