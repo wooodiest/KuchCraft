@@ -16,9 +16,6 @@ namespace KuchCraft {
 	// Renderer data
 	struct RendererData
 	{
-		static const uint32_t MaxQuads        = 20000; // 44004
-		static const uint32_t MaxVertices     = MaxQuads * 4;
-		static const uint32_t MaxIndices      = MaxQuads * 6;
 		static const uint32_t MaxTextureSlots = 32;
 
 		uint32_t VertexArray;
@@ -93,9 +90,6 @@ namespace KuchCraft {
 
 		for (int i = 0; i < vertices.size(); i += 4)
 		{
-			if (indexCount >= s_Data.MaxIndices)
-				FlushChunk(indexCount, textureSlotIndex, vertices);
-
 			float textureIndex = 0.0f;
 			uint32_t texture =  s_Data.Textures[(int)textures[i >> 2]];
 			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
@@ -139,9 +133,6 @@ namespace KuchCraft {
 
 		for (int i = 0; i < vertices.size(); i += 4)
 		{
-			if (indexCount >= s_Data.MaxIndices)
-				FlushChunk(indexCount, textureSlotIndex, vertices);
-
 			float textureIndex = 0.0f;
 			uint32_t texture = s_Data.Textures[(int)textures[i >> 2]];
 			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
@@ -192,9 +183,13 @@ namespace KuchCraft {
 		glBindVertexArray(s_Data.VertexArray);
 
 		// Create vertex buffer and layout setup
+		constexpr int max_quads    = chunk_size_XZ * chunk_size_XZ * chunk_size_Y * 6;
+		constexpr int max_indices  = max_quads * 6;
+		constexpr int max_vertices = max_quads * 4;
+
 		glGenBuffers(1, &s_Data.VertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, s_Data.MaxVertices * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, max_vertices * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 		glEnableVertexAttribArray(0);
@@ -204,9 +199,9 @@ namespace KuchCraft {
 		glEnableVertexAttribArray(2);
 
 		// Index buffer
-		uint32_t* indices = new uint32_t[s_Data.MaxIndices];
+		uint32_t* indices = new uint32_t[max_indices];
 		uint32_t  offset = 0;
-		for (uint32_t i = 0; i < s_Data.MaxIndices; i += 6)
+		for (uint32_t i = 0; i < max_indices; i += 6)
 		{
 			indices[i + 0] = offset + 0;
 			indices[i + 1] = offset + 1;
@@ -219,7 +214,7 @@ namespace KuchCraft {
 		}
 		glGenBuffers(1, &s_Data.IndexBuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, s_Data.MaxIndices * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, max_indices * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 		delete[] indices;
 
 		// Shader
