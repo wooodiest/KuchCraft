@@ -92,6 +92,7 @@ namespace KuchCraft {
 		static RendererStatistics& GetStats() { return s_Stats; }
 
 		static void DrawChunk(Chunk* chunk);
+		static void DrawChunkTransparent(Chunk* chunk);
 		static void FlushChunk(uint32_t& indexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
 
 	private:

@@ -111,6 +111,9 @@ namespace KuchCraft {
 	{
 		for (auto& c : m_ChunksToDraw)
 			Renderer::DrawChunk(c);
+
+		for (auto& c : m_ChunksToDraw)
+			Renderer::DrawChunkTransparent(c);
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)

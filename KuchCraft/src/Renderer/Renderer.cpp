@@ -129,14 +129,60 @@ namespace KuchCraft {
 		s_Data.VertexOffset = 0;
 	}
 
+	void Renderer::DrawChunkTransparent(Chunk* chunk)
+	{
+		auto& vertices = chunk->GetDrawListTransparent();
+		auto& textures = chunk->GetTextureListTransparent();
+
+		uint32_t indexCount = 0;
+		uint32_t textureSlotIndex = 1;
+
+		for (int i = 0; i < vertices.size(); i += 4)
+		{
+			if (indexCount >= s_Data.MaxIndices)
+				FlushChunk(indexCount, textureSlotIndex, vertices);
+
+			float textureIndex = 0.0f;
+			uint32_t texture = s_Data.Textures[(int)textures[i >> 2]];
+			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
+			{
+				if (j < textureSlotIndex && s_Data.TextureSlots[j] == texture)
+				{
+					textureIndex = (float)j;
+					break;
+				}
+			}
+
+			if (textureIndex == 0.0f) // Is every slot occupied or we have new texture ?
+			{
+				if (textureSlotIndex >= s_Data.MaxTextureSlots)
+					FlushChunk(indexCount, textureSlotIndex, vertices);
+
+				textureIndex = (float)textureSlotIndex;
+				s_Data.TextureSlots[textureSlotIndex] = texture;
+				textureSlotIndex++;
+			}
+
+			vertices[i + 0].TexIndex = textureIndex;
+			vertices[i + 1].TexIndex = textureIndex;
+			vertices[i + 2].TexIndex = textureIndex;
+			vertices[i + 3].TexIndex = textureIndex;
+
+			indexCount += quad_index_count;
+		}
+
+		FlushChunk(indexCount, textureSlotIndex, vertices);
+		s_Data.VertexOffset = 0;
+	}
+
 	void Renderer::Init()
 	{
 		// Setup viewport
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glViewport(0, 0, width, height);
 		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);

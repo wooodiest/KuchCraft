@@ -31,8 +31,12 @@ namespace KuchCraft {
 		void SetRecreateStatus(bool status) { m_NeedToRecreate = status; }
 
 		const glm::vec3& GetPosition()                 const { return m_Position;         }
+
 		const std::vector<BlockType>& GetTextureList() const { return m_DrawListTextures; }
 		std::vector<Vertex>& GetDrawList()                   { return m_DrawList;         }
+
+		const std::vector<BlockType>& GetTextureListTransparent() const { return m_DrawListTexturesTransparent; }
+		std::vector<Vertex>& GetDrawListTransparent()                   { return m_DrawListTransparent;         }
 
 	private:
 		glm::vec3 m_Position;
@@ -41,9 +45,12 @@ namespace KuchCraft {
 
 		std::vector<Vertex>    m_DrawList;
 		std::vector<BlockType> m_DrawListTextures;
+		std::vector<Vertex>    m_DrawListTransparent;
+		std::vector<BlockType> m_DrawListTexturesTransparent;
 
 	private:
 		void AddToDrawList(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
+		void AddToDrawListTransparent(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
 
 	};
 
