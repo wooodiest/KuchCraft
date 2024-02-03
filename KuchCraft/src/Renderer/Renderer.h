@@ -96,6 +96,8 @@ namespace KuchCraft {
 		static void FlushChunk(uint32_t& indexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
 
 		static void SetBlending(bool status);
+		static void SetFaceCulling(bool status);
+		static void SetTintColor(const glm::vec4& color);
 
 	private:
 		Renderer() = default;

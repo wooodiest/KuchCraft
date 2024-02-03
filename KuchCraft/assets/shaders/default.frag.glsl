@@ -6,8 +6,9 @@ in vec2 v_TexCoord;
 in flat float v_TexIndex;
 
 uniform sampler2D u_Textures[32];
+uniform vec4 u_TintColor;
 
 void main()
 {
-	color = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
+	color = texture(u_Textures[int(v_TexIndex)], v_TexCoord) * u_TintColor;
 }

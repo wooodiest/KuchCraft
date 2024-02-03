@@ -28,6 +28,12 @@ namespace KuchCraft {
 		glUniform1i(location, v);
 	}
 
+	void Shader::SetFloat4(const std::string& name, const glm::vec4& v)
+	{
+		int location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform4f(location, v.x, v.y, v.z, v.w);
+	}
+
 	void Shader::SetIntArray(const std::string& name, int* values, uint32_t count)
 	{
 		int location = glGetUniformLocation(m_RendererID, name.c_str());

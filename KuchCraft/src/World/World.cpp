@@ -109,14 +109,20 @@ namespace KuchCraft {
 
 	void World::Render()
 	{
+		if (GetBlock(m_Player.GetCamera().GetPosition()) == BlockType::Water)
+			Renderer::SetTintColor({ 0.0f, 0.0f, 1.0f, 1.0f });
+
 		for (auto& c : m_ChunksToDraw)
 			Renderer::DrawChunk(c);
 
-
+		Renderer::SetFaceCulling(false);
 		Renderer::SetBlending(true);
+		
 		for (auto& c : m_ChunksToDraw)
 			Renderer::DrawChunkTransparent(c);
+
 		Renderer::SetBlending(false);
+		Renderer::SetFaceCulling(true);
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)
@@ -133,22 +139,26 @@ namespace KuchCraft {
 			if (x == 0)
 			{
 				auto c = GetChunk({ position.x - chunk_size_XZ, position.y, position.z });
-				c->Recreate();
+				if(c)
+					c->Recreate();
 			}
 			if (x == chunk_size_XZ - 1)
 			{
 				auto c = GetChunk({ position.x + chunk_size_XZ, position.y, position.z });
-				c->Recreate();
+				if (c)
+					c->Recreate();
 			}
 			if (z == 0)
 			{
 				auto c = GetChunk({ position.x, position.y, position.z - chunk_size_XZ });
-				c->Recreate();
+				if (c)
+					c->Recreate();
 			}
 			if (z == chunk_size_XZ - 1)
 			{
 				auto c = GetChunk({ position.x, position.y, position.z + chunk_size_XZ });
-				c->Recreate();
+				if (c)
+					c->Recreate();
 			}
 		}
 	}

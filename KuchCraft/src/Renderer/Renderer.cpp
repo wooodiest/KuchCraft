@@ -21,7 +21,7 @@ namespace KuchCraft {
 		uint32_t VertexArray;
 		uint32_t VertexBuffer;
 		uint32_t IndexBuffer;
-		Shader   Shader;
+		Shader   DefaultShader;
 
 		uint32_t VertexOffset = 0;
 
@@ -37,8 +37,9 @@ namespace KuchCraft {
 	void Renderer::BeginScene(const Camera& camera)
 	{
 		// Set uniform: view-projection matrix
-		s_Data.Shader.Bind();
-		s_Data.Shader.SetMat4("u_ViewProjection", camera.GetViewProjection());
+		s_Data.DefaultShader.Bind();
+		s_Data.DefaultShader.SetMat4("u_ViewProjection", camera.GetViewProjection());
+		s_Data.DefaultShader.SetFloat4("u_TintColor", { 1.0f, 1.0f, 1.0f, 1.0f });
 	}
 
 	void Renderer::EndScene()
@@ -221,14 +222,14 @@ namespace KuchCraft {
 		delete[] indices;
 
 		// Shader
-		s_Data.Shader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
-		s_Data.Shader.Bind();
+		s_Data.DefaultShader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
+		s_Data.DefaultShader.Bind();
 
 		// Textures
 		int samplers[s_Data.MaxTextureSlots];
 		for (int i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
-		s_Data.Shader.SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+		s_Data.DefaultShader.SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
 		LoadTextureAtlas();
 
@@ -288,8 +289,20 @@ namespace KuchCraft {
 		if (status)
 			glEnable(GL_BLEND);
 		else
-			glDisable(GL_BLEND);
-		
+			glDisable(GL_BLEND);		
+	}
+
+	void Renderer::SetTintColor(const glm::vec4& color)
+	{
+		s_Data.DefaultShader.SetFloat4("u_TintColor", color);
+	}
+
+	void Renderer::SetFaceCulling(bool status)
+	{
+		if (status)
+			glEnable(GL_CULL_FACE);
+		else
+			glDisable(GL_CULL_FACE);
 	}
 
 	uint32_t Renderer::LoadTextureToAtals(const std::string& path)
