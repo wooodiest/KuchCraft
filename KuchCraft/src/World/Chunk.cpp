@@ -14,8 +14,10 @@ namespace KuchCraft {
 
 	Chunk::~Chunk()
 	{
-		m_DrawList.clear();
-		m_DrawListTextures.clear();
+		m_DrawList.                   clear();
+		m_DrawListTextures.           clear();
+		m_DrawListTransparent.        clear();
+		m_DrawListTexturesTransparent.clear();
 	}
 
 	void Chunk::Recreate()
@@ -118,10 +120,10 @@ namespace KuchCraft {
 
 				}
 			}
-		}
-		m_DrawList.shrink_to_fit();
-		m_DrawListTextures.shrink_to_fit();
-		m_DrawListTextures.shrink_to_fit();
+		}				              
+		m_DrawList.                   shrink_to_fit();
+		m_DrawListTextures.           shrink_to_fit();
+		m_DrawListTextures.           shrink_to_fit();
 		m_DrawListTexturesTransparent.shrink_to_fit();
 		m_NeedToRecreate = false;
 	}

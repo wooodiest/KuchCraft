@@ -58,7 +58,7 @@ namespace KuchCraft {
 		// Find chunks to draw
 		m_ChunksToDraw.clear();
 		m_ChunksToDraw.reserve((2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1));
-		constexpr int max_to_Build = 5;
+		constexpr int max_to_Build = 3;
 		int totalBuilded = 0;
 
 		for (float x  = playerPosition.x - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
@@ -169,7 +169,7 @@ namespace KuchCraft {
 	int World::GetChunkIndex(const glm::vec3& position)
 	{
 		if (position.x < 0 || position.z < 0)
-			return -1.0f;
+			return -1;
 
 		int index_X = static_cast<int>(position.x / chunk_size_XZ);
 		int index_Z = static_cast<int>(position.z / chunk_size_XZ);
