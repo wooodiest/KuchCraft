@@ -51,6 +51,16 @@ namespace KuchCraft {
 		// Update necessary stuff
 		m_Player.OnUpdate(dt);
 
+		// Tmp
+		static bool trianglesVisibility = false;
+		static InputKeyboardHandler handler{KeyCode::M};
+		handler.OnUpdate(dt);
+		if(handler.PerformAction())
+		{
+			trianglesVisibility = !trianglesVisibility;
+			Renderer::SetTrianglesVisibility(trianglesVisibility);
+		}
+
 		// Useful extracted variables
 		const auto& playerPosition          = m_Player.GetPosition();
 		const auto& playerGraphicalSettings = m_Player.GetGraphicalSettings();
@@ -123,6 +133,8 @@ namespace KuchCraft {
 
 		Renderer::SetBlending(false);
 		Renderer::SetFaceCulling(true);
+		Renderer::DrawSkybox(m_Player.GetCamera());
+
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)

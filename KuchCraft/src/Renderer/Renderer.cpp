@@ -16,6 +16,7 @@ namespace KuchCraft {
 	// Renderer data
 	struct RendererData
 	{
+		// Rendering blocks
 		static const uint32_t MaxTextureSlots = 32;
 
 		uint32_t VertexArray;
@@ -29,6 +30,11 @@ namespace KuchCraft {
 		std::array<uint32_t, number_of_blocks> Textures;
 		uint32_t TextureSlotIndex = 1;
 
+		// Rendering skybox
+		uint32_t SkyboxVertexArray;
+		uint32_t SkyboxVertexBuffer;
+		uint32_t SkyboxTexture;
+		Shader   SkyboxShader;
 	};
 	static RendererData s_Data;
 
@@ -167,6 +173,25 @@ namespace KuchCraft {
 		s_Data.VertexOffset = 0;
 	}
 
+	void Renderer::DrawSkybox(const Camera& camera)
+	{
+		s_Data.SkyboxShader.Bind();
+		s_Data.SkyboxShader.SetMat4("u_ViewProjection0", camera.GetSkyboxProjection());
+		glCullFace(GL_FRONT);
+		glDepthFunc(GL_LEQUAL);
+
+		glBindVertexArray(s_Data.SkyboxVertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_Data.SkyboxVertexBuffer);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, s_Data.SkyboxTexture);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
+		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+
+		glCullFace(GL_BACK);
+		glDepthFunc(GL_LESS);
+	}
+
 	void Renderer::Init()
 	{
 		// Setup viewport
@@ -182,6 +207,21 @@ namespace KuchCraft {
 		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);
 
+		// Skybox
+		glGenVertexArrays(1, &s_Data.SkyboxVertexArray);
+		glBindVertexArray(s_Data.SkyboxVertexArray);
+
+		glGenBuffers(1, &s_Data.SkyboxVertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_Data.SkyboxVertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		s_Data.SkyboxShader.Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
+		s_Data.SkyboxShader.Bind();
+		s_Data.SkyboxShader.SetInt("u_CubemapTexture", 0);
+		s_Data.SkyboxTexture = LoadSkyboxTexture();
 		// Create vertex array
 		glGenVertexArrays(1, &s_Data.VertexArray);
 		glBindVertexArray(s_Data.VertexArray);
@@ -232,8 +272,6 @@ namespace KuchCraft {
 		s_Data.DefaultShader.SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
 		LoadTextureAtlas();
-
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	void Renderer::ShutDown()
@@ -242,6 +280,17 @@ namespace KuchCraft {
 		glDeleteBuffers(1, &s_Data.IndexBuffer);
 		glDeleteBuffers(1, &s_Data.VertexBuffer);
 		glDeleteVertexArrays(1, &s_Data.VertexArray);
+
+		glDeleteBuffers(1, &s_Data.SkyboxVertexBuffer);
+		glDeleteVertexArrays(1, &s_Data.SkyboxVertexArray);
+	}
+
+	void Renderer::SetTrianglesVisibility(bool status)
+	{
+		if (status)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	void Renderer::LoadTextureAtlas()
@@ -303,6 +352,47 @@ namespace KuchCraft {
 			glEnable(GL_CULL_FACE);
 		else
 			glDisable(GL_CULL_FACE);
+	}
+
+	uint32_t Renderer::LoadSkyboxTexture()
+	{
+		const GLenum types[6] = {
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+			GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+			GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+			GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+			GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+		};
+		const std::string paths[6] =
+		{
+			"assets/skybox/xpos.png",
+			"assets/skybox/xneg.png",
+			"assets/skybox/ypos.png",
+			"assets/skybox/yneg.png",
+			"assets/skybox/zpos.png",
+			"assets/skybox/zneg.png"
+		};
+		uint32_t texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+
+		for (uint32_t i = 0; i < 6; i++)
+		{
+			int width, height, channels;
+			unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 0);
+
+			glTexImage2D(types[i], 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+			stbi_image_free(data);
+		}
+
+		return texture;
 	}
 
 	uint32_t Renderer::LoadTextureToAtals(const std::string& path)

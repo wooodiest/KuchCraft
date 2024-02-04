@@ -60,6 +60,11 @@ namespace KuchCraft {
 			m_Pitch = glm::radians(-89.9f);
 	}
 
+	const glm::mat4 Camera::GetSkyboxProjection() const
+	{
+		return m_Projection * glm::mat4(glm::mat3(glm::lookAt(glm::vec3(0.0f), m_Front, m_Up)));
+	}
+
 	void Camera::CalculateHorizontalFov()
 	{
 		m_HFov = 2 * glm::atan(glm::tan(m_Fov / 2.0f) * m_AspectRatio);
