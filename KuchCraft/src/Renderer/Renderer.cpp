@@ -372,7 +372,7 @@ namespace KuchCraft {
 			"assets/skybox/yneg.png",
 			"assets/skybox/zpos.png",
 			"assets/skybox/zneg.png"
-		};
+		}; 
 		uint32_t texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
@@ -380,9 +380,10 @@ namespace KuchCraft {
 		for (uint32_t i = 0; i < 6; i++)
 		{
 			int width, height, channels;
-			unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 0);
+			stbi_set_flip_vertically_on_load(0);
+			unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 4);
 
-			glTexImage2D(types[i], 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(types[i], 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

@@ -68,7 +68,7 @@ namespace KuchCraft {
 		// Find chunks to draw
 		m_ChunksToDraw.clear();
 		m_ChunksToDraw.reserve((2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1));
-		constexpr int max_to_Build = 3;
+		constexpr int max_to_Build = 1;
 		int totalBuilded = 0;
 
 		for (float x  = playerPosition.x - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
@@ -100,7 +100,7 @@ namespace KuchCraft {
 				break;
 		}
 		// If needed recreate chunks
-		constexpr int max_to_recreate = 2;
+		constexpr int max_to_recreate = 1;
 		int totalRecreated = 0;
 		for (auto& c : m_ChunksToDraw)
 		{
@@ -133,8 +133,8 @@ namespace KuchCraft {
 
 		Renderer::SetBlending(false);
 		Renderer::SetFaceCulling(true);
-		Renderer::DrawSkybox(m_Player.GetCamera());
 
+		Renderer::DrawSkybox(m_Player.GetCamera());
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)
