@@ -51,16 +51,17 @@ namespace KuchCraft {
 		}
 	}
 
-	constexpr double zoomFactor = chunk_size_XZ * chunk_size_XZ;
-	constexpr double zoom1 = 1.0 / zoomFactor;
-	constexpr double zoom2 = 1.0 / (zoomFactor / 2.0);
-	constexpr double zoom3 = 1.0 / (zoomFactor / 4.0);
-	constexpr double zoom4 = 1.0 / (zoomFactor / 8.0);
+
 
 	void WorldGenerator::Generate(Chunk* chunk)
 	{
 		auto& position = chunk->GetPosition();
+		constexpr double zoomFactor = chunk_size_XZ * chunk_size_XZ;
+		constexpr double zoom1      = 1.0 / zoomFactor;
+		constexpr double zoom2      = 1.0 / (zoomFactor / 2.0);
 
+		// Terain shape
+		// I dont know what I created here
 		for (int x = 0; x < chunk_size_XZ; x++)
 		{
 			for (int z = 0; z < chunk_size_XZ; z++)
@@ -70,23 +71,34 @@ namespace KuchCraft {
 					s_Noise.octave2D((position.x + x) * zoom2, (position.z + z) * zoom2, 4);
 
 				int height = s_SeeLevel + 10 + 10.0 * H;; 
-				for (int y = 0; y < chunk_size_Y - 1; y++)
+			
+				for (int y = 0; y < chunk_size_Y; y++)
 				{	
 					if (y < height)
 					{
 						if (y <= s_SeeLevel)
 						{
-							Block block = s_SeeLevel - y >= 5 ? Block(BlockType::Gravel) : Block(BlockType::Sand);
-							if (y == height - 1)
-								chunk->Blocks[x][y][z] = block;
-							else if (y == height - 2)
-								chunk->Blocks[x][y][z] = block;
-							else if (y == height - 3)
-								chunk->Blocks[x][y][z] = block;
-							else if (y == height - 4)
-								chunk->Blocks[x][y][z] = block;
+							if (y == s_SeeLevel - 1 || y == s_SeeLevel)
+							{
+								if (peresistance > 1.0)
+									chunk->Blocks[x][y][z] = Block(BlockType::Grass);
+								else
+									chunk->Blocks[x][y][z] = Block(BlockType::Sand);
+							}
 							else
-								chunk->Blocks[x][y][z] = Block(BlockType::Stone);
+							{
+								Block block = s_SeeLevel - y >= 6 ? Block(BlockType::Gravel) : Block(BlockType::Sand);
+								if (y == height - 1)
+									chunk->Blocks[x][y][z] = block;
+								else if (y == height - 2)
+									chunk->Blocks[x][y][z] = block;
+								else if (y == height - 3)
+									chunk->Blocks[x][y][z] = block;
+								else if (y == height - 4)
+									chunk->Blocks[x][y][z] = block;
+								else
+									chunk->Blocks[x][y][z] = Block(BlockType::Stone);
+							}
 						}
 						else
 						{
@@ -107,15 +119,21 @@ namespace KuchCraft {
 			}
 		}
 
+		// Fill with bedrock and water
+		for (int x = 0; x < chunk_size_XZ; x++)
+		{
+			for (int z = 0; z < chunk_size_XZ; z++)
+			{
+				chunk->Blocks[x][0][z] = Block(BlockType::Bedrock);
+			}
+		}
 		for (int x = 0; x < chunk_size_XZ; x++)
 		{
 			for (int y = 0; y < chunk_size_Y - 1; y++)
 			{
 				for (int z = 0; z < chunk_size_XZ; z++)
 				{
-					if (y == 0)
-						chunk->Blocks[x][y][z] = Block(BlockType::Bedrock);
-					else if (y < s_SeeLevel - 1)
+					if (y < s_SeeLevel - 1)
 					{
 						if (chunk->Blocks[x][y + 1][z].blockType == BlockType::Air)
 						{
