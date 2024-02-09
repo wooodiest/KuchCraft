@@ -145,6 +145,76 @@ namespace KuchCraft {
 
 		}
 
+		// Foliage
+		for (int x = 2; x < chunk_size_XZ - 2; x++)
+		{
+			for (int z = 2; z < chunk_size_XZ - 2; z++)
+			{
+				double peresistance = s_Noise.noise2D_01((position.x + x) * zoom1, (position.z + z) * zoom1) / 2.0;
+				double tree = s_Noise.octave2D((position.x + x), (position.z + z), 3, peresistance); 
+				bool treeProb = tree >= 0.5;
+				for (int y = 0; y < chunk_size_Y - 7; y++)
+				{
+					// Max height trees can spaw
+					if (y > 80)
+						break;
+
+					// We dont want trees to be next to rach other
+					if (treeProb && chunk->Blocks[x][y][z].blockType == BlockType::Grass
+						&& chunk->Blocks[x][y + 1][z].blockType == BlockType::Air)
+					{
+						if (chunk->Blocks[x - 1][y + 1][z] == Block(BlockType::OakLog) ||
+							chunk->Blocks[x + 1][y + 1][z] == Block(BlockType::OakLog) ||
+							chunk->Blocks[x][y + 1][z - 1] == Block(BlockType::OakLog) ||
+							chunk->Blocks[x][y + 1][z + 1] == Block(BlockType::OakLog) ||
+							chunk->Blocks[x - 1][y + 1][z - 1] == Block(BlockType::OakLog) ||
+							chunk->Blocks[x - 1][y + 1][z + 1] == Block(BlockType::OakLog) ||
+							chunk->Blocks[x + 1][y + 1][z - 1] == Block(BlockType::OakLog) ||
+							chunk->Blocks[x + 1][y + 1][z + 1] == Block(BlockType::OakLog))
+							break;
+
+						// tree
+						chunk->Blocks[x][y + 1][z] = Block(BlockType::OakLog);
+						chunk->Blocks[x][y + 2][z] = Block(BlockType::OakLog);
+						chunk->Blocks[x][y + 3][z] = Block(BlockType::OakLog);
+						chunk->Blocks[x][y + 4][z] = Block(BlockType::OakLog);
+
+						chunk->Blocks[x - 1][y + 4][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 4][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 4][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 4][z + 1] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x][y + 5][z]     = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z + 1] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x - 1][y + 5][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 5][z + 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 5][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 5][z + 1] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x - 2][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 2][y + 5][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z - 2] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 5][z + 2] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x][y + 6][z]     = Block(BlockType::Leaves);
+						chunk->Blocks[x - 1][y + 6][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x + 1][y + 6][z] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 6][z - 1] = Block(BlockType::Leaves);
+						chunk->Blocks[x][y + 6][z + 1] = Block(BlockType::Leaves);
+
+						chunk->Blocks[x][y + 7][z] = Block(BlockType::Leaves);
+
+						break;
+					}
+
+				}
+			}
+		}
+
 	}
 
 }
