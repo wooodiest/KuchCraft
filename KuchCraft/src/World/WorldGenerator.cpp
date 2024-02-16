@@ -7,9 +7,9 @@ namespace KuchCraft {
 
 	siv::PerlinNoise::seed_type WorldGenerator::s_Seed;
 	siv::PerlinNoise WorldGenerator::s_Noise;
-	static uint32_t s_SeeLevel = 60;
+	static int s_SeeLevel = 60;
 
-	void WorldGenerator::Init(uint64_t seed)
+	void WorldGenerator::Init(uint32_t seed)
 	{
 		s_Seed = seed;
 		s_Noise = siv::PerlinNoise{ s_Seed };
@@ -70,7 +70,7 @@ namespace KuchCraft {
 				double H = s_Noise.octave2D((position.x + x) * zoom1, (position.z + z) * zoom1, 3, peresistance) + 
 					s_Noise.octave2D((position.x + x) * zoom2, (position.z + z) * zoom2, 4);
 
-				int height = s_SeeLevel + 10 + 10.0 * H;; 
+				int height = s_SeeLevel + 10 + 10.0 * H; 
 			
 				for (int y = 0; y < chunk_size_Y; y++)
 				{	

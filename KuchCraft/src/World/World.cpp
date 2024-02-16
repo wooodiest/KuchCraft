@@ -224,7 +224,7 @@ namespace KuchCraft {
 		return nullptr;
 	}
 
-	const glm::vec3& World::CalculateChunkAbsolutePosition(const glm::vec3& position)
+	glm::vec3 World::CalculateChunkAbsolutePosition(const glm::vec3& position)
 	{
 		return { position.x - std::fmod(position.x, chunk_size_XZ), 0.0f, position.z - std::fmod(position.z, chunk_size_XZ) };
 	}

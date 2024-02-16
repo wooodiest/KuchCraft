@@ -56,7 +56,7 @@ namespace KuchCraft {
 	{
 		m_GraphicalSettings.RenderDistance = distance;
 
-		float horizontalDistane = m_GraphicalSettings.RenderDistance * (chunk_size_XZ + 1) * glm::sqrt(2);
+		float horizontalDistane = m_GraphicalSettings.RenderDistance * (chunk_size_XZ + 1) * (float)glm::sqrt(2);
 		float verticalDistance = chunk_size_Y * 2.0f;
 
 		if (horizontalDistane > verticalDistance)

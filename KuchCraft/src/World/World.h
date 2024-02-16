@@ -35,7 +35,7 @@ namespace KuchCraft {
 		std::vector<Chunk*>& GetChunks()       { return m_Chunks;       }
 		std::vector<Chunk*>& GetChunksToDraw() { return m_ChunksToDraw; }
 
-		const glm::vec3& CalculateChunkAbsolutePosition(const glm::vec3& position);
+		glm::vec3 CalculateChunkAbsolutePosition(const glm::vec3& position);
 
 	private:
 		std::string filePath;

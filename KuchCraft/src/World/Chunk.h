@@ -36,7 +36,6 @@ namespace KuchCraft {
 
 		const std::vector<BlockType>& GetTextureList() const { return m_DrawListTextures; }
 		std::vector<Vertex>& GetDrawList()                   { return m_DrawList;         }
-
 		std::vector<Vertex>& GetDrawListWater()              { return m_DrawListWater;    }
 
 	private:
