@@ -14,23 +14,20 @@ namespace KuchCraft {
 
 	Chunk::~Chunk()
 	{
-		m_DrawList.                   clear();
-		m_DrawListTextures.           clear();
-		m_DrawListTransparent.        clear();
-		m_DrawListTexturesTransparent.clear();
+		m_DrawList.        clear();
+		m_DrawListTextures.clear();
+		m_DrawListWater.   clear();
 	}
 
 	void Chunk::Recreate()
 	{
 		// Check what geometry should be rendered
-		m_DrawList.                   clear();
-		m_DrawListTextures.           clear();
-		m_DrawListTransparent.        clear();
-		m_DrawListTexturesTransparent.clear();
-		m_DrawList.                   reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count                    );
-		m_DrawListTextures.           reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count / quad_vertex_count);
-		m_DrawListTransparent.        reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count);
-		m_DrawListTexturesTransparent.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count / quad_vertex_count);
+		m_DrawList.        clear();
+		m_DrawListTextures.clear();
+		m_DrawListWater.   clear();
+		m_DrawList.        reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count                     );
+		m_DrawListTextures.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count / quad_vertex_count );
+		m_DrawListWater.   reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count                     );
 
 		Chunk* leftChunk   = World::Get().GetChunk({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z                 });
 		Chunk* rightChunk  = World::Get().GetChunk({ m_Position.x + chunk_size_XZ, m_Position.y, m_Position.z                 });
@@ -54,7 +51,7 @@ namespace KuchCraft {
 					if (Blocks[x][y][z] == BlockType::Water && y != chunk_size_Y - 1)
 					{
 						if (Blocks[x][y + 1][z] == BlockType::Air)
-							AddToDrawListTransparent(transform, vertices_top, x, y, z);
+							AddToDrawListWater(transform, vertices_top, x, y, z);
 
 						continue;
 					}
@@ -124,7 +121,6 @@ namespace KuchCraft {
 		m_DrawList.                   shrink_to_fit();
 		m_DrawListTextures.           shrink_to_fit();
 		m_DrawListTextures.           shrink_to_fit();
-		m_DrawListTexturesTransparent.shrink_to_fit();
 		m_NeedToRecreate = false;
 	}
 
@@ -153,16 +149,15 @@ namespace KuchCraft {
 		m_DrawListTextures.push_back(Blocks[x][y][z]);
 	}
 
-	void Chunk::AddToDrawListTransparent(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z)
+	void Chunk::AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z)
 	{
 		for (int i = 0; i < quad_vertex_count; i++)
 		{
-			m_DrawListTransparent.emplace_back(Vertex{
+			m_DrawListWater.emplace_back(Vertex{
 				glm::vec3(model * glm::vec4(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z, 1.0f)),
 				glm::vec2(vertices[i].TexCoord.x, vertices[i].TexCoord.y),
-				0.0f });
+				water_texture_slot });
 		}
-		m_DrawListTexturesTransparent.push_back(Blocks[x][y][z]);
 	}
 
 }

@@ -136,14 +136,10 @@ namespace KuchCraft {
 		for (auto& c : m_ChunksToDraw)
 			Renderer::DrawChunk(c);
 
-		Renderer::SetFaceCulling(false);
-		Renderer::SetBlending(true);
-		
+		Renderer::BeginRenderingWater();
 		for (auto& c : m_ChunksToDraw)
-			Renderer::DrawChunkTransparent(c);
-
-		Renderer::SetBlending(false);
-		Renderer::SetFaceCulling(true);
+			Renderer::DrawChunkWater(c);
+		Renderer::EndRenderingWater();
 
 		Renderer::DrawSkybox(m_Player.GetCamera());
 	}

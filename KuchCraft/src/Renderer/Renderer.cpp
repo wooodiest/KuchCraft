@@ -53,6 +53,20 @@ namespace KuchCraft {
 
 	}
 
+	void Renderer::BeginRenderingWater()
+	{
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+		glDepthFunc(GL_LEQUAL);
+	}
+
+	void Renderer::EndRenderingWater()
+	{
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+		glDepthFunc(GL_LESS);
+	}
+
 	void Renderer::ResetStats()
 	{
 		s_Stats.DrawCalls = 0;
@@ -98,50 +112,7 @@ namespace KuchCraft {
 		for (int i = 0; i < vertices.size(); i += 4)
 		{
 			float textureIndex = 0.0f;
-			uint32_t texture =  s_Data.Textures[(int)textures[i >> 2]];
-			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
-			{
-				if (j < textureSlotIndex && s_Data.TextureSlots[j] == texture)
-				{
-					textureIndex = (float)j;
-					break;
-				}
-			}
-
-			if (textureIndex == 0.0f) // Is every slot occupied or we have new texture ?
-			{
-				if (textureSlotIndex >= s_Data.MaxTextureSlots)
-					FlushChunk(indexCount, textureSlotIndex, vertices);
-
-				textureIndex = (float)textureSlotIndex;
-				s_Data.TextureSlots[textureSlotIndex] = texture;
-				textureSlotIndex++;
-			}
-
-			vertices[i + 0].TexIndex = textureIndex;
-			vertices[i + 1].TexIndex = textureIndex;
-			vertices[i + 2].TexIndex = textureIndex;
-			vertices[i + 3].TexIndex = textureIndex;
-
-			indexCount  += quad_index_count;
-		}
-
-		FlushChunk(indexCount, textureSlotIndex, vertices);
-		s_Data.VertexOffset = 0;
-	}
-
-	void Renderer::DrawChunkTransparent(Chunk* chunk)
-	{
-		auto& vertices = chunk->GetDrawListTransparent();
-		auto& textures = chunk->GetTextureListTransparent();
-
-		uint32_t indexCount = 0;
-		uint32_t textureSlotIndex = 1;
-
-		for (int i = 0; i < vertices.size(); i += 4)
-		{
-			float textureIndex = 0.0f;
-			uint32_t texture = s_Data.Textures[(int)textures[i >> 2]];
+			uint32_t texture   = s_Data.Textures[(int)textures[i >> 2]];
 			for (uint32_t j = 1; j < s_Data.MaxTextureSlots; j++)
 			{
 				if (j < textureSlotIndex && s_Data.TextureSlots[j] == texture)
@@ -171,6 +142,31 @@ namespace KuchCraft {
 
 		FlushChunk(indexCount, textureSlotIndex, vertices);
 		s_Data.VertexOffset = 0;
+	}
+
+	void Renderer::DrawChunkWater(Chunk* chunk)
+	{
+		auto&    vertices = chunk->GetDrawListWater();
+		uint32_t indexCount = vertices.size() * triangle_index_count;
+
+		if (indexCount != 0)
+		{
+			uint32_t vertexCount = (uint32_t)(indexCount / quad_index_count) * quad_vertex_count;
+			glBindVertexArray(s_Data.VertexArray);
+			glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), &vertices[s_Data.VertexOffset]);
+
+			s_Stats.Quads += vertexCount / 4;
+			// Bind textures
+			glBindTextureUnit((uint32_t)water_texture_slot, s_Data.Textures[(int)BlockType::Water]);
+
+			// Draw elements		
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
+			glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
+			// Update stats
+			Renderer::s_Stats.DrawCalls++;
+		}
 	}
 
 	void Renderer::DrawSkybox(const Camera& camera)
@@ -333,25 +329,9 @@ namespace KuchCraft {
 		glViewport(0, 0, width, height);
 	}
 
-	void Renderer::SetBlending(bool status)
-	{
-		if (status)
-			glEnable(GL_BLEND);
-		else
-			glDisable(GL_BLEND);		
-	}
-
 	void Renderer::SetTintColor(const glm::vec4& color)
 	{
 		s_Data.DefaultShader.SetFloat4("u_TintColor", color);
-	}
-
-	void Renderer::SetFaceCulling(bool status)
-	{
-		if (status)
-			glEnable(GL_CULL_FACE);
-		else
-			glDisable(GL_CULL_FACE);
 	}
 
 	uint32_t Renderer::LoadSkyboxTexture()

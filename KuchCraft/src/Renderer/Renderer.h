@@ -16,9 +16,10 @@ namespace KuchCraft {
 
 	};
 
-	constexpr size_t quad_index_count = 6;
-	constexpr size_t quad_vertex_count = 4;
-	constexpr size_t cube_vertex_count = 24;
+	constexpr size_t triangle_index_count = 6;
+	constexpr size_t quad_index_count     = 6;
+	constexpr size_t quad_vertex_count    = 4;
+	constexpr size_t cube_vertex_count    = 24;
 
 	class Chunk;
 	class Block;
@@ -45,19 +46,18 @@ namespace KuchCraft {
 		static void BeginScene(const Camera& camera);
 		static void EndScene();
 
+		static void BeginRenderingWater();
+		static void EndRenderingWater();
+
 		static void ResetStats();
 		static RendererStatistics& GetStats() { return s_Stats; }
 
 		static void DrawChunk(Chunk* chunk);
-		static void DrawChunkTransparent(Chunk* chunk);
+		static void DrawChunkWater(Chunk* chunk);
 		static void FlushChunk(uint32_t& indexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
 
 		static void DrawSkybox(const Camera& camera);
-
-		static void SetBlending(bool status);
-		static void SetFaceCulling(bool status);
 		static void SetTintColor(const glm::vec4& color);
-
 
 		static void SetTrianglesVisibility(bool status);
 
