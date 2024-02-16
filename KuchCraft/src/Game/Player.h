@@ -38,6 +38,8 @@ namespace KuchCraft {
 		PlayerGraphicalSettings& GetGraphicalSettings()      { return m_GraphicalSettings;      }
 		PlayerMovementSettings&  GetPlayerMovementSettings() { return m_PlayerMovementSettings; }
 
+		void OnRenderDistanceChanged(int distance);
+
 	private:
 		glm::vec3 m_Position{ 2000.0f, 90.0f, 2000.0f };
 		glm::vec2 m_Rotation{ glm::radians(45.0f), glm::radians(-20.0f)}; // yaw, pitch

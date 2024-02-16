@@ -42,6 +42,7 @@ namespace KuchCraft {
 		bool m_QuitStatus = false;
 		Player m_Player;
 		std::vector<Chunk*> m_Chunks;
+		std::vector<Chunk*> m_ChunksToUpdate;
 		std::vector<Chunk*> m_ChunksToDraw;
 
 	private:

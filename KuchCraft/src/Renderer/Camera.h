@@ -26,17 +26,21 @@ namespace KuchCraft {
 			m_Yaw = rotation.x; m_Speed = speed; m_SprintSpeed = sprintSpeed; m_DeltaTime = dt;
 		}
 
+		void SetFarPlan(float far) { m_Far = far; UpdateProjection(); }
+
 		const glm::mat4& GetProjection()     const { return m_Projection;          }
 		const glm::mat4& GetView()           const { return m_View;                }
-		const glm::mat4& GetViewProjection() const { return m_Projection * m_View; }
-		const glm::mat4 GetSkyboxProjection() const;
+		const glm::mat4  GetViewProjection() const { return m_Projection * m_View; }
+		const glm::mat4  GetSkyboxProjection() const;
 
 		const glm::vec3& GetPosition()       const { return m_Position;                }
-		const glm::vec2& GetRotation()       const { return glm::vec2(m_Yaw, m_Pitch); }
-		float            GetHorizontalFov()  const { return m_HFov;                    }
+		const glm::vec2  GetRotation()       const { return glm::vec2(m_Yaw, m_Pitch); }                 
+
+		const glm::vec3& GetFront() const { return m_Front; }
+		const glm::vec3& GetUp()    const { return m_Front; }
+		const glm::vec4  GetAspectRatioFovNearFar() const { return { m_AspectRatio, m_Fov, m_Near, m_Far }; }
 
 	private:
-		void CalculateHorizontalFov();
 		void UpdateProjection();
 		void UpdateView();
 		void UpdateFront();
@@ -54,7 +58,6 @@ namespace KuchCraft {
 		float m_Pitch = glm::radians(0.0f);
 		float m_Yaw   = glm::radians(0.0f);
 		float m_Fov   = glm::radians(45.0f);
-		float m_HFov  = 0.0f;
 
 		float m_Near        = 0.01f;
 		float m_Far         = 1000.0f;

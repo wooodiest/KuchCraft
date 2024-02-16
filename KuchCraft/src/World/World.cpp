@@ -1,7 +1,10 @@
 #include "World.h"
 
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
+#include "Renderer/FrustumCulling.h"
 #include "Core/Input.h"
 #include "WorldGenerator.h"
 
@@ -41,6 +44,7 @@ namespace KuchCraft {
 			}
 		}
 		m_ChunksToDraw.clear();
+		m_ChunksToUpdate.clear();
 		s_Instance = nullptr;
 
 		WorldGenerator::ShutDown();
@@ -65,9 +69,10 @@ namespace KuchCraft {
 		const auto& playerPosition          = m_Player.GetPosition();
 		const auto& playerGraphicalSettings = m_Player.GetGraphicalSettings();
 
-		// Find chunks to draw
-		m_ChunksToDraw.clear();
-		m_ChunksToDraw.reserve((2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1));
+		// Find chunks to update
+		size_t numberOfActiveChunks = (2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1);
+		m_ChunksToUpdate.clear();
+		m_ChunksToUpdate.reserve(numberOfActiveChunks);
 		constexpr int max_to_Build = 1;
 		int totalBuilded = 0;
 
@@ -79,11 +84,11 @@ namespace KuchCraft {
 				       z <= playerPosition.z + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
 				       z += chunk_size_XZ)
 			{
-				int index = GetChunkIndex({ x, playerPosition.y, z });
+				int index = GetChunkIndex({ x, 0.0f, z });
 				if (index >= 0 && index < m_Chunks.size())
 				{
 					if (m_Chunks[index] == nullptr)
-						m_Chunks[index] = new Chunk(World::CalculateChunkAbsolutePosition({ x, playerPosition.y, z }));
+						m_Chunks[index] = new Chunk(World::CalculateChunkAbsolutePosition({ x, 0.0f, z }));
 
 					if (m_Chunks[index]->NeedToBuild())
 					{
@@ -93,16 +98,22 @@ namespace KuchCraft {
 							break;
 					}
 
-					m_ChunksToDraw.push_back(m_Chunks[index]);
+					m_ChunksToUpdate.push_back(m_Chunks[index]);
 				}
 			}
 			if (totalBuilded == max_to_Build)
 				break;
 		}
+		// Find chunks to draw
+		m_ChunksToDraw.clear();
+		m_ChunksToDraw.reserve(numberOfActiveChunks / 2);
+		FrustumCulling::GetChunksToDraw(m_ChunksToDraw, m_ChunksToUpdate, m_Player.GetCamera());
+		m_ChunksToDraw.shrink_to_fit();
+	
 		// If needed recreate chunks
 		constexpr int max_to_recreate = 1;
 		int totalRecreated = 0;
-		for (auto& c : m_ChunksToDraw)
+		for (auto& c : m_ChunksToUpdate)
 		{
 			if (c->NeedToRecreate())
 			{

@@ -9,6 +9,7 @@ namespace KuchCraft {
 
 	Player::Player()
 	{
+		OnRenderDistanceChanged(20);
 	}
 
 	Player::~Player()
@@ -49,6 +50,19 @@ namespace KuchCraft {
 		m_Position = { pos.x, pos.y - m_PlayerMovementSettings.Height, pos.z };
 		m_Rotation = m_Camera.GetRotation();	
 
+	}
+
+	void Player::OnRenderDistanceChanged(int distance)
+	{
+		m_GraphicalSettings.RenderDistance = distance;
+
+		float horizontalDistane = m_GraphicalSettings.RenderDistance * (chunk_size_XZ + 1) * glm::sqrt(2);
+		float verticalDistance = chunk_size_Y * 2.0f;
+
+		if (horizontalDistane > verticalDistance)
+			m_Camera.SetFarPlan(horizontalDistane);
+		else
+			m_Camera.SetFarPlan(verticalDistance);
 	}
 
 }
