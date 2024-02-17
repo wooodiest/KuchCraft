@@ -58,7 +58,7 @@ namespace KuchCraft {
 		for (const auto chunk : activeChunks)
 		{
 			AABB chunkAABB{ chunk->GetPosition() };
-			if (IsAABBVisible(chunkAABB, frustumPlanes))
+			if (IsAABBVisible(chunkAABB, frustumPlanes) && !chunk->NeedToRecreate())
 				chunksToDraw.push_back(chunk);
 			
 		}

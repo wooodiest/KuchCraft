@@ -104,12 +104,7 @@ namespace KuchCraft {
 			if (totalBuilded == max_to_Build)
 				break;
 		}
-		// Find chunks to draw
-		m_ChunksToDraw.clear();
-		m_ChunksToDraw.reserve(numberOfActiveChunks / 2);
-		FrustumCulling::GetChunksToDraw(m_ChunksToDraw, m_ChunksToUpdate, m_Player.GetCamera());
-		m_ChunksToDraw.shrink_to_fit();
-	
+
 		// If needed recreate chunks
 		constexpr int max_to_recreate = 1;
 		int totalRecreated = 0;
@@ -122,8 +117,15 @@ namespace KuchCraft {
 				if (totalRecreated == max_to_recreate)
 					break;
 			}
-			
+
 		}
+
+		// Find chunks to draw
+		m_ChunksToDraw.clear();
+		m_ChunksToDraw.reserve(numberOfActiveChunks / 2);
+		FrustumCulling::GetChunksToDraw(m_ChunksToDraw, m_ChunksToUpdate, m_Player.GetCamera());
+		m_ChunksToDraw.shrink_to_fit();
+		
 		// Delete from memory chunks that are too far away
 		DeleteUnusedChunks(playerPosition);
 	}
@@ -136,10 +138,10 @@ namespace KuchCraft {
 		for (auto& c : m_ChunksToDraw)
 			Renderer::DrawChunk(c);
 
-		Renderer::BeginRenderingWater();
-		for (auto& c : m_ChunksToDraw)
-			Renderer::DrawChunkWater(c);
-		Renderer::EndRenderingWater();
+		//Renderer::BeginRenderingWater();
+		//for (auto& c : m_ChunksToDraw)
+			//Renderer::DrawChunkWater(c);
+		//Renderer::EndRenderingWater();
 
 		Renderer::DrawSkybox(m_Player.GetCamera());
 	}

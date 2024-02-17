@@ -16,6 +16,7 @@ namespace KuchCraft {
 
 	};
 
+	constexpr uint32_t max_texture_slots    = 32;
 	constexpr uint32_t triangle_index_count = 6;
 	constexpr uint32_t quad_index_count     = 6;
 	constexpr uint32_t quad_vertex_count    = 4;
@@ -51,10 +52,10 @@ namespace KuchCraft {
 
 		static void ResetStats();
 		static RendererStatistics& GetStats() { return s_Stats; }
+		static uint32_t GetTexture(BlockType type);
 
 		static void DrawChunk(Chunk* chunk);
 		static void DrawChunkWater(Chunk* chunk);
-		static void FlushChunk(uint32_t& indexCount, uint32_t& texturesIndex, const std::vector<Vertex>& vertices);
 
 		static void DrawSkybox(const Camera& camera);
 		static void SetTintColor(const glm::vec4& color);

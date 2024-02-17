@@ -2,6 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <iostream>
+
 #include "World/World.h"
 #include "World/WorldGenerator.h"
 
@@ -15,7 +17,6 @@ namespace KuchCraft {
 	Chunk::~Chunk()
 	{
 		m_DrawList.        clear();
-		m_DrawListTextures.clear();
 		m_DrawListWater.   clear();
 	}
 
@@ -23,16 +24,18 @@ namespace KuchCraft {
 	{
 		// Check what geometry should be rendered
 		m_DrawList.        clear();
-		m_DrawListTextures.clear();
 		m_DrawListWater.   clear();
-		m_DrawList.        reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count                     );
-		m_DrawListTextures.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count / quad_vertex_count );
-		m_DrawListWater.   reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count                     );
+		m_DrawList.        reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count);
+		m_DrawListWater.   reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_XZ * cube_vertex_count);
 
 		Chunk* leftChunk   = World::Get().GetChunk({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z                 });
 		Chunk* rightChunk  = World::Get().GetChunk({ m_Position.x + chunk_size_XZ, m_Position.y, m_Position.z                 });
 		Chunk* frontChunk  = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z + chunk_size_XZ });
 		Chunk* behindChunk = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z - chunk_size_XZ });
+
+		RendererTextureData textureData;
+		m_RendererChunkData.Textures.push_back(0);
+		m_RendererChunkData.IndexCount.push_back(0);
 
 		// Go through all the blocks and corresponding blocks of chunk next to it
 		// If a block is not air, check if the blocks surrounding it are transparant
@@ -51,7 +54,7 @@ namespace KuchCraft {
 					if (Blocks[x][y][z] == BlockType::Water && y != chunk_size_Y - 1)
 					{
 						if (Blocks[x][y + 1][z] == BlockType::Air)
-							AddToDrawListWater(transform, vertices_top, x, y, z);
+							AddToDrawListWater(transform, vertices_top);
 
 						continue;
 					}
@@ -76,52 +79,52 @@ namespace KuchCraft {
 					{
 						checkLeft = false;
 						if (leftChunk && Block::IsTranspaent(leftChunk->Blocks[chunk_size_XZ - 1][y][z]))
-							AddToDrawList(transform, vertices_left, x, y, z);
+							AddToDrawList(textureData, transform, vertices_left, x, y, z);
 					}
 					else if (x == chunk_size_XZ - 1)
 					{
 						checkRight = false;
 						if (rightChunk && Block::IsTranspaent(rightChunk->Blocks[0][y][z]))
-							AddToDrawList(transform, vertices_right, x, y, z);
+							AddToDrawList(textureData, transform, vertices_right, x, y, z);
 					}
 					if (z == 0)
 					{
 						checkBehind = false;
 						if (behindChunk && Block::IsTranspaent(behindChunk->Blocks[x][y][chunk_size_XZ - 1]))
-							AddToDrawList(transform, vertices_behind, x, y, z);
+							AddToDrawList(textureData, transform, vertices_behind, x, y, z);
 					}
 					else if (z == chunk_size_XZ - 1)
 					{
 						checkFront = false;
 						if (frontChunk && Block::IsTranspaent(frontChunk->Blocks[x][y][0]))
-							AddToDrawList(transform, vertices_front, x, y, z);
+							AddToDrawList(textureData, transform, vertices_front, x, y, z);
 					}
 					// Rest of bloks
 					if (checkBottom && Block::IsTranspaent(Blocks[x][y - 1][z]))
-						AddToDrawList(transform, vertices_bottom, x, y, z);
+						AddToDrawList(textureData, transform, vertices_bottom, x, y, z);
 
 					if (checkTop    && Block::IsTranspaent(Blocks[x][y + 1][z]))
-						AddToDrawList(transform, vertices_top, x, y, z);
+						AddToDrawList(textureData, transform, vertices_top, x, y, z);
 
 					if (checkFront  && Block::IsTranspaent(Blocks[x][y][z + 1]))
-						AddToDrawList(transform, vertices_front, x, y, z);
+						AddToDrawList(textureData, transform, vertices_front, x, y, z);
 
 					if (checkRight  && Block::IsTranspaent(Blocks[x + 1][y][z]))
-						AddToDrawList(transform, vertices_right, x, y, z);
+						AddToDrawList(textureData, transform, vertices_right, x, y, z);
 
 					if (checkBehind && Block::IsTranspaent(Blocks[x][y][z - 1]))
-						AddToDrawList(transform, vertices_behind, x, y, z);
+						AddToDrawList(textureData, transform, vertices_behind, x, y, z);
 
 					if (checkLeft   && Block::IsTranspaent(Blocks[x - 1][y][z]))
-						AddToDrawList(transform, vertices_left, x, y, z);
+						AddToDrawList(textureData, transform, vertices_left, x, y, z);
 
 				}
 			}
 		}				              
-		m_DrawList.                   shrink_to_fit();
-		m_DrawListTextures.           shrink_to_fit();
-		m_DrawListTextures.           shrink_to_fit();
+		m_DrawList.     shrink_to_fit();
+		m_DrawListWater.shrink_to_fit();
 		m_NeedToRecreate = false;
+
 	}
 
 	void Chunk::Build()
@@ -137,19 +140,47 @@ namespace KuchCraft {
 		m_NeedToRecreate = true;
 	}
 
-	void Chunk::AddToDrawList(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z)
+	void Chunk::AddToDrawList(RendererTextureData& textureData, const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z)
 	{
+		uint32_t texture = Renderer::GetTexture(Blocks[x][y][z].blockType);
+		float textureIndex = 0.0f;
+		for (uint32_t j = 1; j < max_texture_slots; j++)
+		{
+			if (j < textureData.TextureSlotIndex && textureData.TextureSlots[j] == texture)
+			{
+				textureIndex = (float)j;
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f) // Is every slot occupied or we have new texture ?
+		{
+			if (textureData.TextureSlotIndex >= max_texture_slots)
+			{
+				//FlushChunk(indexCount, textureSlotIndex, vertices);
+				m_RendererChunkData.DrawCalls++;
+				m_RendererChunkData.Textures.push_back(0);
+				m_RendererChunkData.IndexCount.push_back(0);
+				textureData.TextureSlotIndex = 1;
+			}
+			
+			textureIndex = (float)textureData.TextureSlotIndex;
+			textureData.TextureSlots[textureData.TextureSlotIndex] = texture;
+			m_RendererChunkData.Textures.push_back(texture);
+			textureData.TextureSlotIndex++;
+		}
+
 		for (int i = 0; i < quad_vertex_count; i++)
 		{
 			m_DrawList.emplace_back(Vertex{
 				glm::vec3(model * glm::vec4(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z, 1.0f)),
 				glm::vec2(vertices[i].TexCoord.x, vertices[i].TexCoord.y),
-				0.0f });
+				textureIndex });
 		}
-		m_DrawListTextures.push_back(Blocks[x][y][z]);
+		m_RendererChunkData.IndexCount[m_RendererChunkData.DrawCalls] += quad_index_count;
 	}
 
-	void Chunk::AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z)
+	void Chunk::AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count])
 	{
 		for (int i = 0; i < quad_vertex_count; i++)
 		{

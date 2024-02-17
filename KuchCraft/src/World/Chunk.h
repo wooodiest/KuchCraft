@@ -10,8 +10,14 @@ namespace KuchCraft {
 
 	constexpr int   chunk_size_XZ = 16;
 	constexpr int   chunk_size_Y = 128;
-
 	constexpr float water_texture_slot = 1.0f;
+
+	struct RendererChunkData
+	{
+		uint32_t DrawCalls = 0;
+		std::vector<uint32_t> IndexCount;
+		std::vector<uint32_t> Textures;
+	};
 
 	class Chunk
 	{
@@ -34,9 +40,9 @@ namespace KuchCraft {
 
 		const glm::vec3& GetPosition()                 const { return m_Position;         }
 
-		const std::vector<BlockType>& GetTextureList() const { return m_DrawListTextures; }
 		std::vector<Vertex>& GetDrawList()                   { return m_DrawList;         }
 		std::vector<Vertex>& GetDrawListWater()              { return m_DrawListWater;    }
+		RendererChunkData&   GetRendererChunkData()          { return m_RendererChunkData;}
 
 	private:
 		glm::vec3 m_Position;
@@ -44,12 +50,19 @@ namespace KuchCraft {
 		bool m_NeedToBuild    = true;
 
 		std::vector<Vertex>    m_DrawList;
-		std::vector<BlockType> m_DrawListTextures;
 		std::vector<Vertex>    m_DrawListWater;
 
+		RendererChunkData m_RendererChunkData;
+
 	private:
-		void AddToDrawList(const glm::mat4& model,      const Vertex vertices[quad_vertex_count], int x, int y, int z);
-		void AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
+		struct RendererTextureData
+		{
+			uint32_t TextureSlots[max_texture_slots];
+			uint32_t TextureSlotIndex = 1;
+		};
+
+		void AddToDrawList(RendererTextureData& textureData, const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
+		void AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count]);
 
 	};
 

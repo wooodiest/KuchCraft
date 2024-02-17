@@ -20,7 +20,7 @@ namespace KuchCraft {
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), glfwGetPrimaryMonitor(), nullptr);
+		m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
 		
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
