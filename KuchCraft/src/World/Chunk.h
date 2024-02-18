@@ -5,6 +5,7 @@
 
 #include "KuchCraftData.h"
 #include "World/Block.h"
+#include "Renderer/ChunkRendererData.h"
 
 namespace KuchCraft {
 
@@ -31,7 +32,8 @@ namespace KuchCraft {
 
 		std::vector<Vertex>& GetDrawList()          { return m_DrawList;         }
 		std::vector<Vertex>& GetDrawListWater()     { return m_DrawListWater;    }
-		RendererChunkData&   GetRendererChunkData() { return m_RendererChunkData;}
+
+		ChunkDrawList& GetChunkDrawList() { return m_ChunkDrawList; } // rename // maybe const
 
 	private:
 		glm::vec3 m_Position;
@@ -41,7 +43,7 @@ namespace KuchCraft {
 		std::vector<Vertex> m_DrawList;
 		std::vector<Vertex> m_DrawListWater;
 
-		RendererChunkData m_RendererChunkData;
+		ChunkDrawList m_ChunkDrawList; // rename to drawlist
 
 	private:
 		struct RendererTextureData

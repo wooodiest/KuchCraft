@@ -36,7 +36,6 @@ namespace KuchCraft {
 		Chunk* behindChunk = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z - chunk_size_XZ });
 
 		RendererTextureData textureData;
-		m_RendererChunkData.IndexCount.push_back(0);
 
 		// Go through all the blocks and corresponding blocks of chunk next to it
 		// If a block is not air, check if the blocks surrounding it are transparant
@@ -148,7 +147,7 @@ namespace KuchCraft {
 
 		for (uint32_t j = 0; j < max_texture_slots; j++)
 		{
-			if (j < textureData.TextureSlotIndex && textureData.TextureSlots[j] == texture)
+			if (j < m_ChunkDrawList.GetCurrentTextureIndex() && m_ChunkDrawList.GetCurrentTexture(j) == texture)
 			{
 				textureIndex = (float)j;
 				break;
@@ -157,15 +156,11 @@ namespace KuchCraft {
 
 		if (textureIndex == -1.0f) // Is every slot occupied or we have new texture ?
 		{
-			if (textureData.TextureSlotIndex >= max_texture_slots)
-			{
-				m_RendererChunkData.StartNewDrawCall();
-				textureData.TextureSlotIndex = 0;
-			}
+			if (m_ChunkDrawList.GetCurrentTextureIndex() >= max_texture_slots)
+				m_ChunkDrawList.NewDrawCall();
 			
-			textureIndex = (float)textureData.TextureSlotIndex;
-			m_RendererChunkData.AddTexture(texture);
-			textureData.AddTexture(texture);
+			textureIndex = (float)m_ChunkDrawList.GetCurrentTextureIndex();
+			m_ChunkDrawList.AddTexture(texture);
 		}
 
 		for (int i = 0; i < quad_vertex_count; i++)
@@ -176,7 +171,7 @@ namespace KuchCraft {
 				textureIndex });
 		}
 
-		m_RendererChunkData.UpdateCurrentIndexCount();
+		m_ChunkDrawList.UpdateIndexCount();
 	}
 
 	void Chunk::AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count])

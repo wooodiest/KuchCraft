@@ -16,7 +16,7 @@ namespace KuchCraft {
 	struct RendererStatistics
 	{
 		uint32_t DrawCalls = 0;
-		uint32_t Quads = 0;
+		uint32_t Quads     = 0;
 	};
 
 	struct Vertex
@@ -28,42 +28,42 @@ namespace KuchCraft {
 	};
 
 	// Cube - quad vertices
-	constexpr Vertex vertices_bottom[4]
+	constexpr Vertex vertices_bottom[quad_vertex_count]
 	{
 		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.0f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 1.0f }, { 0.0f,  0.0f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.0f,  0.5f }, 0.0f },
 		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.25f, 0.5f }, 0.0f }
 	};
-	constexpr Vertex vertices_top[4]
+	constexpr Vertex vertices_top[quad_vertex_count]
 	{
 		Vertex{{ 0.0f, 1.0f, 1.0f }, { 0.25f, 0.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.5f,  0.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.25f, 0.5f }, 0.0f }
 	};
-	constexpr Vertex vertices_front[4]
+	constexpr Vertex vertices_front[quad_vertex_count]
 	{
 		Vertex{{ 0.0f, 0.0f, 1.0f }, { 0.0f,  0.5f }, 0.0f },
 		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.5f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.25f, 1.0f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 1.0f }, { 0.0f,  1.0f }, 0.0f }
 	};
-	constexpr Vertex vertices_right[4]
+	constexpr Vertex vertices_right[quad_vertex_count]
 	{
 		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.5f }, 0.0f },
 		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  1.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.25f, 1.0f }, 0.0f }
 	};
-	constexpr Vertex vertices_behind[4]
+	constexpr Vertex vertices_behind[quad_vertex_count]
 	{
 		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.75f, 0.5f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  1.0f }, 0.0f }
 	};
-	constexpr Vertex vertices_left[4]
+	constexpr Vertex vertices_left[quad_vertex_count]
 	{
 		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.75f, 0.5f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 1.0f }, { 1.0f,  0.5f }, 0.0f },
@@ -71,7 +71,7 @@ namespace KuchCraft {
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f }
 	};
 
-	constexpr float cube_vertices[] =
+	constexpr float skybox_vertices[] =
 	{
 		 1.0f, -1.0f,  1.0f,
 		 1.0f, -1.0f, -1.0f,
@@ -102,40 +102,6 @@ namespace KuchCraft {
 		-1.0f, -1.0f, -1.0f,
 		-1.0f,  1.0f, -1.0f,
 		 1.0f,  1.0f, -1.0f,
-	};
-
-	struct RendererChunkData
-	{
-		uint32_t DrawCalls = 0;
-		std::vector<uint32_t> IndexCount;
-		std::vector<uint32_t> Textures;
-
-		RendererChunkData()
-		{
-			IndexCount.push_back(0);
-		}
-
-		uint32_t GetDrawCallTextureSlots(uint32_t drawCall)
-		{
-			return (uint32_t)Textures.size() - drawCall * max_texture_slots;
-		}
-
-		void StartNewDrawCall()
-		{
-			IndexCount.push_back(0);
-			DrawCalls++;
-		}
-
-		void AddTexture(uint32_t texture)
-		{
-			Textures.push_back(texture);
-		}
-
-		void UpdateCurrentIndexCount()
-		{
-			IndexCount[DrawCalls] += quad_index_count;
-		}
-
 	};
 
 }

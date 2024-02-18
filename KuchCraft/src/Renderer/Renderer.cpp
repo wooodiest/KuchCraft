@@ -73,11 +73,11 @@ namespace KuchCraft {
 	{
 		uint32_t vertexOffset = 0;
 		auto& vertices  = chunk->GetDrawList();
-		auto& chunkData = chunk->GetRendererChunkData();
+		auto& chunkDrawList = chunk->GetChunkDrawList(); // rename to drawlist
 
-		for (uint32_t i = 0; i <= chunkData.DrawCalls; i++)
+		for (uint32_t i = 0; i < chunkDrawList.GetDrawCallCount(); i++)
 		{
-			uint32_t indexCount = chunkData.IndexCount[i];
+			uint32_t indexCount = chunkDrawList.GetIndexCount(i);
 			if (indexCount != 0)
 			{
 				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
@@ -89,9 +89,9 @@ namespace KuchCraft {
 				vertexOffset += vertexCount;
 
 				// Bind textures
-				uint32_t textures = chunkData.GetDrawCallTextureSlots(i);
+				uint32_t textures = chunkDrawList.GetTextureCount(i);
 				for (uint32_t j = 0; j < textures; j++)
-					glBindTextureUnit(j, chunkData.Textures[j + i * max_texture_slots]);
+					glBindTextureUnit(j, chunkDrawList.GetTexture(i, j));
 
 				// Draw elements		
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
@@ -170,7 +170,7 @@ namespace KuchCraft {
 
 		glGenBuffers(1, &s_Data.SkyboxVertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_Data.SkyboxVertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
