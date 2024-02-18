@@ -46,19 +46,7 @@ namespace KuchCraft {
 		ChunkDrawList m_ChunkDrawList; // rename to drawlist
 
 	private:
-		struct RendererTextureData
-		{
-			uint32_t TextureSlots[max_texture_slots];
-			uint32_t TextureSlotIndex = 0;
-
-			void AddTexture(uint32_t texture)
-			{
-				TextureSlots[TextureSlotIndex] = texture;
-				TextureSlotIndex++;
-			}
-		};
-
-		void AddToDrawList(RendererTextureData& textureData, const glm::mat4& model, const Vertex vertices[6], int x, int y, int z);
+		void AddToDrawList(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
 		void AddToDrawListWater(const glm::mat4& model, const Vertex vertices[6]);
 
 	};

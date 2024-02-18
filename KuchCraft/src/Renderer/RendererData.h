@@ -23,7 +23,7 @@ namespace KuchCraft {
 	{
 		glm::vec3 Position;
 		glm::vec2 TexCoord;
-		float     TexIndex;
+		float     TexSlot;
 
 	};
 
