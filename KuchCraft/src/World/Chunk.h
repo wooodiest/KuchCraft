@@ -35,6 +35,9 @@ namespace KuchCraft {
 		const glm::vec3&     GetPosition()  const { return Position; }
 		const ChunkDrawList& GetDrawList()  const { return m_DrawList; } 
 
+		static glm::vec3 CalculatePosition(const glm::vec3& position);
+		static Chunk* Create(const glm::vec3& position);
+
 	private:
 		// Chunk position starts at (0, 0, 0) and continue along the axis + (chunk_size_XZ, 0, chunk_size_XZ)
 		glm::vec3 Position;

@@ -24,7 +24,7 @@ namespace KuchCraft {
 		uint32_t IndexBuffer;
 		Shader   DefaultShader;
 
-		std::array<uint32_t, number_of_blocks> Textures;
+		std::array<uint32_t, total_number_of_blocks> Textures;
 		uint32_t TextureSlotIndex = 1;
 
 		// Rendering skybox

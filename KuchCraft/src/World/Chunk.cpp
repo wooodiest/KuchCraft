@@ -1,13 +1,10 @@
 #include "Chunk.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-
 #include <iostream>
 
 #include "World/World.h"
 #include "World/WorldGenerator.h"
-
-#include "Renderer/Renderer.h"
 
 namespace KuchCraft {
 
@@ -134,6 +131,16 @@ namespace KuchCraft {
 
 		m_NeedToBuild    = false;
 		m_NeedToRecreate = true;
+	}
+
+	glm::vec3 Chunk::CalculatePosition(const glm::vec3& position)
+	{
+		return { position.x - std::fmod(position.x, chunk_size_XZ), 0.0f, position.z - std::fmod(position.z, chunk_size_XZ) };
+	}
+
+	Chunk* Chunk::Create(const glm::vec3& position)
+	{
+		return new Chunk(CalculatePosition(position));
 	}
 
 }

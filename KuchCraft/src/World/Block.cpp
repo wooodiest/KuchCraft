@@ -2,11 +2,6 @@
 
 namespace KuchCraft {
 
-	Block::Block(const BlockType& type)
-		: blockType(type)
-	{
-	}
-
 	bool Block::IsTranspaent(const Block& block)
 	{
 		switch (block.blockType)

@@ -17,23 +17,23 @@ namespace KuchCraft {
 
 		None // No element and/or last element
 	};
-	constexpr int number_of_blocks = (int)BlockType::None - 1;
+	constexpr int total_number_of_blocks = (int)BlockType::None - 1;
 
-	class Block
+	struct Block
 	{
-	public:
-		Block() = default;
-		Block(const BlockType& type);
-		~Block() = default;
-
 		BlockType blockType = BlockType::Air;
-		static bool IsTranspaent(const Block& block);
+
+		Block() = default;
+		Block(BlockType type)
+			: blockType(type) {}
 
 		operator BlockType()                     const { return  blockType;                    }
 		bool operator ==(const Block& other)     const { return  blockType == other.blockType; }
 		bool operator !=(const Block& other)     const { return !(*this == other);             }
 		bool operator ==(const BlockType& other) const { return  blockType == other;           }
 		bool operator !=(const BlockType& other) const { return !(*this == other);             }
+
+		static bool IsTranspaent(const Block& block);
 	};
 
 }

@@ -13,6 +13,8 @@ namespace KuchCraft {
 	constexpr uint32_t quad_vertex_count    = 4;
 	constexpr uint32_t cube_vertex_count    = 24;
 
+	constexpr glm::vec4 water_tint_colot{ 0.0f, 0.0f, 1.0f, 1.0f };
+
 	struct RendererStatistics
 	{
 		uint32_t DrawCalls = 0;

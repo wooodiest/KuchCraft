@@ -15,35 +15,36 @@ namespace KuchCraft {
 		World(const std::string& path);
 		~World();
 
-		void Shutdown();
 		inline static World& Get() { return *s_Instance; }
 
 		void OnUpdate(float dt);
 		void Render();
 
+		// Utils
 		void  SetBlock(const glm::vec3& position, const Block& block);
 		Block GetBlock(const glm::vec3& position);
-
-		const Camera& GetCamera() const { return m_Player.GetCamera(); }
-		bool GetQuitStatus()      const { return m_QuitStatus;         }
 
 		int    GetChunkIndex(const glm::vec3& position);
 		Chunk* GetChunk(const glm::vec3& position);
 
-		std::vector<Chunk*>& GetChunks()       { return m_Chunks;       }
-		std::vector<Chunk*>& GetChunksToDraw() { return m_ChunksToDraw; }
-
-		glm::vec3 CalculateChunkAbsolutePosition(const glm::vec3& position);
+		const Camera& GetCamera() const { return m_Player.GetCamera(); }
+		bool GetQuitStatus()      const { return m_QuitStatus;         }
 
 	private:
+		// Managment
 		std::string filePath;
 		bool m_QuitStatus = false;
+
+		// Data
 		Player m_Player;
-		std::vector<Chunk*> m_Chunks;
+
+		// Chunk data
+		std::vector<Chunk*> m_Chunks{ world_chunk_size * world_chunk_size, nullptr };
 		std::vector<Chunk*> m_ChunksToUpdate;
-		std::vector<Chunk*> m_ChunksToDraw;
+		std::vector<Chunk*> m_ChunksToRender;
 
 	private:
+		void Shutdown();
 		void DeleteUnusedChunks(const glm::vec3& position);
 
 	private:

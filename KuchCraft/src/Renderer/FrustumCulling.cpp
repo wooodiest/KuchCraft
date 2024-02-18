@@ -38,7 +38,7 @@ namespace KuchCraft {
 		return true;
 	}
 	
-	void FrustumCulling::GetChunksToDraw(std::vector<Chunk*>& chunksToDraw, std::vector<Chunk*>& activeChunks, const Camera& camera)
+	void FrustumCulling::GetChunksToRender(std::vector<Chunk*>& out_ChunksToRender, std::vector<Chunk*>& activeChunks, const Camera& camera)
 	{
 		glm::mat4 viewProjection = camera.GetViewProjection();
 		glm::vec4 frustumPlanes[6];
@@ -55,12 +55,11 @@ namespace KuchCraft {
 			frustumPlanes[i] /= length;
 		}
 
-		for (const auto chunk : activeChunks)
+		for (const auto& chunk : activeChunks)
 		{
 			AABB chunkAABB{ chunk->GetPosition() };
 			if (IsAABBVisible(chunkAABB, frustumPlanes) && !chunk->NeedToRecreate())
-				chunksToDraw.push_back(chunk);
-			
+				out_ChunksToRender.push_back(chunk);
 		}
 	}
 
