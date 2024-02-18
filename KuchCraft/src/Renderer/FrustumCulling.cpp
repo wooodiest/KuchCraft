@@ -7,6 +7,8 @@
 
 namespace KuchCraft {
 
+	constexpr uint32_t frustum_planes_count = 6;
+
 	struct AABB 
 	{
 		glm::vec3 min;
@@ -21,7 +23,7 @@ namespace KuchCraft {
 
 	static bool IsAABBVisible(const AABB& aabb, const glm::vec4 frustumPlanes[6])
 	{
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < frustum_planes_count; i++)
 		{
 			glm::vec3 normal = glm::vec3(frustumPlanes[i]);
 			float d = frustumPlanes[i].w;
@@ -41,7 +43,7 @@ namespace KuchCraft {
 	void FrustumCulling::GetChunksToRender(std::vector<Chunk*>& out_ChunksToRender, std::vector<Chunk*>& activeChunks, const Camera& camera)
 	{
 		glm::mat4 viewProjection = camera.GetViewProjection();
-		glm::vec4 frustumPlanes[6];
+		glm::vec4 frustumPlanes[frustum_planes_count];
 		frustumPlanes[0] = glm::row(viewProjection, 3) + glm::row(viewProjection, 0);
 		frustumPlanes[1] = glm::row(viewProjection, 3) - glm::row(viewProjection, 0);
 		frustumPlanes[2] = glm::row(viewProjection, 3) + glm::row(viewProjection, 1);
@@ -49,7 +51,7 @@ namespace KuchCraft {
 		frustumPlanes[4] = glm::row(viewProjection, 3) + glm::row(viewProjection, 2);
 		frustumPlanes[5] = glm::row(viewProjection, 3) - glm::row(viewProjection, 2);
 
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < frustum_planes_count; i++)
 		{
 			float length = glm::length(glm::vec3(frustumPlanes[i]));
 			frustumPlanes[i] /= length;

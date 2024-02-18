@@ -17,7 +17,8 @@ namespace KuchCraft {
 
 		None // No element and/or last element
 	};
-	constexpr int total_number_of_blocks = (int)BlockType::None - 1;
+	constexpr int total_number_of_blocks    = (int)BlockType::None - 1;
+	constexpr int absolute_number_of_blocks = (int)BlockType::None;
 
 	struct Block
 	{

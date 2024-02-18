@@ -16,32 +16,50 @@ namespace KuchCraft {
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
+		// Scene
+		static void BeginScene(const Camera& camera);
+		static void EndScene();
+
+		// Rendering chunks
+		static void BeginChunk();
+		static void RenderChunk(Chunk* chunk);
+		static void EndChunk();
+		
+		// Rendering skybox
+		static void BeginSkybox();
+		static void RenderSkybox();
+		static void EndSkybox();
+			
+		// Utils
+		static void SetWaterTintStatus(bool status);
+		static void ShowTriangles(bool status);
+		static uint32_t GetTexture(BlockType type);
+
+		// Stats
+		static void ResetStats();
+		static RendererStatistics& GetStats() { return s_Stats; }
+
+	private:
+		// Loading textures
 		static void     LoadTextureAtlas();
 		static uint32_t LoadTextureToAtals(const std::string& path);
 		static uint32_t LoadSkyboxTexture();
 
-		static void BeginScene(const Camera& camera);
-		static void EndScene();
+		// Prepare renderer for...
+		static void PrepareRenderer();
+		static void PrepareChunkRendering();
+		static void PrepareSkyboxRendering();
 
-		static void BeginRenderingWater();
-		static void EndRenderingWater();
+		// Renderer data
+		static RendererData       s_RendererData;
+		static RendererStatistics s_Stats;
+		static RendererChunkData  s_ChunkData;
 
-		static void ResetStats();
-		static RendererStatistics& GetStats() { return s_Stats; }
-		static uint32_t GetTexture(BlockType type);
-
-		static void DrawChunk(Chunk* chunk);
-
-		static void DrawSkybox(const Camera& camera);
-		static void SetTintColor(const glm::vec4& color);
-
-		static void SetTrianglesVisibility(bool status);
+		// Temporary
+		static Camera* s_Camera;
 
 	private:
 		Renderer() = default;
-
-		static RendererStatistics s_Stats;
-
 	};
 
 }

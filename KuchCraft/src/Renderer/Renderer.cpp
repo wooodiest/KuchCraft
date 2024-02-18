@@ -12,115 +12,10 @@
 
 namespace KuchCraft {
 
+	RendererData       Renderer::s_RendererData;
 	RendererStatistics Renderer::s_Stats;
-
-	// Renderer data
-	struct RendererData
-	{
-
-		// Rendering blocks
-		uint32_t VertexArray;
-		uint32_t VertexBuffer;
-		uint32_t IndexBuffer;
-		Shader   DefaultShader;
-
-		std::array<uint32_t, total_number_of_blocks> Textures;
-		uint32_t TextureSlotIndex = 1;
-
-		// Rendering skybox
-		uint32_t SkyboxVertexArray;
-		uint32_t SkyboxVertexBuffer;
-		uint32_t SkyboxTexture;
-		Shader   SkyboxShader;
-	};
-	static RendererData s_Data;
-
-	// Declarations
-	void Renderer::BeginScene(const Camera& camera)
-	{
-		// Set uniform: view-projection matrix
-		s_Data.DefaultShader.Bind();
-		s_Data.DefaultShader.SetMat4("u_ViewProjection", camera.GetViewProjection());
-		s_Data.DefaultShader.SetFloat4("u_TintColor", { 1.0f, 1.0f, 1.0f, 1.0f });
-	}
-
-	void Renderer::EndScene()
-	{
-
-	}
-
-	void Renderer::BeginRenderingWater()
-	{
-		glDisable(GL_CULL_FACE);
-		glEnable(GL_BLEND);
-		glDepthFunc(GL_LEQUAL);
-	}
-
-	void Renderer::EndRenderingWater()
-	{
-		glEnable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
-		glDepthFunc(GL_LESS);
-	}
-
-	void Renderer::ResetStats()
-	{
-		s_Stats.DrawCalls = 0;
-		s_Stats.Quads     = 0;
-	}
-
-	void Renderer::DrawChunk(Chunk* chunk)
-	{
-		uint32_t vertexOffset = 0;
-		auto& drawList = chunk->GetDrawList(); // rename to drawlist
-
-		for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
-		{
-			uint32_t indexCount = drawList.GetIndexCount(i);
-			if (indexCount != 0)
-			{
-				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-
-				glBindVertexArray(s_Data.VertexArray);
-				glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), drawList.GetVerticesPtr(vertexOffset));
-				
-				vertexOffset += vertexCount;
-
-				// Bind textures
-				uint32_t textures = drawList.GetTextureCount(i);
-				for (uint32_t j = 0; j < textures; j++)
-					glBindTextureUnit(j, drawList.GetTexture(i, j));
-
-				// Draw elements		
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
-				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
-
-				// Update stats
-				s_Stats.DrawCalls++;
-				s_Stats.Quads += vertexCount / quad_vertex_count;
-			}
-		}
-	}
-
-	void Renderer::DrawSkybox(const Camera& camera)
-	{
-		s_Data.SkyboxShader.Bind();
-		s_Data.SkyboxShader.SetMat4("u_ViewProjection0", camera.GetSkyboxProjection());
-		glCullFace(GL_FRONT);
-		glDepthFunc(GL_LEQUAL);
-
-		glBindVertexArray(s_Data.SkyboxVertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_Data.SkyboxVertexBuffer);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, s_Data.SkyboxTexture);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
-
-		glCullFace(GL_BACK);
-		glDepthFunc(GL_LESS);
-	}
+	RendererChunkData  Renderer::s_ChunkData;
+	Camera*            Renderer::s_Camera = nullptr;
 
 	void Renderer::Init()
 	{
@@ -133,49 +28,107 @@ namespace KuchCraft {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
 
-		glEnable(GL_CULL_FACE);	
+		glEnable(GL_CULL_FACE);
 		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);
 
-		// Skybox
-		glGenVertexArrays(1, &s_Data.SkyboxVertexArray);
-		glBindVertexArray(s_Data.SkyboxVertexArray);
+		PrepareRenderer();
+		PrepareChunkRendering();
 
-		glGenBuffers(1, &s_Data.SkyboxVertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_Data.SkyboxVertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
+		LoadTextureAtlas();
+	}
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
+	void Renderer::ShutDown()
+	{
+		// RendererData
+		glDeleteBuffers(1, &s_RendererData.QuadIndexBuffer);
 
-		s_Data.SkyboxShader.Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
-		s_Data.SkyboxShader.Bind();
-		s_Data.SkyboxShader.SetInt("u_CubemapTexture", 0);
-		s_Data.SkyboxTexture = LoadSkyboxTexture();
-		// Create vertex array
-		glGenVertexArrays(1, &s_Data.VertexArray);
-		glBindVertexArray(s_Data.VertexArray);
+		// RendererChunkData
+		glDeleteBuffers(1, &s_ChunkData.VertexBuffer);
+		glDeleteVertexArrays(1, &s_ChunkData.VertexArray);
+		
+		// RendererStatistics
+		ResetStats();
+	}
 
-		// Create vertex buffer and layout setup
-		constexpr int max_quads    = chunk_size_XZ * chunk_size_XZ * chunk_size_Y * 6;
-		constexpr int max_indices  = max_quads * 6;
-		constexpr int max_vertices = max_quads * 4;
+	void Renderer::BeginScene(const Camera& camera)
+	{
+		s_Camera = (Camera*)(&camera); // temporary
+	}
 
-		glGenBuffers(1, &s_Data.VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, max_vertices * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+	void Renderer::EndScene()
+	{
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(float)));
-		glEnableVertexAttribArray(2);
+	}
 
-		// Index buffer
-		uint32_t* indices = new uint32_t[max_indices];
+	void Renderer::ResetStats()
+	{
+		s_Stats.DrawCalls = 0;
+		s_Stats.Quads     = 0;
+	}
+
+	void Renderer::BeginChunk()
+	{
+		s_ChunkData.Shader.Bind();
+		s_ChunkData.Shader.SetMat4("u_ViewProjection", s_Camera->GetViewProjection());
+	}
+
+	void Renderer::RenderChunk(Chunk* chunk)
+	{
+		uint32_t vertexOffset = 0;
+		auto& drawList = chunk->GetDrawList(); // rename to drawlist
+
+		for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
+		{
+			uint32_t indexCount = drawList.GetIndexCount(i);
+			if (indexCount != 0)
+			{
+				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
+
+				glBindVertexArray(s_ChunkData.VertexArray);
+				glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
+				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), drawList.GetVerticesPtr(vertexOffset));
+				
+				vertexOffset += vertexCount;
+
+				// Bind textures
+				uint32_t textures = drawList.GetTextureCount(i);
+				for (uint32_t j = 0; j < textures; j++)
+					glBindTextureUnit(j, drawList.GetTexture(i, j));
+
+				// Draw elements		
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
+				// Update stats
+				s_Stats.DrawCalls++;
+				s_Stats.Quads += vertexCount / quad_vertex_count;
+			}
+		}
+	}
+
+	void Renderer::EndChunk()
+	{
+	}
+
+	void Renderer::BeginSkybox()
+	{
+	}
+
+	void Renderer::RenderSkybox()
+	{
+	}
+
+	void Renderer::EndSkybox()
+	{
+	}
+
+	void Renderer::PrepareRenderer()
+	{
+		// QuadIndexBuffer
+		uint32_t* indices = new uint32_t[max_indices_in_chunk];
 		uint32_t  offset = 0;
-		for (uint32_t i = 0; i < max_indices; i += 6)
+		for (uint32_t i = 0; i < max_indices_in_chunk; i += 6)
 		{
 			indices[i + 0] = offset + 0;
 			indices[i + 1] = offset + 1;
@@ -186,45 +139,68 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		glGenBuffers(1, &s_Data.IndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, max_indices * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glGenBuffers(1, &s_RendererData.QuadIndexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, max_indices_in_chunk * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 		delete[] indices;
+	}
+
+	void Renderer::PrepareChunkRendering()
+	{
+		// Create vertex array
+		glGenVertexArrays(1, &s_ChunkData.VertexArray);
+		glBindVertexArray(s_ChunkData.VertexArray);
+
+		// Create vertex buffer and layout setup
+		glGenBuffers(1, &s_ChunkData.VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(float)));
+		glEnableVertexAttribArray(2);
 
 		// Shader
-		s_Data.DefaultShader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
-		s_Data.DefaultShader.Bind();
+		s_ChunkData.Shader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
+		s_ChunkData.Shader.Bind();
 
-		// Textures
+		// Set texture slots
 		int samplers[max_texture_slots];
 		for (int i = 0; i < max_texture_slots; i++)
 			samplers[i] = i;
-		s_Data.DefaultShader.SetIntArray("u_Textures", samplers, max_texture_slots);
+		s_ChunkData.Shader.SetIntArray("u_Textures", samplers, max_texture_slots);
 
-		LoadTextureAtlas();
 	}
 
-	void Renderer::ShutDown()
+	void Renderer::PrepareSkyboxRendering()
 	{
-		glDeleteBuffers(1, &s_Data.IndexBuffer);
-		glDeleteBuffers(1, &s_Data.VertexBuffer);
-		glDeleteVertexArrays(1, &s_Data.VertexArray);
-
-		glDeleteBuffers(1, &s_Data.SkyboxVertexBuffer);
-		glDeleteVertexArrays(1, &s_Data.SkyboxVertexArray);
 	}
 
 	uint32_t Renderer::GetTexture(BlockType type)
 	{
-		return s_Data.Textures[(int)type];
+		return s_RendererData.Textures[(int)type];
 	}
 
-	void Renderer::SetTrianglesVisibility(bool status)
+	void Renderer::ShowTriangles(bool status)
 	{
 		if (status)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		else
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	void Renderer::SetWaterTintStatus(bool status)
+	{
+		s_ChunkData.Shader.Bind();
+		s_ChunkData.Shader.SetFloat4("u_TintColor", status ? water_tint_color : white_color);
+	}
+
+	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
+	{
+		glViewport(0, 0, width, height);
 	}
 
 	void Renderer::LoadTextureAtlas()
@@ -258,23 +234,13 @@ namespace KuchCraft {
 		for (const auto& texture : blockTexturePathsAtlas)
 		{
 			std::string path = mainPath + texture.second + extension;
-			s_Data.Textures[(int)texture.first] = LoadTextureToAtals(path);
+			s_RendererData.Textures[(int)texture.first] = LoadTextureToAtals(path);
 		}
-	}
-
-	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
-	{
-		glViewport(0, 0, width, height);
-	}
-
-	void Renderer::SetTintColor(const glm::vec4& color)
-	{
-		s_Data.DefaultShader.SetFloat4("u_TintColor", color);
 	}
 
 	uint32_t Renderer::LoadSkyboxTexture()
 	{
-		const GLenum types[6] = {
+		const GLenum types[cube_face_cout] = {
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X,
 			GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
 			GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
@@ -282,7 +248,7 @@ namespace KuchCraft {
 			GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 			GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
 		};
-		const std::string paths[6] =
+		const std::string paths[cube_face_cout] =
 		{
 			"assets/skybox/xpos.png",
 			"assets/skybox/xneg.png",
@@ -295,7 +261,7 @@ namespace KuchCraft {
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 
-		for (uint32_t i = 0; i < 6; i++)
+		for (uint32_t i = 0; i < cube_face_cout; i++)
 		{
 			int width, height, channels;
 			stbi_set_flip_vertically_on_load(0);

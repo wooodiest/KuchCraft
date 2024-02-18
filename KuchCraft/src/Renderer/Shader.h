@@ -24,7 +24,7 @@ namespace KuchCraft {
 		void Unbind() const;
 
 	private:
-		unsigned int m_RendererID = 0;
+		uint32_t m_RendererID = 0;
 
 	};
 

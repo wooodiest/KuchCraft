@@ -3,6 +3,11 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "World/Block.h"
+#include "World/WorldData.h"
+
+#include "Renderer/Shader.h"
+
 namespace KuchCraft {
 
 	constexpr uint32_t max_texture_slots  = 32;
@@ -12,14 +17,14 @@ namespace KuchCraft {
 	constexpr uint32_t quad_index_count     = 6;
 	constexpr uint32_t quad_vertex_count    = 4;
 	constexpr uint32_t cube_vertex_count    = 24;
+	constexpr uint32_t cube_face_cout       = 6;
 
-	constexpr glm::vec4 water_tint_colot{ 0.0f, 0.0f, 1.0f, 1.0f };
+	constexpr glm::vec4 white_color     { 1.0f, 1.0f, 1.0f, 1.0f };
+	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 1.0f, 1.0f };
 
-	struct RendererStatistics
-	{
-		uint32_t DrawCalls = 0;
-		uint32_t Quads     = 0;
-	};
+	constexpr int max_quads_in_chunk    = chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_face_cout;
+	constexpr int max_indices_in_chunk  = max_quads_in_chunk * 6;
+	constexpr int max_vertices_in_chunk = max_quads_in_chunk * 4;
 
 	struct Vertex
 	{
@@ -27,6 +32,25 @@ namespace KuchCraft {
 		glm::vec2 TexCoord;
 		float     TexSlot;
 
+	};
+
+	struct RendererStatistics
+	{
+		uint32_t DrawCalls = 0;
+		uint32_t Quads = 0;
+	};
+
+	struct RendererData
+	{
+		uint32_t Textures[absolute_number_of_blocks];
+		uint32_t QuadIndexBuffer = 0;
+	};
+
+	struct RendererChunkData
+	{
+		uint32_t VertexArray  = 0;
+		uint32_t VertexBuffer = 0;
+		Shader   Shader;
 	};
 
 	// Cube - quad vertices
