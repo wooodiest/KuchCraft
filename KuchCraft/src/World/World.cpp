@@ -4,8 +4,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Renderer/FrustumCulling.h"
 #include "Core/Input.h"
+
+#include "Renderer/FrustumCulling.h"
+#include "Renderer/Renderer.h"
+
 #include "WorldGenerator.h"
 
 namespace KuchCraft {

@@ -7,6 +7,8 @@
 #include "World/World.h"
 #include "World/WorldGenerator.h"
 
+#include "Renderer/Renderer.h"
+
 namespace KuchCraft {
 
 	Chunk::Chunk(const glm::vec3& position)

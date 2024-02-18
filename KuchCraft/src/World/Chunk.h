@@ -3,13 +3,10 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "KuchCraftData.h"
 #include "World/Block.h"
-#include "Renderer/Renderer.h"
 
 namespace KuchCraft {
-
-	constexpr int   chunk_size_XZ = 16;
-	constexpr int   chunk_size_Y = 128;
 
 	class Chunk
 	{
@@ -30,19 +27,19 @@ namespace KuchCraft {
 		void SetRebuildStatus(bool status)  { m_NeedToBuild = status;    }
 		void SetRecreateStatus(bool status) { m_NeedToRecreate = status; }
 
-		const glm::vec3& GetPosition()                 const { return m_Position;         }
+		const glm::vec3& GetPosition()  const { return m_Position; }
 
-		std::vector<Vertex>& GetDrawList()                   { return m_DrawList;         }
-		std::vector<Vertex>& GetDrawListWater()              { return m_DrawListWater;    }
-		RendererChunkData&   GetRendererChunkData()          { return m_RendererChunkData;}
+		std::vector<Vertex>& GetDrawList()          { return m_DrawList;         }
+		std::vector<Vertex>& GetDrawListWater()     { return m_DrawListWater;    }
+		RendererChunkData&   GetRendererChunkData() { return m_RendererChunkData;}
 
 	private:
 		glm::vec3 m_Position;
 		bool m_NeedToRecreate = true;
 		bool m_NeedToBuild    = true;
 
-		std::vector<Vertex>    m_DrawList;
-		std::vector<Vertex>    m_DrawListWater;
+		std::vector<Vertex> m_DrawList;
+		std::vector<Vertex> m_DrawListWater;
 
 		RendererChunkData m_RendererChunkData;
 
@@ -59,8 +56,8 @@ namespace KuchCraft {
 			}
 		};
 
-		void AddToDrawList(RendererTextureData& textureData, const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
-		void AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count]);
+		void AddToDrawList(RendererTextureData& textureData, const glm::mat4& model, const Vertex vertices[6], int x, int y, int z);
+		void AddToDrawListWater(const glm::mat4& model, const Vertex vertices[6]);
 
 	};
 

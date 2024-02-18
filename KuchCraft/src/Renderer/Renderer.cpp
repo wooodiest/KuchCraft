@@ -2,6 +2,7 @@
 
 #include <array>
 #include <iostream>
+#include <unordered_map>
 #include <glad/glad.h>
 #include <stb_image.h>
 
@@ -16,15 +17,13 @@ namespace KuchCraft {
 	// Renderer data
 	struct RendererData
 	{
+
 		// Rendering blocks
 		uint32_t VertexArray;
 		uint32_t VertexBuffer;
 		uint32_t IndexBuffer;
 		Shader   DefaultShader;
 
-		uint32_t VertexOffset = 0;
-
-		std::array<uint32_t, max_texture_slots> TextureSlots;
 		std::array<uint32_t, number_of_blocks> Textures;
 		uint32_t TextureSlotIndex = 1;
 
@@ -37,7 +36,6 @@ namespace KuchCraft {
 	static RendererData s_Data;
 
 	// Declarations
-
 	void Renderer::BeginScene(const Camera& camera)
 	{
 		// Set uniform: view-projection matrix
@@ -235,7 +233,6 @@ namespace KuchCraft {
 
 	void Renderer::ShutDown()
 	{
-		// free memmory
 		glDeleteBuffers(1, &s_Data.IndexBuffer);
 		glDeleteBuffers(1, &s_Data.VertexBuffer);
 		glDeleteVertexArrays(1, &s_Data.VertexArray);
@@ -248,7 +245,6 @@ namespace KuchCraft {
 	{
 		return s_Data.Textures[(int)type];
 	}
-
 
 	void Renderer::SetTrianglesVisibility(bool status)
 	{

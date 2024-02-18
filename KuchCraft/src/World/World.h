@@ -9,8 +9,6 @@
 
 namespace KuchCraft {
 
-	constexpr int world_chunk_size = 1000; // square: world_chunk_size x world_chunk_size
-
 	class World
 	{
 	public:	
