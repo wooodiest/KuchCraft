@@ -22,6 +22,8 @@ namespace KuchCraft {
 	constexpr uint32_t quad_vertex_count    = 4;
 	constexpr uint32_t cube_vertex_count    = 24;
 
+	constexpr float water_texture_slot = 1.0f;
+
 	class Chunk;
 	class Block;
 	enum class BlockType;
@@ -143,6 +145,40 @@ namespace KuchCraft {
 		-1.0f, -1.0f, -1.0f,
 		-1.0f,  1.0f, -1.0f,
 		 1.0f,  1.0f, -1.0f,
+	};
+
+	struct RendererChunkData
+	{
+		uint32_t DrawCalls = 0;
+		std::vector<uint32_t> IndexCount;
+		std::vector<uint32_t> Textures;
+
+		RendererChunkData()
+		{
+			IndexCount.push_back(0);
+		}
+
+		uint32_t GetDrawCallTextureSlots(uint32_t drawCall)
+		{
+			return (uint32_t)Textures.size() - drawCall * max_texture_slots;
+		}
+
+		void StartNewDrawCall()
+		{
+			IndexCount.push_back(0);
+			DrawCalls++;
+		}
+
+		void AddTexture(uint32_t texture)
+		{
+			Textures.push_back(texture);
+		}
+
+		void UpdateCurrentIndexCount()
+		{
+			IndexCount[DrawCalls] += quad_index_count;
+		}
+
 	};
 
 }

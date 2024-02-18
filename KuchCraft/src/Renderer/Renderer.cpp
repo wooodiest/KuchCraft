@@ -77,7 +77,7 @@ namespace KuchCraft {
 		auto& vertices  = chunk->GetDrawList();
 		auto& chunkData = chunk->GetRendererChunkData();
 
-		for (int i = 0; i <= chunkData.DrawCalls; i++)
+		for (uint32_t i = 0; i <= chunkData.DrawCalls; i++)
 		{
 			uint32_t indexCount = chunkData.IndexCount[i];
 			if (indexCount != 0)
@@ -88,12 +88,11 @@ namespace KuchCraft {
 				glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
 				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), &vertices[vertexOffset]);
 
-				vertexOffset  += vertexCount;
-				s_Stats.Quads += vertexCount / 4;
+				vertexOffset += vertexCount;
 
 				// Bind textures
-				uint32_t textures = chunkData.Textures.size() - i * max_texture_slots;
-				for (uint32_t j = 1; j < textures; j++)
+				uint32_t textures = chunkData.GetDrawCallTextureSlots(i);
+				for (uint32_t j = 0; j < textures; j++)
 					glBindTextureUnit(j, chunkData.Textures[j + i * max_texture_slots]);
 
 				// Draw elements		
@@ -101,7 +100,8 @@ namespace KuchCraft {
 				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 
 				// Update stats
-				Renderer::s_Stats.DrawCalls++;
+				s_Stats.DrawCalls++;
+				s_Stats.Quads += vertexCount / 4;
 			}
 		}
 	}

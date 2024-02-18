@@ -34,7 +34,6 @@ namespace KuchCraft {
 		Chunk* behindChunk = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z - chunk_size_XZ });
 
 		RendererTextureData textureData;
-		m_RendererChunkData.Textures.push_back(0);
 		m_RendererChunkData.IndexCount.push_back(0);
 
 		// Go through all the blocks and corresponding blocks of chunk next to it
@@ -143,8 +142,9 @@ namespace KuchCraft {
 	void Chunk::AddToDrawList(RendererTextureData& textureData, const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z)
 	{
 		uint32_t texture = Renderer::GetTexture(Blocks[x][y][z].blockType);
-		float textureIndex = 0.0f;
-		for (uint32_t j = 1; j < max_texture_slots; j++)
+		float textureIndex = -1.0f;
+
+		for (uint32_t j = 0; j < max_texture_slots; j++)
 		{
 			if (j < textureData.TextureSlotIndex && textureData.TextureSlots[j] == texture)
 			{
@@ -153,21 +153,17 @@ namespace KuchCraft {
 			}
 		}
 
-		if (textureIndex == 0.0f) // Is every slot occupied or we have new texture ?
+		if (textureIndex == -1.0f) // Is every slot occupied or we have new texture ?
 		{
 			if (textureData.TextureSlotIndex >= max_texture_slots)
 			{
-				//FlushChunk(indexCount, textureSlotIndex, vertices);
-				m_RendererChunkData.DrawCalls++;
-				m_RendererChunkData.Textures.push_back(0);
-				m_RendererChunkData.IndexCount.push_back(0);
-				textureData.TextureSlotIndex = 1;
+				m_RendererChunkData.StartNewDrawCall();
+				textureData.TextureSlotIndex = 0;
 			}
 			
 			textureIndex = (float)textureData.TextureSlotIndex;
-			textureData.TextureSlots[textureData.TextureSlotIndex] = texture;
-			m_RendererChunkData.Textures.push_back(texture);
-			textureData.TextureSlotIndex++;
+			m_RendererChunkData.AddTexture(texture);
+			textureData.AddTexture(texture);
 		}
 
 		for (int i = 0; i < quad_vertex_count; i++)
@@ -177,7 +173,8 @@ namespace KuchCraft {
 				glm::vec2(vertices[i].TexCoord.x, vertices[i].TexCoord.y),
 				textureIndex });
 		}
-		m_RendererChunkData.IndexCount[m_RendererChunkData.DrawCalls] += quad_index_count;
+
+		m_RendererChunkData.UpdateCurrentIndexCount();
 	}
 
 	void Chunk::AddToDrawListWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count])

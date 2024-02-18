@@ -10,14 +10,6 @@ namespace KuchCraft {
 
 	constexpr int   chunk_size_XZ = 16;
 	constexpr int   chunk_size_Y = 128;
-	constexpr float water_texture_slot = 1.0f;
-
-	struct RendererChunkData
-	{
-		uint32_t DrawCalls = 0;
-		std::vector<uint32_t> IndexCount;
-		std::vector<uint32_t> Textures;
-	};
 
 	class Chunk
 	{
@@ -58,7 +50,13 @@ namespace KuchCraft {
 		struct RendererTextureData
 		{
 			uint32_t TextureSlots[max_texture_slots];
-			uint32_t TextureSlotIndex = 1;
+			uint32_t TextureSlotIndex = 0;
+
+			void AddTexture(uint32_t texture)
+			{
+				TextureSlots[TextureSlotIndex] = texture;
+				TextureSlotIndex++;
+			}
 		};
 
 		void AddToDrawList(RendererTextureData& textureData, const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
