@@ -1,8 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <glm/glm.hpp>
 
 #include "Renderer/RendererData.h"
+#include "World/Block.h"
 
 namespace KuchCraft {
 
@@ -14,9 +16,9 @@ namespace KuchCraft {
 		void ClearSlots();
 		void AddTexture(uint32_t texture);
 
-		inline uint32_t GetCurrentSlot()          const { return m_CurrentSlot;          }
-		inline uint32_t GetTexture()              const { return m_Slots[m_CurrentSlot]; }
-		inline uint32_t GetTexture(uint32_t slot) const { return m_Slots[slot];          }
+		uint32_t GetCurrentSlot()          const { return m_CurrentSlot;          }
+		uint32_t GetTexture()              const { return m_Slots[m_CurrentSlot]; }
+		uint32_t GetTexture(uint32_t slot) const { return m_Slots[slot];          }
 		
 	private:
 		uint32_t m_Slots[max_texture_slots];
@@ -34,17 +36,21 @@ namespace KuchCraft {
 		void EndRecreating();
 
 		// DrawCallIndex starts at 0 and responds to draw call = 1
-		inline uint32_t GetDrawCallCount()                                 const { return m_DrawCalls;                                                     } 
-		inline uint32_t GetTextureCount(uint32_t drawCallIndex)            const { return (uint32_t)m_Textures.size() - drawCallIndex * max_texture_slots; }
-		inline uint32_t GetIndexCount(uint32_t drawCallIndex)              const { return m_IndexCount[drawCallIndex];                                     }
-		inline uint32_t GetTexture(uint32_t drawCallIndex, uint32_t index) const { return m_Textures[drawCallIndex * max_texture_slots + index];           }
-		inline uint32_t GetCurrentDrawCallIndex()                          const { return m_DrawCalls - 1;                                                 }
+		uint32_t GetDrawCallCount()                                 const { return m_DrawCalls;                                                     } 
+		uint32_t GetTextureCount(uint32_t drawCallIndex)            const { return (uint32_t)m_Textures.size() - drawCallIndex * max_texture_slots; }
+		uint32_t GetIndexCount(uint32_t drawCallIndex)              const { return m_IndexCount[drawCallIndex];                                     }
+		uint32_t GetTexture(uint32_t drawCallIndex, uint32_t index) const { return m_Textures[drawCallIndex * max_texture_slots + index];           }
+		uint32_t GetCurrentDrawCallIndex()                          const { return m_DrawCalls - 1;                                                 }
 
-		inline TextureSlotHelper& GetSlotHelper() const { return *m_TextureSlotHelper; }
+		TextureSlotHelper&         GetSlotHelper()  const { return *m_TextureSlotHelper; }
+		const std::vector<Vertex>& GetVertices()    const { return m_Vertices;           }
+		const void* GetVerticesPtr(uint32_t offset) const { return &m_Vertices[offset];  }
 
 		void NewDrawCall();
 		void AddTexture(uint32_t texture);
 		void UpdateIndexCount();
+
+		void Add(const glm::mat4& model, const Vertex vertices[quad_vertex_count], const Block& block);
 
 	private:
 		TextureSlotHelper* m_TextureSlotHelper = nullptr;
@@ -52,6 +58,7 @@ namespace KuchCraft {
 		uint32_t m_DrawCalls = 1;
 		std::vector<uint32_t> m_IndexCount;
 		std::vector<uint32_t> m_Textures;
+		std::vector<Vertex>   m_Vertices;
 
 		
 	};

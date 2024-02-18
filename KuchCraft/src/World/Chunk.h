@@ -12,42 +12,37 @@ namespace KuchCraft {
 	class Chunk
 	{
 	public:
-		Block Blocks[chunk_size_XZ][chunk_size_Y][chunk_size_XZ];
+		Block Block[chunk_size_XZ][chunk_size_Y][chunk_size_XZ];
 
 	public:
 		Chunk(const glm::vec3& position);
 		~Chunk();
 
-		void Render();
+		// Check what geometry should be rendered and builds draw list
 		void Recreate();
+
+		// Create blocks that make up the chunk
 		void Build();
 
+		// Build/Recreate utils
 		bool NeedToRecreate() const { return m_NeedToRecreate; }
 		bool NeedToBuild()    const { return m_NeedToBuild;    }
 
 		void SetRebuildStatus(bool status)  { m_NeedToBuild = status;    }
 		void SetRecreateStatus(bool status) { m_NeedToRecreate = status; }
 
-		const glm::vec3& GetPosition()  const { return m_Position; }
-
-		std::vector<Vertex>& GetDrawList()          { return m_DrawList;         }
-		std::vector<Vertex>& GetDrawListWater()     { return m_DrawListWater;    }
-
-		ChunkDrawList& GetChunkDrawList() { return m_ChunkDrawList; } // rename // maybe const
+		// Utils
+		const glm::vec3&     GetPosition()  const { return Position; }
+		const ChunkDrawList& GetDrawList()  const { return m_DrawList; } 
 
 	private:
-		glm::vec3 m_Position;
+		// Chunk position starts at (0, 0, 0) and continue along the axis + (chunk_size_XZ, 0, chunk_size_XZ)
+		glm::vec3 Position;
+
 		bool m_NeedToRecreate = true;
 		bool m_NeedToBuild    = true;
 
-		std::vector<Vertex> m_DrawList;
-		std::vector<Vertex> m_DrawListWater;
-
-		ChunkDrawList m_ChunkDrawList; // rename to drawlist
-
-	private:
-		void AddToDrawList(const glm::mat4& model, const Vertex vertices[quad_vertex_count], int x, int y, int z);
-		void AddToDrawListWater(const glm::mat4& model, const Vertex vertices[6]);
+		ChunkDrawList m_DrawList; 
 
 	};
 

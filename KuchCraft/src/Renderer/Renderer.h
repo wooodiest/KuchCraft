@@ -31,7 +31,6 @@ namespace KuchCraft {
 		static uint32_t GetTexture(BlockType type);
 
 		static void DrawChunk(Chunk* chunk);
-		static void DrawChunkWater(Chunk* chunk);
 
 		static void DrawSkybox(const Camera& camera);
 		static void SetTintColor(const glm::vec4& color);

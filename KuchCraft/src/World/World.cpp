@@ -157,7 +157,7 @@ namespace KuchCraft {
 			int x = static_cast<int>(std::fmod(position.x, chunk_size_XZ ));
 			int y = static_cast<int>(std::fmod(position.y, chunk_size_Y  ));
 			int z = static_cast<int>(std::fmod(position.z, chunk_size_XZ ));
-			chunk->Blocks[x][y][z] = block;
+			chunk->Block[x][y][z] = block;
 			chunk->Recreate();
 
 			if (x == 0)
@@ -195,7 +195,7 @@ namespace KuchCraft {
 			int x = static_cast<int>(std::fmod(position.x, chunk_size_XZ));
 			int y = static_cast<int>(std::fmod(position.y, chunk_size_Y));
 			int z = static_cast<int>(std::fmod(position.z, chunk_size_XZ));
-			return chunk->Blocks[x][y][z];
+			return chunk->Block[x][y][z];
 		}
 		return Block();	
 	}

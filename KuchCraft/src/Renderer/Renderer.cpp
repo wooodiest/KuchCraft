@@ -72,26 +72,25 @@ namespace KuchCraft {
 	void Renderer::DrawChunk(Chunk* chunk)
 	{
 		uint32_t vertexOffset = 0;
-		auto& vertices  = chunk->GetDrawList();
-		auto& chunkDrawList = chunk->GetChunkDrawList(); // rename to drawlist
+		auto& drawList = chunk->GetDrawList(); // rename to drawlist
 
-		for (uint32_t i = 0; i < chunkDrawList.GetDrawCallCount(); i++)
+		for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
 		{
-			uint32_t indexCount = chunkDrawList.GetIndexCount(i);
+			uint32_t indexCount = drawList.GetIndexCount(i);
 			if (indexCount != 0)
 			{
 				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
 
 				glBindVertexArray(s_Data.VertexArray);
 				glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), &vertices[vertexOffset]);
-
+				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), drawList.GetVerticesPtr(vertexOffset));
+				
 				vertexOffset += vertexCount;
 
 				// Bind textures
-				uint32_t textures = chunkDrawList.GetTextureCount(i);
+				uint32_t textures = drawList.GetTextureCount(i);
 				for (uint32_t j = 0; j < textures; j++)
-					glBindTextureUnit(j, chunkDrawList.GetTexture(i, j));
+					glBindTextureUnit(j, drawList.GetTexture(i, j));
 
 				// Draw elements		
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
@@ -99,34 +98,8 @@ namespace KuchCraft {
 
 				// Update stats
 				s_Stats.DrawCalls++;
-				s_Stats.Quads += vertexCount / 4;
+				s_Stats.Quads += vertexCount / quad_vertex_count;
 			}
-		}
-	}
-
-	void Renderer::DrawChunkWater(Chunk* chunk)
-	{
-		auto&    vertices   = chunk->GetDrawListWater();
-		uint32_t indexCount = vertices.size() * triangle_index_count;
-
-
-		if (indexCount != 0)
-		{
-			uint32_t vertexCount = (uint32_t)(indexCount / quad_index_count) * quad_vertex_count;
-			glBindVertexArray(s_Data.VertexArray);
-			glBindBuffer(GL_ARRAY_BUFFER, s_Data.VertexBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), &vertices[0]);
-
-			s_Stats.Quads += vertexCount / 4;
-			// Bind textures
-			glBindTextureUnit((uint32_t)water_texture_slot, GetTexture(BlockType::Water));
-
-			// Draw elements		
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_Data.IndexBuffer);
-			glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
-
-			// Update stats
-			Renderer::s_Stats.DrawCalls++;
 		}
 	}
 
