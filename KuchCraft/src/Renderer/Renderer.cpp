@@ -19,20 +19,8 @@ namespace KuchCraft {
 
 	void Renderer::Init()
 	{
-		// Setup viewport
-		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-		glViewport(0, 0, width, height);
-		glEnable(GL_DEPTH_TEST);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_BLEND);
-
-		glEnable(GL_CULL_FACE);
-		glFrontFace(GL_CCW);
-		glCullFace(GL_BACK);
-
 		PrepareRenderer();
+
 		PrepareChunkRendering();
 
 		LoadTextureAtlas();
@@ -48,6 +36,14 @@ namespace KuchCraft {
 		glDeleteVertexArrays(1, &s_ChunkData.VertexArray);
 		
 		// RendererStatistics
+		ResetStats();
+	}
+
+	void Renderer::BeginFrame()
+	{
+		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		ResetStats();
 	}
 
@@ -125,6 +121,21 @@ namespace KuchCraft {
 
 	void Renderer::PrepareRenderer()
 	{
+		// Setup viewport
+		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
+		glViewport(0, 0, width, height);
+
+		// Enable...
+		glEnable(GL_DEPTH_TEST);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_BLEND);
+
+		glEnable(GL_CULL_FACE);
+		glFrontFace(GL_CCW);
+		glCullFace(GL_BACK);
+
 		// QuadIndexBuffer
 		uint32_t* indices = new uint32_t[max_indices_in_chunk];
 		uint32_t  offset = 0;

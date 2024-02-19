@@ -29,10 +29,6 @@ namespace KuchCraft {
 	{
 		while (m_Running)
 		{
-			// Renderer commands
-			glClearColor(0.8f, 0.8f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 			if (!m_Minimized)
 			{
 				// Calculate delta time

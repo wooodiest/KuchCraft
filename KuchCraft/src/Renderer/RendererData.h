@@ -21,6 +21,7 @@ namespace KuchCraft {
 
 	constexpr glm::vec4 white_color     { 1.0f, 1.0f, 1.0f, 1.0f };
 	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 1.0f, 1.0f };
+	constexpr glm::vec4 clear_color     { 0.8f, 0.8f, 1.0f, 1.0f };
 
 	constexpr int max_quads_in_chunk    = chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_face_cout;
 	constexpr int max_indices_in_chunk  = max_quads_in_chunk * 6;

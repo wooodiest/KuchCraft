@@ -22,7 +22,8 @@ namespace KuchCraft {
 
 	void KuchCraft::OnUpdate(float dt)
 	{
-		Renderer::ResetStats();
+		Renderer::BeginFrame();
+
 		if (m_World)
 		{
 			m_World->OnUpdate(dt);

@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 
-#include "Renderer/Camera.h"
+#include "Game/Camera.h"
 #include "World/Chunk.h"
 
 namespace KuchCraft {
@@ -13,6 +13,7 @@ namespace KuchCraft {
 	public:
 		static void Init();
 		static void ShutDown();
+		static void BeginFrame();
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 

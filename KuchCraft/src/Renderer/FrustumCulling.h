@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Camera.h"
+#include "Game/Camera.h"
 #include "World/Chunk.h"
 
 namespace KuchCraft {

@@ -1,6 +1,4 @@
-#include "Renderer/ChunkRendererData.h"
-
-#include <iostream>
+#include "Renderer/RendererChunkData.h"
 
 #include "Renderer/Renderer.h"
 

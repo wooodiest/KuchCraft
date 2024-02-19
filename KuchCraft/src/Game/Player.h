@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "Renderer/Camera.h"
+#include "Game/Camera.h"
 #include "Core/Input.h"
 
 namespace KuchCraft {
