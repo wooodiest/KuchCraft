@@ -2,11 +2,16 @@
 
 layout (location = 0) out vec4 color;
 
+uniform sampler2D u_Textures[32];
+layout(std140, binding = 0) uniform UniformData
+{
+	mat4 u_ViewProjection;
+	mat4 u_AbsoluteViewProjection;
+	vec4 u_TintColor;
+};
+
 in vec2 v_TexCoord;
 in flat float v_TexIndex;
-
-uniform sampler2D u_Textures[32];
-uniform vec4 u_TintColor;
 
 void main()
 {

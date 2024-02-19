@@ -4,7 +4,12 @@ layout (location = 0) in vec3 a_Position;
 layout (location = 1) in vec2 a_TexCoord;
 layout (location = 2) in float a_TexIndex;
 
-uniform mat4 u_ViewProjection;
+layout(std140, binding = 0) uniform UniformData
+{
+	mat4 u_ViewProjection;
+	mat4 u_AbsoluteViewProjection;
+	vec4 u_TintColor;
+};
 
 out vec2 v_TexCoord;
 out flat float v_TexIndex;

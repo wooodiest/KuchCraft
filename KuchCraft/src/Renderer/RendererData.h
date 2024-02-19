@@ -38,14 +38,23 @@ namespace KuchCraft {
 	struct RendererStatistics
 	{
 		uint32_t DrawCalls = 0;
-		uint32_t Quads = 0;
+		uint32_t Quads     = 0;
+	};
+
+	struct UniformBuffer
+	{
+		glm::mat4 ViewProjection;
+		glm::mat4 AbsoluteViewProjection;
+		glm::vec4 TintColor;
 	};
 
 	struct RendererData
 	{
 		uint32_t Textures[absolute_number_of_blocks];
 		uint32_t QuadIndexBuffer = 0;
-	};
+		uint32_t UniformBuffer   = 0;
+		bool     TintStatus      = false;
+	}; 
 
 	struct RendererChunkData
 	{

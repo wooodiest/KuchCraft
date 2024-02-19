@@ -2,11 +2,17 @@
 
 layout (location = 0) out vec4 color;
 
-in vec3 v_TexCoord;
-
 uniform samplerCube u_Texture;
+layout(std140, binding = 0) uniform UniformData
+{
+	mat4 u_ViewProjection;
+	mat4 u_AbsoluteViewProjection;
+	vec4 u_TintColor;
+};
+
+in vec3 v_TexCoord;
 
 void main()
 {
-	color = texture(u_Texture, v_TexCoord);
+	color = texture(u_Texture, v_TexCoord) * u_TintColor;
 }

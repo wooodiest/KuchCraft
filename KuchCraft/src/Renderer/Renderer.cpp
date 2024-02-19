@@ -16,7 +16,6 @@ namespace KuchCraft {
 	RendererStatistics  Renderer::s_Stats;
 	RendererChunkData   Renderer::s_ChunkData;
 	RendererSkyboxData  Renderer::s_SkyboxData;
-	Camera*             Renderer::s_Camera = nullptr;
 
 	void Renderer::Init()
 	{
@@ -32,6 +31,7 @@ namespace KuchCraft {
 	{
 		// RendererData
 		glDeleteBuffers(1, &s_RendererData.QuadIndexBuffer);
+		glDeleteBuffers(1, &s_RendererData.UniformBuffer);
 
 		// RendererChunkData
 		glDeleteBuffers(1, &s_ChunkData.VertexBuffer);
@@ -51,7 +51,13 @@ namespace KuchCraft {
 
 	void Renderer::BeginScene(const Camera& camera)
 	{
-		s_Camera = (Camera*)(&camera); // temporary
+		// Set uniform buffer
+		UniformBuffer buffer{
+			camera.GetViewProjection(),
+			camera.GetSkyboxProjection(),
+			s_RendererData.TintStatus ? water_tint_color : white_color
+		};
+		glNamedBufferSubData(s_RendererData.UniformBuffer, 0, sizeof(buffer), &buffer);
 	}
 
 	void Renderer::EndScene()
@@ -68,7 +74,6 @@ namespace KuchCraft {
 	void Renderer::BeginChunk()
 	{
 		s_ChunkData.Shader.Bind();
-		s_ChunkData.Shader.SetMat4("u_ViewProjection", s_Camera->GetViewProjection());
 	}
 
 	void Renderer::RenderChunk(Chunk* chunk)
@@ -112,7 +117,6 @@ namespace KuchCraft {
 	void Renderer::BeginSkybox()
 	{
 		s_SkyboxData.Shader.Bind();
-		s_SkyboxData.Shader.SetMat4("u_ViewProjection0", s_Camera->GetSkyboxProjection());
 
 		glCullFace(GL_FRONT);
 		glDepthFunc(GL_LEQUAL);
@@ -171,6 +175,12 @@ namespace KuchCraft {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, max_indices_in_chunk * sizeof(uint32_t), indices, GL_STATIC_DRAW);
 		delete[] indices;
+
+		// Uniform buffer
+		constexpr uint32_t binding = 0;
+		glCreateBuffers(1, &s_RendererData.UniformBuffer);
+		glNamedBufferData(s_RendererData.UniformBuffer, sizeof(UniformBuffer), nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding, s_RendererData.UniformBuffer);
 	}
 
 	void Renderer::PrepareChunkRendering()
@@ -238,8 +248,7 @@ namespace KuchCraft {
 
 	void Renderer::SetWaterTintStatus(bool status)
 	{
-		s_ChunkData.Shader.Bind();
-		s_ChunkData.Shader.SetFloat4("u_TintColor", status ? water_tint_color : white_color);
+		s_RendererData.TintStatus = status;
 	}
 
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
