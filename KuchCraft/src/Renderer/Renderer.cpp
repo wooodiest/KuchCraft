@@ -54,7 +54,7 @@ namespace KuchCraft {
 		// Set uniform buffer
 		UniformBuffer buffer{
 			camera.GetViewProjection(),
-			camera.GetSkyboxProjection(),
+			camera.GetAbsoluteViewProjection(),
 			s_RendererData.TintStatus ? water_tint_color : white_color
 		};
 		glNamedBufferSubData(s_RendererData.UniformBuffer, 0, sizeof(buffer), &buffer);
@@ -202,7 +202,7 @@ namespace KuchCraft {
 		glEnableVertexAttribArray(2);
 
 		// Shader
-		s_ChunkData.Shader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
+		s_ChunkData.Shader.Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl");
 		s_ChunkData.Shader.Bind();
 
 		// Set texture slots

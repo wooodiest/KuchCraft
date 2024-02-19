@@ -31,7 +31,7 @@ namespace KuchCraft {
 		const glm::mat4& GetProjection()     const { return m_Projection;          }
 		const glm::mat4& GetView()           const { return m_View;                }
 		const glm::mat4  GetViewProjection() const { return m_Projection * m_View; }
-		const glm::mat4  GetSkyboxProjection() const;
+		const glm::mat4  GetAbsoluteViewProjection() const;
 
 		const glm::vec3& GetPosition() const { return m_Position;                }
 		const glm::vec2  GetRotation() const { return glm::vec2(m_Yaw, m_Pitch); }                 
