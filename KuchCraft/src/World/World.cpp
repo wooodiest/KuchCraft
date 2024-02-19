@@ -109,6 +109,10 @@ namespace KuchCraft {
 		for (const auto& c : m_ChunksToRender)
 			Renderer::RenderChunk(c);
 		Renderer::EndChunk();
+
+		Renderer::BeginSkybox();
+		Renderer::RenderSkybox();
+		Renderer::EndSkybox();
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)

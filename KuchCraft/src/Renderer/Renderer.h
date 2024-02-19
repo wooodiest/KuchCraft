@@ -55,6 +55,7 @@ namespace KuchCraft {
 		static RendererData       s_RendererData;
 		static RendererStatistics s_Stats;
 		static RendererChunkData  s_ChunkData;
+		static RendererSkyboxData s_SkyboxData;
 
 		// Temporary
 		static Camera* s_Camera;

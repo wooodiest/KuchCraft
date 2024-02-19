@@ -54,6 +54,14 @@ namespace KuchCraft {
 		Shader   Shader;
 	};
 
+	struct RendererSkyboxData
+	{
+		uint32_t VertexArray  = 0;
+		uint32_t VertexBuffer = 0;
+		uint32_t Texture      = 0;
+		Shader   Shader;
+	};
+
 	// Cube - quad vertices
 	constexpr Vertex vertices_bottom[quad_vertex_count]
 	{

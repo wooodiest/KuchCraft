@@ -12,16 +12,18 @@
 
 namespace KuchCraft {
 
-	RendererData       Renderer::s_RendererData;
-	RendererStatistics Renderer::s_Stats;
-	RendererChunkData  Renderer::s_ChunkData;
-	Camera*            Renderer::s_Camera = nullptr;
+	RendererData        Renderer::s_RendererData;
+	RendererStatistics  Renderer::s_Stats;
+	RendererChunkData   Renderer::s_ChunkData;
+	RendererSkyboxData  Renderer::s_SkyboxData;
+	Camera*             Renderer::s_Camera = nullptr;
 
 	void Renderer::Init()
 	{
 		PrepareRenderer();
 
 		PrepareChunkRendering();
+		PrepareSkyboxRendering();
 
 		LoadTextureAtlas();
 	}
@@ -109,14 +111,29 @@ namespace KuchCraft {
 
 	void Renderer::BeginSkybox()
 	{
+		s_SkyboxData.Shader.Bind();
+		s_SkyboxData.Shader.SetMat4("u_ViewProjection0", s_Camera->GetSkyboxProjection());
+
+		glCullFace(GL_FRONT);
+		glDepthFunc(GL_LEQUAL);
 	}
 
 	void Renderer::RenderSkybox()
 	{
+		glBindVertexArray(s_SkyboxData.VertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count , GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Renderer::EndSkybox()
 	{
+		glCullFace(GL_BACK);
+		glDepthFunc(GL_LESS);
 	}
 
 	void Renderer::PrepareRenderer()
@@ -188,6 +205,22 @@ namespace KuchCraft {
 
 	void Renderer::PrepareSkyboxRendering()
 	{
+		// Skybox
+		glGenVertexArrays(1, &s_SkyboxData.VertexArray);
+		glBindVertexArray(s_SkyboxData.VertexArray);
+
+		glGenBuffers(1, &s_SkyboxData.VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		s_SkyboxData.Shader.Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
+		s_SkyboxData.Shader.Bind();
+		s_SkyboxData.Shader.SetInt("u_CubemapTexture", 0);
+
+		s_SkyboxData.Texture = LoadSkyboxTexture();
 	}
 
 	uint32_t Renderer::GetTexture(BlockType type)
