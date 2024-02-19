@@ -160,7 +160,7 @@ namespace KuchCraft {
 		// QuadIndexBuffer
 		uint32_t* indices = new uint32_t[max_indices_in_chunk];
 		uint32_t  offset = 0;
-		for (uint32_t i = 0; i < max_indices_in_chunk; i += 6)
+		for (uint32_t i = 0; i < max_indices_in_chunk; i += quad_index_count)
 		{
 			indices[i + 0] = offset + 0;
 			indices[i + 1] = offset + 1;
@@ -189,11 +189,12 @@ namespace KuchCraft {
 		glGenVertexArrays(1, &s_ChunkData.VertexArray);
 		glBindVertexArray(s_ChunkData.VertexArray);
 
-		// Create vertex buffer and layout setup
+		// Create vertex buffer
 		glGenBuffers(1, &s_ChunkData.VertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
+		// Setup layout
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
@@ -215,21 +216,27 @@ namespace KuchCraft {
 
 	void Renderer::PrepareSkyboxRendering()
 	{
-		// Skybox
+		// Create vertex array
 		glGenVertexArrays(1, &s_SkyboxData.VertexArray);
 		glBindVertexArray(s_SkyboxData.VertexArray);
 
+		// Create vertex buffer and layout setup
 		glGenBuffers(1, &s_SkyboxData.VertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
+		// Setup layout
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
+		// Shader
 		s_SkyboxData.Shader.Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
 		s_SkyboxData.Shader.Bind();
+
+		// Set texture slot
 		s_SkyboxData.Shader.SetInt("u_CubemapTexture", 0);
 
+		// Load cube map texture
 		s_SkyboxData.Texture = LoadSkyboxTexture();
 	}
 
