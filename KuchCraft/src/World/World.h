@@ -15,6 +15,8 @@ namespace KuchCraft {
 		World(const std::string& path);
 		~World();
 
+		void PreLoadWorld();
+
 		inline static World& Get() { return *s_Instance; }
 
 		void OnUpdate(float dt);

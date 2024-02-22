@@ -20,6 +20,9 @@ namespace KuchCraft {
 
 		// Set data
 		WorldGenerator::Init(4206999);
+
+		// Loading stuff
+		PreLoadWorld();
 	}
 
 	World::~World()
@@ -41,7 +44,7 @@ namespace KuchCraft {
 		size_t surroundingChunksCount = (2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1);
 		m_ChunksToUpdate.clear();
 		m_ChunksToUpdate.reserve(surroundingChunksCount);
-	
+
 		constexpr int max_chunks_to_Build = 1; // This is not a strict value, chunk Recreate() can also build surrounding chunks
 		int totalChunksBuilded = 0;
 
@@ -266,6 +269,39 @@ namespace KuchCraft {
 		s_Instance = nullptr;
 
 		WorldGenerator::ShutDown();
+	}
+
+	void World::PreLoadWorld()
+	{
+		const auto& playerPosition = m_Player.GetPosition();
+		const auto& playerGraphicalSettings = m_Player.GetGraphicalSettings();
+
+		// Find surrounding chunks to update
+		size_t surroundingChunksCount = (2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1);
+		for (float x = playerPosition.x - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+			x <= playerPosition.x + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+			x += chunk_size_XZ)
+		{
+			for (float z = playerPosition.z - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+				z <= playerPosition.z + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+				z += chunk_size_XZ)
+			{
+				int chunkIndex = GetChunkIndex({ x, 0.0f, z });
+
+				if (chunkIndex >= 0 && chunkIndex < m_Chunks.size())
+				{
+					if (m_Chunks[chunkIndex] == nullptr)
+						m_Chunks[chunkIndex] = Chunk::Create({ x, 0.0f, z });
+
+					if (m_Chunks[chunkIndex]->NeedToBuild())
+						m_Chunks[chunkIndex]->Build();
+
+					if (m_Chunks[chunkIndex]->NeedToRecreate())
+						m_Chunks[chunkIndex]->Recreate();
+
+				}
+			}
+		}
 	}
 
 }

@@ -56,7 +56,7 @@ namespace KuchCraft {
 	void WorldGenerator::Generate(Chunk* chunk)
 	{
 		auto& position = chunk->GetPosition();
-		constexpr double zoomFactor = chunk_size_XZ * chunk_size_XZ;
+		constexpr double zoomFactor = 256.0f; //chunk_size_XZ * chunk_size_XZ;
 		constexpr double zoom1      = 1.0 / zoomFactor;
 		constexpr double zoom2      = 1.0 / (zoomFactor / 2.0);
 
