@@ -29,7 +29,7 @@ namespace KuchCraft {
 		void OnUpdate(float dt);
 
 		const Camera&    GetCamera()   const { return m_Camera; }
-		const glm::vec3  GetPosition() const { return m_Position; }
+		const glm::vec3& GetPosition() const { return m_Position; }
 		const glm::vec2& GetRotation() const { return m_Rotation; }
 
 		void SetRenderDistance(uint32_t distance)             { m_GraphicalSettings.RenderDistance             = distance; }

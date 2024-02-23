@@ -41,7 +41,7 @@ namespace KuchCraft {
 
 					// Calculate model matrix
 					// TODO: Rotation
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x + x, Position.y + y, Position.z + z));
+					glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x + x, Position.y + y, Position.z + z) + quad_initial_displacement);
 
 					// Water has separate draw list
 					// TODO: Add other translucent blocks

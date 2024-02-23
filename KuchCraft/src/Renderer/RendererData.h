@@ -22,6 +22,8 @@ namespace KuchCraft {
 	constexpr glm::vec4 white_color     { 1.0f, 1.0f, 1.0f, 1.0f };
 	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 1.0f, 1.0f };
 	constexpr glm::vec4 clear_color     { 0.8f, 0.8f, 1.0f, 1.0f };
+	
+	constexpr glm::vec3 quad_initial_displacement{ 0.5f, 0.5f, 0.5f };
 
 	constexpr int max_quads_in_chunk    = chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_face_cout;
 	constexpr int max_indices_in_chunk  = max_quads_in_chunk * 6;
@@ -74,45 +76,45 @@ namespace KuchCraft {
 	// Cube - quad vertices
 	constexpr Vertex vertices_bottom[quad_vertex_count]
 	{
-		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.0f }, 0.0f },
-		Vertex{{ 0.0f, 0.0f, 1.0f }, { 0.0f,  0.0f }, 0.0f },
-		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.0f,  0.5f }, 0.0f },
-		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.25f, 0.5f }, 0.0f }
+		Vertex{{  0.5f, -0.5f,  0.5f }, { 0.25f, 0.0f }, 0.0f },
+		Vertex{{ -0.5f, -0.5f,  0.5f }, { 0.0f,  0.0f }, 0.0f },
+		Vertex{{ -0.5f, -0.5f, -0.5f }, { 0.0f,  0.5f }, 0.0f },
+		Vertex{{  0.5f, -0.5f, -0.5f }, { 0.25f, 0.5f }, 0.0f }
 	};
 	constexpr Vertex vertices_top[quad_vertex_count]
 	{
-		Vertex{{ 0.0f, 1.0f, 1.0f }, { 0.25f, 0.0f }, 0.0f },
-		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.5f,  0.0f }, 0.0f },
-		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
-		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.25f, 0.5f }, 0.0f }
+		Vertex{{ -0.5f,  0.5f,  0.5f }, { 0.25f, 0.0f }, 0.0f },
+		Vertex{{  0.5f,  0.5f,  0.5f }, { 0.5f,  0.0f }, 0.0f },
+		Vertex{{  0.5f,  0.5f, -0.5f }, { 0.5f,  0.5f }, 0.0f },
+		Vertex{{ -0.5f,  0.5f, -0.5f }, { 0.25f, 0.5f }, 0.0f }
 	};
 	constexpr Vertex vertices_front[quad_vertex_count]
 	{
-		Vertex{{ 0.0f, 0.0f, 1.0f }, { 0.0f,  0.5f }, 0.0f },
-		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.5f }, 0.0f },
-		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.25f, 1.0f }, 0.0f },
-		Vertex{{ 0.0f, 1.0f, 1.0f }, { 0.0f,  1.0f }, 0.0f }
+		Vertex{{ -0.5f, -0.5f,  0.5f }, { 0.0f,  0.5f }, 0.0f },
+		Vertex{{  0.5f, -0.5f,  0.5f }, { 0.25f, 0.5f }, 0.0f },
+		Vertex{{  0.5f,  0.5f,  0.5f }, { 0.25f, 1.0f }, 0.0f },
+		Vertex{{ -0.5f,  0.5f,  0.5f }, { 0.0f,  1.0f }, 0.0f }
 	};
 	constexpr Vertex vertices_right[quad_vertex_count]
 	{
-		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.5f }, 0.0f },
-		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
-		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  1.0f }, 0.0f },
-		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.25f, 1.0f }, 0.0f }
+		Vertex{{  0.5f, -0.5f,  0.5f }, { 0.25f, 0.5f }, 0.0f },
+		Vertex{{  0.5f, -0.5f, -0.5f }, { 0.5f,  0.5f }, 0.0f },
+		Vertex{{  0.5f,  0.5f, -0.5f }, { 0.5f,  1.0f }, 0.0f },
+		Vertex{{  0.5f,  0.5f,  0.5f }, { 0.25f, 1.0f }, 0.0f }
 	};
 	constexpr Vertex vertices_behind[quad_vertex_count]
 	{
-		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
-		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.75f, 0.5f }, 0.0f },
-		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f },
-		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  1.0f }, 0.0f }
+		Vertex{{  0.5f, -0.5f, -0.5f }, { 0.5f,  0.5f }, 0.0f },
+		Vertex{{ -0.5f, -0.5f, -0.5f }, { 0.75f, 0.5f }, 0.0f },
+		Vertex{{ -0.5f,  0.5f, -0.5f }, { 0.75f, 1.0f }, 0.0f },
+		Vertex{{  0.5f,  0.5f, -0.5f }, { 0.5f,  1.0f }, 0.0f }
 	};
 	constexpr Vertex vertices_left[quad_vertex_count]
 	{
-		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.75f, 0.5f }, 0.0f },
-		Vertex{{ 0.0f, 0.0f, 1.0f }, { 1.0f,  0.5f }, 0.0f },
-		Vertex{{ 0.0f, 1.0f, 1.0f }, { 1.0f,  1.0f }, 0.0f },
-		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f }
+		Vertex{{ -0.5f, -0.5f, -0.5f }, { 0.75f, 0.5f }, 0.0f },
+		Vertex{{ -0.5f, -0.5f,  0.5f }, { 1.0f,  0.5f }, 0.0f },
+		Vertex{{ -0.5f,  0.5f,  0.5f }, { 1.0f,  1.0f }, 0.0f },
+		Vertex{{ -0.5f,  0.5f, -0.5f }, { 0.75f, 1.0f }, 0.0f }
 	};
 
 	constexpr float skybox_vertices[] =
