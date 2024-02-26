@@ -22,15 +22,11 @@ namespace KuchCraft {
 
 	void KuchCraft::OnUpdate(float dt)
 	{
-		Renderer::BeginFrame();
-
+		Renderer::OnUpdate(dt);
 		if (m_World)
 		{
 			m_World->OnUpdate(dt);
-
-			Renderer::BeginScene(m_World->GetCamera());
 			m_World->Render();
-			Renderer::EndScene();
 
 			// Check to safety exit from world
 			if (m_World->GetQuitStatus())

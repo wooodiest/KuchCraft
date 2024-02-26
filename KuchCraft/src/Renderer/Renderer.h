@@ -13,13 +13,13 @@ namespace KuchCraft {
 	public:
 		static void Init();
 		static void ShutDown();
-		static void BeginFrame();
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
+		static void OnUpdate(float dt);
 
 		// Scene
-		static void BeginScene(const Camera& camera);
-		static void EndScene();
+		static void BeginWorld(const Camera& camera);
+		static void EndWorld();
 
 		// Rendering chunks
 		static void BeginChunk();
@@ -46,6 +46,9 @@ namespace KuchCraft {
 		static RendererStatistics& GetStats() { return s_Stats; }
 
 	private:
+		//Utils
+		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
+
 		// Loading textures
 		static void     LoadTextureAtlas();
 		static uint32_t LoadTextureToAtals(const std::string& path);

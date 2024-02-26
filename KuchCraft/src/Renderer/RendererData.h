@@ -10,12 +10,14 @@
 
 namespace KuchCraft {
 
-	constexpr uint32_t max_texture_slots  = 32;
-	constexpr uint32_t water_texture_slot = 0;
+	// Constances
+	constexpr uint32_t max_texture_slots    = 32;
+	constexpr uint32_t default_texture_slot = 0;
 
 	constexpr uint32_t triangle_index_count = 6;
 	constexpr uint32_t quad_index_count     = 6;
 	constexpr uint32_t quad_vertex_count    = 4;
+	constexpr uint32_t quad_vertex_count_a  = 6;
 	constexpr uint32_t cube_vertex_count    = 24;
 	constexpr uint32_t cube_face_cout       = 6;
 
@@ -29,6 +31,7 @@ namespace KuchCraft {
 	constexpr int max_indices_in_chunk  = max_quads_in_chunk * 6;
 	constexpr int max_vertices_in_chunk = max_quads_in_chunk * 4;
 
+	// Data structures
 	struct Vertex
 	{
 		glm::vec3 Position;
@@ -36,12 +39,19 @@ namespace KuchCraft {
 		float     TexSlot;
 	};
 
-	struct WaterVertex
+	struct Vertex_P2C2
+	{
+		glm::vec2 Position;
+		glm::vec2 TexCoord;
+	};
+
+	struct Vertex_P3C2
 	{
 		glm::vec3 Position;
 		glm::vec2 TexCoord;
 	};
 
+	// Renderer data
 	struct RendererStatistics
 	{
 		uint32_t DrawCalls = 0;
@@ -55,12 +65,24 @@ namespace KuchCraft {
 		glm::vec4 TintColor;
 	};
 
+	struct RendererMainFrameBuffer
+	{
+		uint32_t RendererID      = 0;
+		uint32_t ColorAttachment = 0;
+		uint32_t DepthAttachment = 0;
+	};
+
 	struct RendererData
 	{
 		uint32_t Textures[absolute_number_of_blocks];
 		uint32_t QuadIndexBuffer = 0;
 		uint32_t UniformBuffer   = 0;
 		bool     TintStatus      = false;
+
+		Shader   Shader;
+		uint32_t VertexBuffer = 0;
+		uint32_t VertexArray  = 0;
+		RendererMainFrameBuffer MainFrameBuffer;
 	}; 
 
 	struct RendererChunkData
@@ -83,6 +105,18 @@ namespace KuchCraft {
 		uint32_t VertexArray  = 0;
 		uint32_t VertexBuffer = 0;
 		Shader   Shader;
+	};
+
+	// Renderer data utils
+	constexpr Vertex_P2C2 screen_vertices[quad_vertex_count_a]
+	{
+		Vertex_P2C2{{ -1.0f, -1.0f }, { 0.0f, 0.0f }},
+		Vertex_P2C2{{  1.0f, -1.0f }, { 1.0f, 0.0f }},
+		Vertex_P2C2{{  1.0f,  1.0f }, { 1.0f, 1.0f }},
+
+		Vertex_P2C2{{ -1.0f, -1.0f }, { 0.0f, 0.0f }},
+		Vertex_P2C2{{  1.0f,  1.0f }, { 1.0f, 1.0f }},
+		Vertex_P2C2{{ -1.0f,  1.0f }, { 0.0f, 1.0f }},
 	};
 
 	// Cube - quad vertices

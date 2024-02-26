@@ -46,7 +46,7 @@ namespace KuchCraft {
 		const std::vector<Vertex>& GetVertices()    const { return m_Vertices;           }
 		const void* GetVerticesPtr(uint32_t offset) const { return &m_Vertices[offset];  }
 
-		const std::vector<WaterVertex>& GetWaterVertices() const { return m_WaterVertices;     }
+		const std::vector<Vertex_P3C2>& GetWaterVertices() const { return m_WaterVertices;     }
 		const void* GetWaterVerticesPtr()                  const { return &m_WaterVertices[0]; }
 
 		void NewDrawCall();
@@ -65,7 +65,7 @@ namespace KuchCraft {
 		std::vector<Vertex>   m_Vertices;
 
 		// Water
-		std::vector<WaterVertex> m_WaterVertices;
+		std::vector<Vertex_P3C2> m_WaterVertices;
 		
 	};
 

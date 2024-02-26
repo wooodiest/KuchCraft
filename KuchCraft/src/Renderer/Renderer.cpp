@@ -34,24 +34,28 @@ namespace KuchCraft {
 		// RendererData
 		glDeleteBuffers(1, &s_RendererData.QuadIndexBuffer);
 		glDeleteBuffers(1, &s_RendererData.UniformBuffer);
+		glDeleteFramebuffers(1, &s_RendererData.MainFrameBuffer.RendererID);
+		glDeleteTextures(1, &s_RendererData.MainFrameBuffer.ColorAttachment);
+		glDeleteTextures(1, &s_RendererData.MainFrameBuffer.DepthAttachment);
 
 		// RendererChunkData
 		glDeleteBuffers(1, &s_ChunkData.VertexBuffer);
 		glDeleteVertexArrays(1, &s_ChunkData.VertexArray);
+
+		// WaterData
+		glDeleteBuffers(1, &s_WaterData.VertexBuffer);
+		glDeleteVertexArrays(1, &s_WaterData.VertexArray);
 		
 		// RendererStatistics
 		ResetStats();
 	}
 
-	void Renderer::BeginFrame()
+	void Renderer::OnUpdate(float dt)
 	{
-		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		ResetStats();
 	}
 
-	void Renderer::BeginScene(const Camera& camera)
+	void Renderer::BeginWorld(const Camera& camera)
 	{
 		// Set uniform buffer
 		UniformBuffer buffer{
@@ -60,11 +64,26 @@ namespace KuchCraft {
 			s_RendererData.TintStatus ? water_tint_color : white_color
 		};
 		glNamedBufferSubData(s_RendererData.UniformBuffer, 0, sizeof(buffer), &buffer);
+
+		// Setup main frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.MainFrameBuffer.RendererID);
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void Renderer::EndScene()
+	void Renderer::EndWorld()
 	{
+		// Setup deafult frame buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST);
+		glClear(GL_COLOR_BUFFER_BIT);
 
+		// Render main frame buffer data to default frame buffer 
+		s_RendererData.Shader.Bind();
+		glBindVertexArray(s_RendererData.VertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_RendererData.VertexBuffer);
+		glBindTextureUnit(default_texture_slot, s_RendererData.MainFrameBuffer.ColorAttachment);
+		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 	}
 
 	void Renderer::ResetStats()
@@ -165,9 +184,9 @@ namespace KuchCraft {
 
 			glBindVertexArray(s_WaterData.VertexArray);
 			glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(WaterVertex), drawList.GetWaterVerticesPtr());
+			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex_P3C2), drawList.GetWaterVerticesPtr());
 
-			glBindTextureUnit(water_texture_slot, GetTexture(BlockType::Water));
+			glBindTextureUnit(default_texture_slot, GetTexture(BlockType::Water));
 
 			// Draw elements		
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
@@ -187,12 +206,9 @@ namespace KuchCraft {
 
 	void Renderer::PrepareRenderer()
 	{
-		// Setup viewport
+		// Setup
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-		glViewport(0, 0, width, height);
-
-		// Enable...
-		glEnable(GL_DEPTH_TEST);
+		OnViewportSizeChanged(width, height);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -201,6 +217,8 @@ namespace KuchCraft {
 		glEnable(GL_CULL_FACE);
 		glFrontFace(GL_CCW);
 		glCullFace(GL_BACK);
+
+		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
 
 		// QuadIndexBuffer
 		uint32_t* indices = new uint32_t[max_indices_in_chunk];
@@ -226,20 +244,34 @@ namespace KuchCraft {
 		glCreateBuffers(1, &s_RendererData.UniformBuffer);
 		glNamedBufferData(s_RendererData.UniformBuffer, sizeof(UniformBuffer), nullptr, GL_DYNAMIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding, s_RendererData.UniformBuffer);
+
+		// Prepare for rendering to screen
+		glGenVertexArrays(1, &s_RendererData.VertexArray);
+		glBindVertexArray(s_RendererData.VertexArray);
+
+		glGenBuffers(1, &s_RendererData.VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_RendererData.VertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex_P2C2), screen_vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P2C2), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P2C2), (void*)(2 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		s_RendererData.Shader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
+		s_RendererData.Shader.Bind();
+		s_RendererData.Shader.SetInt("u_Texture", default_texture_slot);
 	}
 
 	void Renderer::PrepareChunkRendering()
 	{
-		// Create vertex array
 		glGenVertexArrays(1, &s_ChunkData.VertexArray);
 		glBindVertexArray(s_ChunkData.VertexArray);
 
-		// Create vertex buffer
 		glGenBuffers(1, &s_ChunkData.VertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
-		// Setup layout
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
@@ -247,90 +279,89 @@ namespace KuchCraft {
 		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 
-		// Shader
 		s_ChunkData.Shader.Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl");
 		s_ChunkData.Shader.Bind();
 
-		// Set texture slots
 		int samplers[max_texture_slots];
 		for (int i = 0; i < max_texture_slots; i++)
 			samplers[i] = i;
 		s_ChunkData.Shader.SetIntArray("u_Textures", samplers, max_texture_slots);
-
 	}
 
 	void Renderer::PrepareSkyboxRendering()
 	{
-		// Create vertex array
 		glGenVertexArrays(1, &s_SkyboxData.VertexArray);
 		glBindVertexArray(s_SkyboxData.VertexArray);
 
-		// Create vertex buffer and layout setup
 		glGenBuffers(1, &s_SkyboxData.VertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
 
-		// Setup layout
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		// Shader
 		s_SkyboxData.Shader.Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
 		s_SkyboxData.Shader.Bind();
-
-		// Set texture slot
 		s_SkyboxData.Shader.SetInt("u_CubemapTexture", 0);
 
-		// Load cube map texture
 		s_SkyboxData.Texture = LoadSkyboxTexture();
 	}
 
 	void Renderer::PrepareWaterRendering()
 	{
-		// Create vertex array
 		glGenVertexArrays(1, &s_WaterData.VertexArray);
 		glBindVertexArray(s_WaterData.VertexArray);
 
-		// Create vertex buffer
 		glGenBuffers(1, &s_WaterData.VertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(WaterVertex), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(Vertex_P3C2), nullptr, GL_DYNAMIC_DRAW);
 
-		// Setup layout
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(WaterVertex), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex_P3C2), (void*)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(WaterVertex), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P3C2), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-		// Shader
 		s_WaterData.Shader.Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
 		s_WaterData.Shader.Bind();
-
-		// Set texture slot
-		s_ChunkData.Shader.SetInt("u_Texture", water_texture_slot);
-	}
-
-	uint32_t Renderer::GetTexture(BlockType type)
-	{
-		return s_RendererData.Textures[(int)type];
-	}
-
-	void Renderer::ShowTriangles(bool status)
-	{
-		if (status)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		else
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-
-	void Renderer::SetWaterTintStatus(bool status)
-	{
-		s_RendererData.TintStatus = status;
+		s_ChunkData.Shader.SetInt("u_Texture", default_texture_slot);
 	}
 
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
+		InvalidateMainFrameBuffer(width, height);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.MainFrameBuffer.RendererID);
 		glViewport(0, 0, width, height);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, width, height);
+	}
+
+	void Renderer::InvalidateMainFrameBuffer(uint32_t width, uint32_t height)
+	{
+		if (s_RendererData.MainFrameBuffer.RendererID)
+		{
+			glDeleteFramebuffers(1, &s_RendererData.MainFrameBuffer.RendererID);
+			glDeleteTextures(1, &s_RendererData.MainFrameBuffer.ColorAttachment);
+			glDeleteTextures(1, &s_RendererData.MainFrameBuffer.DepthAttachment);
+		}
+
+		glCreateFramebuffers(1, &s_RendererData.MainFrameBuffer.RendererID);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.MainFrameBuffer.RendererID);
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.MainFrameBuffer.ColorAttachment);
+		glBindTexture(GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.ColorAttachment);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.ColorAttachment, 0);
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.MainFrameBuffer.DepthAttachment);
+		glBindTexture(GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.DepthAttachment);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.DepthAttachment, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void Renderer::LoadTextureAtlas()
@@ -427,6 +458,24 @@ namespace KuchCraft {
 		stbi_image_free(data);
 
 		return texture;
+	}
+
+	uint32_t Renderer::GetTexture(BlockType type)
+	{
+		return s_RendererData.Textures[(int)type];
+	}
+
+	void Renderer::ShowTriangles(bool status)
+	{
+		if (status)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	void Renderer::SetWaterTintStatus(bool status)
+	{
+		s_RendererData.TintStatus = status;
 	}
 
 
