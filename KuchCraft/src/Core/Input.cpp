@@ -29,13 +29,13 @@ namespace KuchCraft {
 		return { xpos, ypos };
 	}
 
-	float Input::GetMousePositionX()
+	double Input::GetMousePositionX()
 	{
 		auto position = GetMousePosition();
 		return position.x;
 	}
 
-	float Input::GetMousePositionY()
+	double Input::GetMousePositionY()
 	{
 		auto position = GetMousePosition();
 		return position.y;

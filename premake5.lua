@@ -5,7 +5,8 @@ workspace "KuchCraft"
     configurations 
     { 
         "Debug", 
-        "Release" 
+        "Release",
+        "Dist"
     }
     flags
     { 
@@ -69,6 +70,12 @@ project "KuchCraft"
 
 	filter "configurations:Release"
 	defines "KC_RELEASE"
+	runtime "Release"
+	optimize "on"
+	symbols "On"
+
+    filter "configurations:Dist"
+	defines "KC_Dist"
 	runtime "Release"
 	optimize "on"
 	symbols "Off"

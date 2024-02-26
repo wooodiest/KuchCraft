@@ -49,8 +49,8 @@ namespace KuchCraft {
 		auto deltaPosition  = position - m_PrevMousePosition;
 		m_PrevMousePosition = position;
 
-		m_Yaw   += m_Sensitivity * m_DeltaTime * deltaPosition.x;
-		m_Pitch -= m_Sensitivity * m_DeltaTime * deltaPosition.y;
+		m_Yaw   += (float)(m_Sensitivity * m_DeltaTime * deltaPosition.x);
+		m_Pitch -= (float)(m_Sensitivity * m_DeltaTime * deltaPosition.y);
 
 		if (m_Pitch > glm::radians(89.9f))
 			m_Pitch = glm::radians(89.9f);
