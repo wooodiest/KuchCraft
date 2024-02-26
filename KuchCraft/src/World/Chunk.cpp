@@ -44,11 +44,10 @@ namespace KuchCraft {
 					glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x + x, Position.y + y, Position.z + z) + quad_initial_displacement);
 
 					// Water has separate draw list
-					// TODO: Add other translucent blocks
 					if (Block[x][y][z] == BlockType::Water && y != chunk_size_Y - 1)
 					{
-						// if (Blocks[x][y + 1][z] == BlockType::Air)
-							// AddToDrawListWater(transform, vertices_top);	
+						 if (Block[x][y + 1][z] == BlockType::Air)
+							 m_DrawList.AddWater(transform, vertices_top);
 						continue;
 					}
 

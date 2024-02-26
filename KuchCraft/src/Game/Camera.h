@@ -53,7 +53,7 @@ namespace KuchCraft {
 		glm::vec3 m_Front   { 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Up      { 0.0f, 1.0f, 0.0f };
 
-		glm::vec2 m_PrevMousePosition{ 0.0f, 0.0f };
+		glm::vec<2, double> m_PrevMousePosition{ 0.0, 0.0 };
 
 		float m_Pitch = glm::radians(0.0f);
 		float m_Yaw   = glm::radians(0.0f);

@@ -30,7 +30,12 @@ namespace KuchCraft {
 		static void BeginSkybox();
 		static void RenderSkybox();
 		static void EndSkybox();
-			
+
+		// Rendering water
+		static void BeginWater();
+		static void RenderWater(Chunk* chunk);
+		static void EndWater();
+
 		// Utils
 		static void SetWaterTintStatus(bool status);
 		static void ShowTriangles(bool status);
@@ -50,12 +55,14 @@ namespace KuchCraft {
 		static void PrepareRenderer();
 		static void PrepareChunkRendering();
 		static void PrepareSkyboxRendering();
+		static void PrepareWaterRendering();
 
 		// Renderer data
 		static RendererData       s_RendererData;
 		static RendererStatistics s_Stats;
 		static RendererChunkData  s_ChunkData;
 		static RendererSkyboxData s_SkyboxData;
+		static RendererWaterData  s_WaterData;
 
 	private:
 		Renderer() = default;

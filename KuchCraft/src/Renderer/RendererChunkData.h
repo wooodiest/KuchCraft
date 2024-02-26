@@ -46,11 +46,15 @@ namespace KuchCraft {
 		const std::vector<Vertex>& GetVertices()    const { return m_Vertices;           }
 		const void* GetVerticesPtr(uint32_t offset) const { return &m_Vertices[offset];  }
 
+		const std::vector<WaterVertex>& GetWaterVertices() const { return m_WaterVertices;     }
+		const void* GetWaterVerticesPtr()                  const { return &m_WaterVertices[0]; }
+
 		void NewDrawCall();
 		void AddTexture(uint32_t texture);
 		void UpdateIndexCount();
 
 		void Add(const glm::mat4& model, const Vertex vertices[quad_vertex_count], const Block& block);
+		void AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count]);
 
 	private:
 		TextureSlotHelper* m_TextureSlotHelper = nullptr;
@@ -60,6 +64,8 @@ namespace KuchCraft {
 		std::vector<uint32_t> m_Textures;
 		std::vector<Vertex>   m_Vertices;
 
+		// Water
+		std::vector<WaterVertex> m_WaterVertices;
 		
 	};
 

@@ -16,7 +16,7 @@ namespace KuchCraft {
 	public:
 		static bool IsKeyPressed(KeyCode keycode);
 		static bool IsMouseButtonPressed(MouseCode button);
-		static glm::vec2 GetMousePosition();
+		static glm::vec<2, double> GetMousePosition();
 		static float GetMousePositionX();
 		static float GetMousePositionY();
 

@@ -16,6 +16,7 @@ namespace KuchCraft {
 	RendererStatistics  Renderer::s_Stats;
 	RendererChunkData   Renderer::s_ChunkData;
 	RendererSkyboxData  Renderer::s_SkyboxData;
+	RendererWaterData   Renderer::s_WaterData;
 
 	void Renderer::Init()
 	{
@@ -23,6 +24,7 @@ namespace KuchCraft {
 
 		PrepareChunkRendering();
 		PrepareSkyboxRendering();
+		PrepareWaterRendering();
 
 		LoadTextureAtlas();
 	}
@@ -79,7 +81,7 @@ namespace KuchCraft {
 	void Renderer::RenderChunk(Chunk* chunk)
 	{
 		uint32_t vertexOffset = 0;
-		auto& drawList = chunk->GetDrawList(); // rename to drawlist
+		const auto& drawList = chunk->GetDrawList();
 
 		for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
 		{
@@ -132,12 +134,55 @@ namespace KuchCraft {
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
 		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count , GL_UNSIGNED_INT, nullptr);
+
+		// Update stats
+		s_Stats.DrawCalls++;
+		s_Stats.Quads += cube_face_cout;
 	}
 
 	void Renderer::EndSkybox()
 	{
 		glCullFace(GL_BACK);
 		glDepthFunc(GL_LESS);
+	}
+
+	void Renderer::BeginWater()
+	{
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+
+		s_WaterData.Shader.Bind();
+	}
+
+	void Renderer::RenderWater(Chunk* chunk)
+	{
+		const auto& drawList = chunk->GetDrawList();
+		uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
+
+		if (indexCount != 0)
+		{
+			uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
+
+			glBindVertexArray(s_WaterData.VertexArray);
+			glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(WaterVertex), drawList.GetWaterVerticesPtr());
+
+			glBindTextureUnit(water_texture_slot, GetTexture(BlockType::Water));
+
+			// Draw elements		
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+			glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
+			// Update stats
+			s_Stats.DrawCalls++;
+			s_Stats.Quads += vertexCount / quad_vertex_count;
+		}
+	}
+
+	void Renderer::EndWater()
+	{
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
 	}
 
 	void Renderer::PrepareRenderer()
@@ -238,6 +283,31 @@ namespace KuchCraft {
 
 		// Load cube map texture
 		s_SkyboxData.Texture = LoadSkyboxTexture();
+	}
+
+	void Renderer::PrepareWaterRendering()
+	{
+		// Create vertex array
+		glGenVertexArrays(1, &s_WaterData.VertexArray);
+		glBindVertexArray(s_WaterData.VertexArray);
+
+		// Create vertex buffer
+		glGenBuffers(1, &s_WaterData.VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(WaterVertex), nullptr, GL_DYNAMIC_DRAW);
+
+		// Setup layout
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(WaterVertex), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(WaterVertex), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		// Shader
+		s_WaterData.Shader.Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
+		s_WaterData.Shader.Bind();
+
+		// Set texture slot
+		s_ChunkData.Shader.SetInt("u_Texture", water_texture_slot);
 	}
 
 	uint32_t Renderer::GetTexture(BlockType type)

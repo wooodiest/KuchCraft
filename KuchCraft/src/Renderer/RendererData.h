@@ -20,7 +20,7 @@ namespace KuchCraft {
 	constexpr uint32_t cube_face_cout       = 6;
 
 	constexpr glm::vec4 white_color     { 1.0f, 1.0f, 1.0f, 1.0f };
-	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 1.0f, 1.0f };
+	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 0.7f, 1.0f };
 	constexpr glm::vec4 clear_color     { 0.8f, 0.8f, 1.0f, 1.0f };
 	
 	constexpr glm::vec3 quad_initial_displacement{ 0.5f, 0.5f, 0.5f };
@@ -34,7 +34,12 @@ namespace KuchCraft {
 		glm::vec3 Position;
 		glm::vec2 TexCoord;
 		float     TexSlot;
+	};
 
+	struct WaterVertex
+	{
+		glm::vec3 Position;
+		glm::vec2 TexCoord;
 	};
 
 	struct RendererStatistics
@@ -70,6 +75,13 @@ namespace KuchCraft {
 		uint32_t VertexArray  = 0;
 		uint32_t VertexBuffer = 0;
 		uint32_t Texture      = 0;
+		Shader   Shader;
+	};
+
+	struct RendererWaterData
+	{
+		uint32_t VertexArray  = 0;
+		uint32_t VertexBuffer = 0;
 		Shader   Shader;
 	};
 

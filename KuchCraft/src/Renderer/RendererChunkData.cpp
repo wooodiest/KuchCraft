@@ -14,6 +14,8 @@ namespace KuchCraft {
 		m_IndexCount.clear();
 		m_Textures.  clear();
 		m_Vertices.  clear();
+
+		m_WaterVertices.clear();
 	}
 
 	void ChunkDrawList::StartRecreating()
@@ -21,6 +23,9 @@ namespace KuchCraft {
 		m_TextureSlotHelper = new TextureSlotHelper();
 		m_Vertices.clear();
 		m_Vertices.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_vertex_count);
+
+		m_WaterVertices.clear();
+		m_WaterVertices.reserve(chunk_size_XZ * chunk_size_XZ);
 	}
 
 	void ChunkDrawList::EndRecreating()
@@ -73,7 +78,7 @@ namespace KuchCraft {
 			AddTexture(texture);
 		}
 		// Create geometry
-		for (int i = 0; i < quad_vertex_count; i++)
+		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
 			m_Vertices.emplace_back(Vertex{
 					glm::vec3(model * glm::vec4(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z, 1.0f)),
@@ -82,6 +87,17 @@ namespace KuchCraft {
 				});
 		}
 		UpdateIndexCount();
+	}
+
+	void ChunkDrawList::AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count])
+	{
+		for (int i = 0; i < quad_vertex_count; i++)
+		{
+			m_WaterVertices.emplace_back(WaterVertex{
+					glm::vec3(model * glm::vec4(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z, 1.0f)),
+					glm::vec2(vertices[i].TexCoord.x, vertices[i].TexCoord.y)
+				});
+		}
 	}
 
 	///

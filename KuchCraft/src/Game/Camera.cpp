@@ -45,9 +45,9 @@ namespace KuchCraft {
 
 	void Camera::OnMouseMovement()
 	{
-		glm::vec2 position      = Input::GetMousePosition();
-		glm::vec2 deltaPosition = position - m_PrevMousePosition;
-		m_PrevMousePosition     = position;
+		auto position       = Input::GetMousePosition();
+		auto deltaPosition  = position - m_PrevMousePosition;
+		m_PrevMousePosition = position;
 
 		m_Yaw   += m_Sensitivity * m_DeltaTime * deltaPosition.x;
 		m_Pitch -= m_Sensitivity * m_DeltaTime * deltaPosition.y;
