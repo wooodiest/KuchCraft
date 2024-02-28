@@ -4,6 +4,7 @@
 
 #include "Core/Input.h"
 #include "Core/Random.h"
+#include "Core/Log.h"
 
 namespace KuchCraft {
 
@@ -14,6 +15,7 @@ namespace KuchCraft {
 		s_Instance = this;
 
 		Random::Init();
+		Log::Init();
 
 		m_Window = new Window("KuchCraft", 1920, 1080, false);
 		m_Game   = new KuchCraft();

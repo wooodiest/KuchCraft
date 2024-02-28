@@ -45,6 +45,7 @@ project "KuchCraft"
         "%{wks.location}/KuchCraft/vendor/glm",
         "%{wks.location}/KuchCraft/vendor/perlin_noise",
         "%{wks.location}/KuchCraft/vendor/stb_image",
+        "%{wks.location}/KuchCraft/vendor/spdlog/include"
     }
 
     links
@@ -75,7 +76,7 @@ project "KuchCraft"
 	symbols "On"
 
     filter "configurations:Dist"
-	defines "KC_Dist"
+	defines "KC_DIST"
 	runtime "Release"
 	optimize "on"
 	symbols "Off"
