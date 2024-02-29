@@ -4,26 +4,42 @@
 #include <glad/glad.h>
 
 #include "Core/Application.h"
+#include "Core/Log.h"
 
 namespace KuchCraft {
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
-		std::cout << "GLFW Error: (" << error << "): " << description << std::endl;
+		KC_ERROR("GLFW: {0} : {1}", error, description);
 	}
 
 	Window::Window(const std::string& title, uint32_t width, uint32_t height, bool vsync)
 		: m_Title(title), m_Width(width), m_Height(height), m_Vsync(vsync)
 	{	
-		glfwInit();
-		glfwSetErrorCallback(GLFWErrorCallback);
+		// GLFW
+		{
+			int succes = glfwInit();
+			if (!succes)
+			{
+				KC_ERROR("GLFW init error");
+			}
+		}
 
+		glfwSetErrorCallback(GLFWErrorCallback);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), glfwGetPrimaryMonitor(), nullptr);
+		KC_INFO("Created window : {0} : ({1}, {2})", m_Title.c_str(), m_Width, m_Height);
 		glfwMakeContextCurrent(m_Window);
-		
-		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+		// Glad
+		{
+			int succes = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+			if (!succes)
+			{
+				KC_ERROR("Glad init error");
+			}
+		}
 
 		SetVsync(m_Vsync);
 		SetCursor(false);

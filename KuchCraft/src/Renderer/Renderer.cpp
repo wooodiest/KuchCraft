@@ -9,6 +9,7 @@
 #include "Shader.h"
 #include "Core/Application.h"
 #include "World/World.h"
+#include "Core/Log.h"
 
 namespace KuchCraft {
 
@@ -392,10 +393,10 @@ namespace KuchCraft {
 		// Load all textures to gpu
 		const std::string mainPath  = "assets/textures/";
 		const std::string extension = ".png";
-		for (const auto& texture : blockTexturePathsAtlas)
+		for (auto& [type, name] : blockTexturePathsAtlas)
 		{
-			std::string path = mainPath + texture.second + extension;
-			s_RendererData.Textures[(int)texture.first] = LoadTextureToAtals(path);
+			std::string path = mainPath + name + extension;
+			s_RendererData.Textures[(int)type] = LoadTextureToAtals(path);
 		}
 	}
 

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "Core/Log.h"
+
 namespace KuchCraft {
 
 	Shader::Shader()
@@ -57,7 +59,7 @@ namespace KuchCraft {
 			if (!success)
 			{
 				glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-				std::cout << "ERROR::SHADER::VERTEX::COMPILATION FAILED\n" << infoLog << std::endl;
+				KC_ERROR("Vertex shader compilation failed : {0}", infoLog);
 			}
 		}
 
@@ -71,7 +73,7 @@ namespace KuchCraft {
 			if (!success)
 			{
 				glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-				std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION FAILED\n" << infoLog << std::endl;
+				KC_ERROR("Fragment shader compilation failed : {0}", infoLog);
 			}
 		}
 
@@ -86,7 +88,7 @@ namespace KuchCraft {
 			glGetProgramiv(m_RendererID, GL_LINK_STATUS, &success);
 			if (!success) {
 				glGetProgramInfoLog(m_RendererID, 512, NULL, infoLog);
-				std::cout << "ERROR::SHADER::LINKING FAILED\n" << infoLog << std::endl;
+				KC_ERROR("Shader linking failed : {0}", infoLog);
 			}
 		}
 		glDeleteShader(vertexShader);
@@ -113,10 +115,14 @@ namespace KuchCraft {
 				in.close();
 			}
 			else
-				std::cout << "Could not read from file: " << filepath << std::endl;
+			{
+				KC_ERROR("Could not read shader from file : {0}", filepath.c_str());
+			}
 		}
 		else
-			std::cout << "Could not open file: " << filepath << std::endl;
+		{
+			KC_ERROR("Could not open shader file: {0}", filepath.c_str());
+		}
 
 		return result;
 	}
