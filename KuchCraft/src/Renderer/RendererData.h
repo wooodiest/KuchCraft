@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <map>
 
 #include "World/Block.h"
 #include "World/WorldData.h"
@@ -11,8 +12,9 @@
 namespace KuchCraft {
 
 	// Constances
-	constexpr uint32_t max_texture_slots    = 32;
-	constexpr uint32_t default_texture_slot = 0;
+	constexpr uint32_t max_texture_slots       = 32;
+	constexpr uint32_t default_texture_slot    = 0;
+	constexpr uint32_t max_uniform_array_limit = 200;
 
 	constexpr uint32_t triangle_index_count = 6;
 	constexpr uint32_t quad_index_count     = 6;
@@ -62,6 +64,7 @@ namespace KuchCraft {
 	{
 		glm::mat4 ViewProjection;
 		glm::mat4 AbsoluteViewProjection;
+		glm::mat4 OrthoProjection;
 		glm::vec4 TintColor;
 	};
 
@@ -105,6 +108,30 @@ namespace KuchCraft {
 		uint32_t VertexArray  = 0;
 		uint32_t VertexBuffer = 0;
 		Shader   Shader;
+	};
+
+	struct RendererTextDataCharacter
+	{
+		uint32_t   ID;
+		glm::ivec2 Size;
+		glm::ivec2 Bearing;
+		uint32_t   Advance;
+	};
+
+	struct RendererTextData
+	{
+		const char* FontPath     = "assets/fonts/Roboto-Regular.ttf";
+		uint32_t FontPixelSize   = 256;
+		uint32_t CharactersCount = 128;
+		uint32_t TextureArray    = 0;
+
+		uint32_t VertexArray  = 0;
+		uint32_t VertexBuffer = 0;
+		Shader   Shader;
+
+		std::map<char, RendererTextDataCharacter> Characters;
+		std::vector<glm::mat4> Transforms;
+		std::vector<int32_t> LetterMap;
 	};
 
 	// Renderer data utils

@@ -28,9 +28,10 @@ namespace KuchCraft {
 
 		void SetFarPlan(float far) { m_Far = far; UpdateProjection(); }
 
-		const glm::mat4& GetProjection()     const { return m_Projection;          }
-		const glm::mat4& GetView()           const { return m_View;                }
-		const glm::mat4  GetViewProjection() const { return m_Projection * m_View; }
+		const glm::mat4& GetProjection()      const { return m_Projection;          }
+		const glm::mat4& GetOrthoProjection() const { return m_OrthoProjection;     }
+		const glm::mat4& GetView()            const { return m_View;                }
+		const glm::mat4  GetViewProjection()  const { return m_Projection * m_View; }
 		const glm::mat4  GetAbsoluteViewProjection() const;
 
 		const glm::vec3& GetPosition() const { return m_Position;                }
@@ -48,6 +49,8 @@ namespace KuchCraft {
 	private:
 		glm::mat4 m_Projection{ 1.0f };
 		glm::mat4 m_View{ 1.0f };
+
+		glm::mat4 m_OrthoProjection{ 1.0f };
 
 		glm::vec3 m_Position{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_Front   { 0.0f, 0.0f, 0.0f };

@@ -67,6 +67,7 @@ namespace KuchCraft {
 	void Camera::UpdateProjection()
 	{
 		m_Projection = glm::perspective(m_Fov, m_AspectRatio, m_Near, m_Far);
+		m_OrthoProjection = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f); // TODO;
 	}
 
 	void Camera::UpdateView()

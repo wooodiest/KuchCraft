@@ -5,6 +5,9 @@
 #include <unordered_map>
 #include <glad/glad.h>
 #include <stb_image.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Shader.h"
 #include "Core/Application.h"
@@ -18,6 +21,7 @@ namespace KuchCraft {
 	RendererChunkData   Renderer::s_ChunkData;
 	RendererSkyboxData  Renderer::s_SkyboxData;
 	RendererWaterData   Renderer::s_WaterData;
+	RendererTextData    Renderer::s_TextData;
 
 	void Renderer::Init()
 	{
@@ -26,6 +30,7 @@ namespace KuchCraft {
 		PrepareChunkRendering();
 		PrepareSkyboxRendering();
 		PrepareWaterRendering();
+		PrepareTextRendering();
 
 		LoadTextureAtlas();
 	}
@@ -46,7 +51,11 @@ namespace KuchCraft {
 		// WaterData
 		glDeleteBuffers(1, &s_WaterData.VertexBuffer);
 		glDeleteVertexArrays(1, &s_WaterData.VertexArray);
-		
+
+		// Text data
+		glDeleteBuffers(1, &s_TextData.VertexBuffer);
+		glDeleteVertexArrays(1, &s_TextData.VertexArray);
+
 		// RendererStatistics
 		ResetStats();
 	}
@@ -62,6 +71,7 @@ namespace KuchCraft {
 		UniformBuffer buffer{
 			camera.GetViewProjection(),
 			camera.GetAbsoluteViewProjection(),
+			camera.GetOrthoProjection(),
 			s_RendererData.TintStatus ? water_tint_color : white_color
 		};
 		glNamedBufferSubData(s_RendererData.UniformBuffer, 0, sizeof(buffer), &buffer);
@@ -85,6 +95,16 @@ namespace KuchCraft {
 		glBindBuffer(GL_ARRAY_BUFFER, s_RendererData.VertexBuffer);
 		glBindTextureUnit(default_texture_slot, s_RendererData.MainFrameBuffer.ColorAttachment);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
+
+		// Render dubug text
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		std::string jd = "Draw calls: " + std::to_string(s_Stats.DrawCalls) + "\nQuads: " + std::to_string(s_Stats.Quads);
+		RenderDebugText(jd);
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
 	}
 
 	void Renderer::ResetStats()
@@ -327,6 +347,91 @@ namespace KuchCraft {
 		s_ChunkData.Shader.SetInt("u_Texture", default_texture_slot);
 	}
 
+	void Renderer::PrepareTextRendering()
+	{
+		FT_Library ft;
+		if (FT_Init_FreeType(&ft))
+		{
+			KC_ERROR("Failed to init freetype");
+		}
+
+		FT_Face face;
+		if (FT_New_Face(ft, s_TextData.FontPath, 0, &face))
+		{
+			KC_ERROR("Failed to load font: {0}", s_TextData.FontPath);
+		}
+
+		FT_Set_Pixel_Sizes(face, s_TextData.FontPixelSize, s_TextData.FontPixelSize);
+
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glGenTextures(1, &s_TextData.TextureArray);
+		//glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, s_TextData.TextureArray);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, s_TextData.FontPixelSize, s_TextData.FontPixelSize, s_TextData.CharactersCount, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+
+		for (unsigned char c = 0; c < s_TextData.CharactersCount; c++)
+		{
+			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+			{
+				KC_ERROR("Failed to load glyph: {0}", (int)c);
+			}
+
+			glTexSubImage3D(
+				GL_TEXTURE_2D_ARRAY,
+				0, 0, 0, int(c),
+				face->glyph->bitmap.width,
+				face->glyph->bitmap.rows,
+				1,
+				GL_RED,
+				GL_UNSIGNED_BYTE,
+				face->glyph->bitmap.buffer
+			);
+
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			RendererTextDataCharacter character =
+			{
+				int(c),
+				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+				glm::ivec2(face->glyph->bitmap_left,  face->glyph->bitmap_top),
+				static_cast<uint32_t>(face->glyph->advance.x)
+			};
+			s_TextData.Characters.insert(std::pair<char, RendererTextDataCharacter>(c, character));
+		}
+
+		for (uint32_t i = 0; i < max_uniform_array_limit; i++)
+		{
+			s_TextData.LetterMap.push_back(0);
+			s_TextData.Transforms.push_back(glm::mat4(1.0f));
+		}
+
+		float vertices[] = {
+			0.0f,1.0f,
+			0.0f,0.0f,
+			1.0f,1.0f,
+			1.0f,0.0f,
+		};
+
+		glGenVertexArrays(1, &s_TextData.VertexArray);
+		glBindVertexArray(s_TextData.VertexArray);
+
+		glGenBuffers(1, &s_TextData.VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_TextData.VertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		s_TextData.Shader.Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
+		s_TextData.Shader.Bind();
+
+		FT_Done_Face(face);
+		FT_Done_FreeType(ft);
+	}
+
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		InvalidateMainFrameBuffer(width, height);
@@ -363,6 +468,65 @@ namespace KuchCraft {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.DepthAttachment, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void Renderer::RenderDebugText(const std::string& text)
+	{
+		glm::vec2 position{ 0.0f, 1040.0f };
+		float copyX = position.x;
+		float scale = 48.0f / s_TextData.FontPixelSize;
+
+		s_TextData.Shader.Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, s_TextData.TextureArray);
+		glBindVertexArray(s_TextData.VertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_TextData.VertexBuffer);
+
+		int workingIndex = 0;
+		std::string::const_iterator c;
+		for (c = text.begin(); c != text.end(); c++)
+		{
+			RendererTextDataCharacter ch = s_TextData.Characters[*c];
+
+			if (*c == '\n') 
+			{
+				position.y -= ((ch.Size.y)) * 1.3 * scale;
+				position.x = copyX;
+			}
+			else if (*c == ' ') 
+			{
+				position.x += (ch.Advance >> 6) * scale;
+			}
+			else 
+			{
+				float xpos = position.x + ch.Bearing.x * scale;
+				float ypos = position.y - (256 - ch.Bearing.y) * scale;
+
+				s_TextData.Transforms[workingIndex] = glm::translate(glm::mat4(1.0f), glm::vec3(xpos, ypos, 0)) *
+					glm::scale(glm::mat4(1.0f), glm::vec3(256 * scale, 256 * scale, 0));
+				s_TextData.LetterMap[workingIndex] = ch.ID;
+
+				position.x += (ch.Advance >> 6) * scale;
+				workingIndex++;
+				if (workingIndex == max_uniform_array_limit) 
+				{
+					RenderDubugTest(workingIndex);
+					workingIndex = 0;
+				}
+			}
+		}
+		RenderDubugTest(workingIndex);
+
+	}
+
+	void Renderer::RenderDubugTest(uint32_t length)
+	{
+		if (length != 0) 
+		{
+			s_TextData.Shader.SetFloat4Array("u_Transforms", &s_TextData.Transforms[0][0][0], length);
+			s_TextData.Shader.SetIntArray("u_LetterMap", &s_TextData.LetterMap[0], length);
+			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, length);
+		}
 	}
 
 	void Renderer::LoadTextureAtlas()

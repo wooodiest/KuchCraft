@@ -45,14 +45,22 @@ project "KuchCraft"
         "%{wks.location}/KuchCraft/vendor/glm",
         "%{wks.location}/KuchCraft/vendor/perlin_noise",
         "%{wks.location}/KuchCraft/vendor/stb_image",
-        "%{wks.location}/KuchCraft/vendor/spdlog/include"
+        "%{wks.location}/KuchCraft/vendor/spdlog/include",
+        "%{wks.location}/KuchCraft/vendor/freetype/include",
+        "%{wks.location}/KuchCraft/vendor/freetype"
     }
+
+    libdirs 
+	{
+		"%{wks.location}/KuchCraft/vendor/freetype/lib"
+	}
 
     links
     {
         "GLFW",
         "Glad",
-        "opengl32.lib"
+        "opengl32.lib",
+        "freetype.lib"
     }
 
     filter "system:windows"

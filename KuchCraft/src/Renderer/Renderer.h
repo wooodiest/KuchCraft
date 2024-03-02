@@ -46,8 +46,10 @@ namespace KuchCraft {
 		static RendererStatistics& GetStats() { return s_Stats; }
 
 	private:
-		//Utils
+		// Utils
 		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
+		static void RenderDebugText(const std::string& text);
+		static void RenderDubugTest(uint32_t length);
 
 		// Loading textures
 		static void     LoadTextureAtlas();
@@ -59,6 +61,7 @@ namespace KuchCraft {
 		static void PrepareChunkRendering();
 		static void PrepareSkyboxRendering();
 		static void PrepareWaterRendering();
+		static void PrepareTextRendering();
 
 		// Renderer data
 		static RendererData       s_RendererData;
@@ -66,6 +69,7 @@ namespace KuchCraft {
 		static RendererChunkData  s_ChunkData;
 		static RendererSkyboxData s_SkyboxData;
 		static RendererWaterData  s_WaterData;
+		static RendererTextData s_TextData;
 
 	private:
 		Renderer() = default;

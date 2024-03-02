@@ -15,6 +15,7 @@ namespace KuchCraft {
 		void SetInt(const std::string& name, int v);
 		void SetFloat4(const std::string& name, const glm::vec4& v);
 		void SetIntArray(const std::string& name, int* values, uint32_t count);
+		void SetFloat4Array(const std::string& name, float* data , uint32_t count);
 
 		uint32_t Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 			
