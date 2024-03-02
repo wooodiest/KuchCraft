@@ -80,6 +80,9 @@ namespace KuchCraft {
 		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.MainFrameBuffer.RendererID);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Clear text buffer
+		s_TextData.TextToRender.clear();
 	}
 
 	void Renderer::EndWorld()
@@ -97,14 +100,9 @@ namespace KuchCraft {
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 
 		// Render dubug text
-		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
-		std::string jd = "Draw calls: " + std::to_string(s_Stats.DrawCalls) + "\nQuads: " + std::to_string(s_Stats.Quads);
-		RenderDebugText(jd);
-		glEnable(GL_CULL_FACE);
+		RenderDebugText();
 		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
 	}
 
 	void Renderer::ResetStats()
@@ -361,13 +359,13 @@ namespace KuchCraft {
 			KC_ERROR("Failed to load font: {0}", s_TextData.FontPath);
 		}
 
-		FT_Set_Pixel_Sizes(face, s_TextData.FontPixelSize, s_TextData.FontPixelSize);
+		FT_Set_Pixel_Sizes(face, s_TextData.FontTexturePixelSize, s_TextData.FontTexturePixelSize);
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glGenTextures(1, &s_TextData.TextureArray);
 		//glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, s_TextData.TextureArray);
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, s_TextData.FontPixelSize, s_TextData.FontPixelSize, s_TextData.CharactersCount, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, s_TextData.FontTexturePixelSize, s_TextData.FontTexturePixelSize, s_TextData.CharactersCount, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
 
 		for (unsigned char c = 0; c < s_TextData.CharactersCount; c++)
 		{
@@ -430,6 +428,8 @@ namespace KuchCraft {
 
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
+
+		s_TextData.TextToRender.reserve(10);
 	}
 
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
@@ -470,11 +470,12 @@ namespace KuchCraft {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Renderer::RenderDebugText(const std::string& text)
+	void Renderer::RenderDebugText()
 	{
-		glm::vec2 position{ 0.0f, 1040.0f };
+		float windowHeight = Application::Get().GetWindow().GetHeight();
+		glm::vec2 position{ s_TextData.TextStartPadding.x, windowHeight - s_TextData.TextStartPadding.y };
 		float copyX = position.x;
-		float scale = 48.0f / s_TextData.FontPixelSize;
+		float scale = s_TextData.FontSize / s_TextData.FontTexturePixelSize;
 
 		s_TextData.Shader.Bind();
 		glActiveTexture(GL_TEXTURE0);
@@ -483,40 +484,41 @@ namespace KuchCraft {
 		glBindBuffer(GL_ARRAY_BUFFER, s_TextData.VertexBuffer);
 
 		int workingIndex = 0;
-		std::string::const_iterator c;
-		for (c = text.begin(); c != text.end(); c++)
+		for (auto& text : s_TextData.TextToRender)
 		{
-			RendererTextDataCharacter ch = s_TextData.Characters[*c];
-
-			if (*c == '\n') 
+			std::string::const_iterator c;
+			for (c = text.begin(); c != text.end(); c++)
 			{
-				position.y -= ((ch.Size.y)) * 1.3 * scale;
-				position.x = copyX;
-			}
-			else if (*c == ' ') 
-			{
-				position.x += (ch.Advance >> 6) * scale;
-			}
-			else 
-			{
-				float xpos = position.x + ch.Bearing.x * scale;
-				float ypos = position.y - (256 - ch.Bearing.y) * scale;
-
-				s_TextData.Transforms[workingIndex] = glm::translate(glm::mat4(1.0f), glm::vec3(xpos, ypos, 0)) *
-					glm::scale(glm::mat4(1.0f), glm::vec3(256 * scale, 256 * scale, 0));
-				s_TextData.LetterMap[workingIndex] = ch.ID;
-
-				position.x += (ch.Advance >> 6) * scale;
-				workingIndex++;
-				if (workingIndex == max_uniform_array_limit) 
+				RendererTextDataCharacter ch = s_TextData.Characters[*c];
+				if (*c == '\n')
 				{
-					RenderDubugTest(workingIndex);
-					workingIndex = 0;
+					position.y -= ((ch.Size.y)) * 1.3 * scale;
+					position.x = copyX;
+				}
+				else if (*c == ' ')
+				{
+					position.x += (ch.Advance >> 6) * scale;
+				}
+				else
+				{
+					float xpos = position.x + ch.Bearing.x * scale;
+					float ypos = position.y - (256 - ch.Bearing.y) * scale;
+
+					s_TextData.Transforms[workingIndex] = glm::translate(glm::mat4(1.0f), glm::vec3(xpos, ypos, 0)) *
+						glm::scale(glm::mat4(1.0f), glm::vec3(256 * scale, 256 * scale, 0));
+					s_TextData.LetterMap[workingIndex] = ch.ID;
+
+					position.x += (ch.Advance >> 6) * scale;
+					workingIndex++;
+					if (workingIndex == max_uniform_array_limit)
+					{
+						RenderDubugTest(workingIndex);
+						workingIndex = 0;
+					}
 				}
 			}
 		}
 		RenderDubugTest(workingIndex);
-
 	}
 
 	void Renderer::RenderDubugTest(uint32_t length)
@@ -628,6 +630,11 @@ namespace KuchCraft {
 	uint32_t Renderer::GetTexture(BlockType type)
 	{
 		return s_RendererData.Textures[(int)type];
+	}
+
+	void Renderer::AddTextToDrawList(const std::string& text)
+	{
+		s_TextData.TextToRender.emplace_back(text + "\n");
 	}
 
 	void Renderer::ShowTriangles(bool status)

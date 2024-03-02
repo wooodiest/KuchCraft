@@ -6,12 +6,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Core/Input.h"
+#include "Core/Application.h"
 
 namespace KuchCraft {
 
 	Camera::Camera()
 	{
 		m_PrevMousePosition = Input::GetMousePosition();
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 
 		UpdateProjection();
 		UpdateFront();
@@ -28,17 +30,27 @@ namespace KuchCraft {
 		UpdateView(); 
 	}
 
+	void Camera::SetFarPlan(float far)
+	{
+		m_Far = far; UpdateProjection();
+	}
+
+	void Camera::OnViewportSizeChanged()
+	{
+		UpdateProjection();
+	}
+
 	void Camera::OnKeyboardMovement(KeyboardMovement m, bool sprint)
 	{
 		float speed = sprint ? m_SprintSpeed : m_Speed;
 		switch (m)
 		{
-			case KuchCraft::KeyboardMovement::Forward:  m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
-			case KuchCraft::KeyboardMovement::Backward: m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
-			case KuchCraft::KeyboardMovement::Left:     m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
-			case KuchCraft::KeyboardMovement::Right:    m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
-			case KuchCraft::KeyboardMovement::Up:       m_Position.y += speed * m_DeltaTime;                                                               break;
-			case KuchCraft::KeyboardMovement::Down:     m_Position.y -= speed * m_DeltaTime;                                                               break;
+			case KeyboardMovement::Forward:  m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
+			case KeyboardMovement::Backward: m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
+			case KeyboardMovement::Left:     m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
+			case KeyboardMovement::Right:    m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
+			case KeyboardMovement::Up:       m_Position.y += speed * m_DeltaTime;                                                               break;
+			case KeyboardMovement::Down:     m_Position.y -= speed * m_DeltaTime;                                                               break;
 			default: break;
 		}
 	}
@@ -66,8 +78,9 @@ namespace KuchCraft {
 
 	void Camera::UpdateProjection()
 	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 		m_Projection = glm::perspective(m_Fov, m_AspectRatio, m_Near, m_Far);
-		m_OrthoProjection = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f); // TODO;
+		m_OrthoProjection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
 	}
 
 	void Camera::UpdateView()

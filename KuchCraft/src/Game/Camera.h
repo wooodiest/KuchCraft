@@ -18,6 +18,7 @@ namespace KuchCraft {
 		~Camera();
 
 		void OnUpdate();
+		void OnViewportSizeChanged();
 		void OnKeyboardMovement(KeyboardMovement m, bool sprint = false);
 		void OnMouseMovement();
 
@@ -26,7 +27,7 @@ namespace KuchCraft {
 			m_Yaw = rotation.x; m_Speed = speed; m_SprintSpeed = sprintSpeed; m_DeltaTime = dt;
 		}
 
-		void SetFarPlan(float far) { m_Far = far; UpdateProjection(); }
+		void SetFarPlan(float far);
 
 		const glm::mat4& GetProjection()      const { return m_Projection;          }
 		const glm::mat4& GetOrthoProjection() const { return m_OrthoProjection;     }

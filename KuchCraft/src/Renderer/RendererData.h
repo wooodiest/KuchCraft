@@ -120,18 +120,22 @@ namespace KuchCraft {
 
 	struct RendererTextData
 	{
-		const char* FontPath     = "assets/fonts/Roboto-Regular.ttf";
-		uint32_t FontPixelSize   = 256;
-		uint32_t CharactersCount = 128;
-		uint32_t TextureArray    = 0;
+		const char* FontPath  = "assets/fonts/Roboto-Regular.ttf";
+		float FontSize        = 24.0f;
+		std::vector<std::string> TextToRender;
 
-		uint32_t VertexArray  = 0;
-		uint32_t VertexBuffer = 0;
+		uint32_t   CharactersCount = 128;
+		glm::ivec2 TextStartPadding{ 6, 25 };
+
+		uint32_t FontTexturePixelSize = 256;
+		uint32_t VertexArray          = 0;
+		uint32_t VertexBuffer         = 0;
+		uint32_t TextureArray         = 0;
 		Shader   Shader;
-
+	
 		std::map<char, RendererTextDataCharacter> Characters;
 		std::vector<glm::mat4> Transforms;
-		std::vector<int32_t> LetterMap;
+		std::vector<int32_t>   LetterMap;
 	};
 
 	// Renderer data utils

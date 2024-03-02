@@ -1,6 +1,7 @@
 #include "World.h"
 
 #include <glm/glm.hpp>
+#include <string>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer/FrustumCulling.h"
@@ -33,6 +34,7 @@ namespace KuchCraft {
 
 	void World::OnUpdate(float dt)
 	{
+		ClearStats();
 		// Update necessary stuff
 		m_Player.OnUpdate(dt);
 
@@ -61,11 +63,15 @@ namespace KuchCraft {
 				if (chunkIndex >= 0 && chunkIndex < m_Chunks.size())
 				{
 					if (m_Chunks[chunkIndex] == nullptr)
+					{
 						m_Chunks[chunkIndex] = Chunk::Create({ x, 0.0f, z });
+						m_WorldStats.ChunksInMemory++;
+					}
 
 					if (m_Chunks[chunkIndex]->NeedToBuild())
 					{
 						m_Chunks[chunkIndex]->Build();
+						m_WorldStats.TotalBuiltChunks++;
 
 						totalChunksBuilded++;
 						if (totalChunksBuilded == max_chunks_to_Build)
@@ -78,7 +84,7 @@ namespace KuchCraft {
 			if (totalChunksBuilded == max_chunks_to_Build)
 				break;
 		}
-
+		m_WorldStats.ActiveChunks = m_ChunksToUpdate.size();
 		// If needed recreate chunks
 		constexpr int max_chunks_to_recreate = 1;
 		int totalChunksRecreated = 0;
@@ -89,6 +95,7 @@ namespace KuchCraft {
 			{
 				c->Recreate();
 				totalChunksRecreated++;
+				m_WorldStats.TotalRecreatedChunks++;
 				if (totalChunksRecreated == max_chunks_to_recreate)
 					break;
 			}
@@ -99,7 +106,8 @@ namespace KuchCraft {
 		m_ChunksToRender.clear();
 		m_ChunksToRender.reserve(surroundingChunksCount / 2); // It is very likely that we will not render all the chunks around the player
 		FrustumCulling::GetChunksToRender(m_ChunksToRender, m_ChunksToUpdate, m_Player.GetCamera());
-		
+		m_WorldStats.ChunksToRender = m_ChunksToRender.size();
+
 		// Delete from memory chunks that are too far away
 		DeleteUnusedChunks(playerPosition);
 	}
@@ -123,6 +131,33 @@ namespace KuchCraft {
 			Renderer::RenderWater(c);
 		Renderer::EndWater();
 
+		// Text to render
+		{
+			auto& position = m_Player.GetPosition();
+			auto& rotation = m_Player.GetRotation();
+
+			auto& rendererStats = Renderer::GetStats();
+
+			std::string Text = "Player:"  
+							 "\n    Position: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z) + 
+							 "\n    Rotation: " + std::to_string(glm::degrees(rotation.x)) + ", " + std::to_string(glm::degrees(rotation.y)) +
+							 "\n    Chunk ID: " + std::to_string(GetChunkIndex(position)) +
+							 "\nWorld:"
+							 "\n    Seed: "			 + std::to_string((uint32_t)WorldGenerator::GetSeed()) +
+							 "\n    Chunks:" 
+							 "\n      - active: "   + std::to_string(m_WorldStats.ActiveChunks) +
+							 "\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender) +
+						     "\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
+							 "\n      - built: "     + std::to_string(m_WorldStats.TotalBuiltChunks) +
+							 "\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks) +
+							 "\nRenderer:"
+							 "\n    Draw cals: " + std::to_string(rendererStats.DrawCalls) +
+							 "\n    Quads: "     + std::to_string(rendererStats.Quads);
+
+
+			Renderer::AddTextToDrawList(Text);
+		}
+
 		Renderer::EndWorld();
 	}
 
@@ -137,31 +172,44 @@ namespace KuchCraft {
 
 			chunk->Block[x][y][z] = block;
 			chunk->Recreate();
+			m_WorldStats.TotalRecreatedChunks++;
 
 			// If it is an edge block, recreate the corresponding chunk
 			if (x == 0)
 			{
 				auto c = GetChunk({ position.x - chunk_size_XZ, position.y, position.z });
-				if(c)
+				if (c)
+				{
 					c->Recreate();
+					m_WorldStats.TotalRecreatedChunks++;
+				}
 			}
 			if (x == chunk_size_XZ - 1)
 			{
 				auto c = GetChunk({ position.x + chunk_size_XZ, position.y, position.z });
 				if (c)
+				{
 					c->Recreate();
+					m_WorldStats.TotalRecreatedChunks++;
+				}
 			}
 			if (z == 0)
 			{
 				auto c = GetChunk({ position.x, position.y, position.z - chunk_size_XZ });
 				if (c)
+				{
 					c->Recreate();
+					m_WorldStats.TotalRecreatedChunks++;
+				}
 			}
 			if (z == chunk_size_XZ - 1)
 			{
 				auto c = GetChunk({ position.x, position.y, position.z + chunk_size_XZ });
 				if (c)
+				{
 					c->Recreate();
+					m_WorldStats.TotalRecreatedChunks++;
+				}
 			}
 		}
 	}
@@ -198,10 +246,16 @@ namespace KuchCraft {
 		if (index >= 0 && index < m_Chunks.size())
 		{
 			if (m_Chunks[index] == nullptr)
+			{
 				m_Chunks[index] = Chunk::Create(position);
+				m_WorldStats.ChunksInMemory++;
+			}
 
 			if (m_Chunks[index]->NeedToBuild())
+			{
 				m_Chunks[index]->Build();
+				m_WorldStats.TotalBuiltChunks++;
+			}
 
 			return m_Chunks[index];
 		}
@@ -227,6 +281,7 @@ namespace KuchCraft {
 			{
 				delete m_Chunks[index];
 				m_Chunks[index] = nullptr;
+				m_WorldStats.ChunksInMemory--;
 			}
 		}
 		for (float z = distance_minus_z; z <= distance_plus_z; z += chunk_size_XZ)
@@ -236,6 +291,7 @@ namespace KuchCraft {
 			{
 				delete m_Chunks[index];
 				m_Chunks[index] = nullptr;
+				m_WorldStats.ChunksInMemory--;
 			}
 		}
 		for (float x = distance_minus_x; x <= distance_plus_x; x += chunk_size_XZ)
@@ -245,6 +301,7 @@ namespace KuchCraft {
 			{
 				delete m_Chunks[index];
 				m_Chunks[index] = nullptr;
+				m_WorldStats.ChunksInMemory--;
 			}
 		}
 		for (float x = distance_minus_x; x <= distance_plus_x; x += chunk_size_XZ)
@@ -254,8 +311,15 @@ namespace KuchCraft {
 			{
 				delete m_Chunks[index];
 				m_Chunks[index] = nullptr;
+				m_WorldStats.ChunksInMemory--;
 			}
 		}
+	}
+
+	void World::ClearStats()
+	{
+		m_WorldStats.ActiveChunks = 0;
+		m_WorldStats.ChunksToRender = 0;
 	}
 
 	void World::Shutdown()
@@ -270,6 +334,7 @@ namespace KuchCraft {
 			{
 				delete m_Chunks[i];
 				m_Chunks[i] = nullptr;
+				m_WorldStats.ChunksInMemory--;
 			}
 		}
 		m_ChunksToRender.clear();
@@ -299,14 +364,22 @@ namespace KuchCraft {
 				if (chunkIndex >= 0 && chunkIndex < m_Chunks.size())
 				{
 					if (m_Chunks[chunkIndex] == nullptr)
+					{
 						m_Chunks[chunkIndex] = Chunk::Create({ x, 0.0f, z });
+						m_WorldStats.ChunksInMemory++;
+					}
 
 					if (m_Chunks[chunkIndex]->NeedToBuild())
+					{
 						m_Chunks[chunkIndex]->Build();
+						m_WorldStats.TotalBuiltChunks++;
+					}
 
 					if (m_Chunks[chunkIndex]->NeedToRecreate())
+					{
 						m_Chunks[chunkIndex]->Recreate();
-
+						m_WorldStats.TotalRecreatedChunks++;
+					}
 				}
 			}
 		}

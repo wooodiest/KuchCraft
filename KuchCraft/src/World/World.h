@@ -9,6 +9,16 @@
 
 namespace KuchCraft {
 
+	struct WorldStats
+	{
+		uint32_t ActiveChunks   = 0;
+		uint32_t ChunksToRender = 0;
+
+		uint32_t ChunksInMemory       = 0;
+		uint32_t TotalBuiltChunks     = 0;
+		uint32_t TotalRecreatedChunks = 0;
+	};
+
 	class World
 	{
 	public:	
@@ -18,6 +28,7 @@ namespace KuchCraft {
 		void PreLoadWorld();
 
 		inline static World& Get() { return *s_Instance; }
+		void OnViewportSizeChanged() { m_Player.OnViewportSizeChanged(); };
 
 		void OnUpdate(float dt);
 		void Render();
@@ -36,6 +47,10 @@ namespace KuchCraft {
 		// Managment
 		std::string filePath;
 		bool m_QuitStatus = false;
+
+		// Stats
+		WorldStats m_WorldStats;
+		void ClearStats();
 
 		// Data
 		Player m_Player;

@@ -40,6 +40,7 @@ namespace KuchCraft {
 		static void SetWaterTintStatus(bool status);
 		static void ShowTriangles(bool status);
 		static uint32_t GetTexture(BlockType type);
+		static void AddTextToDrawList(const std::string& text);
 
 		// Stats
 		static void ResetStats();
@@ -48,7 +49,7 @@ namespace KuchCraft {
 	private:
 		// Utils
 		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
-		static void RenderDebugText(const std::string& text);
+		static void RenderDebugText();
 		static void RenderDubugTest(uint32_t length);
 
 		// Loading textures
@@ -69,7 +70,7 @@ namespace KuchCraft {
 		static RendererChunkData  s_ChunkData;
 		static RendererSkyboxData s_SkyboxData;
 		static RendererWaterData  s_WaterData;
-		static RendererTextData s_TextData;
+		static RendererTextData   s_TextData;
 
 	private:
 		Renderer() = default;

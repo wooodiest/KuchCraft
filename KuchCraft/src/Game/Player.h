@@ -39,6 +39,7 @@ namespace KuchCraft {
 		PlayerMovementSettings&  GetPlayerMovementSettings() { return m_PlayerMovementSettings; }
 
 		void OnRenderDistanceChanged(int distance);
+		void OnViewportSizeChanged() { m_Camera.OnViewportSizeChanged(); }
 
 	private:
 		glm::vec3 m_Position{ 2000.0f, 90.0f, 2000.0f };

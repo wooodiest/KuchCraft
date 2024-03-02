@@ -15,6 +15,8 @@ namespace KuchCraft {
 		static void FillWithRandomBlocks(Chunk* chunk);
 		static void Generate(Chunk* chunk);
 
+		static siv::PerlinNoise::seed_type GetSeed() { return s_Seed; }
+
 	private:
 		static siv::PerlinNoise::seed_type s_Seed;
 		static siv::PerlinNoise s_Noise;
