@@ -8,7 +8,7 @@ namespace KuchCraft {
 
 	struct PlayerGraphicalSettings
 	{
-		uint32_t RenderDistance              = 10;
+		uint32_t RenderDistance              = 8;
 		uint32_t ChunksKeptInMemoryDistance  = 30;
 	};
 

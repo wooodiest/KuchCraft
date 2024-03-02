@@ -36,11 +36,14 @@ namespace KuchCraft {
 		static void RenderWater(Chunk* chunk);
 		static void EndWater();
 
+		// Text
+		static void RenderTextTopLeft(const std::string& text, const glm::vec2& margin, const glm::vec4& color = default_text_color, float fontSize = default_font_size, float spacing = default_text_spacing);
+		static void RenderText(const std::string& text, const glm::vec2& position, const glm::vec4& color = default_text_color, float fontSize = default_font_size, float spacing = default_text_spacing);
+
 		// Utils
 		static void SetWaterTintStatus(bool status);
 		static void ShowTriangles(bool status);
 		static uint32_t GetTexture(BlockType type);
-		static void AddTextToDrawList(const std::string& text);
 
 		// Stats
 		static void ResetStats();
@@ -49,8 +52,8 @@ namespace KuchCraft {
 	private:
 		// Utils
 		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
-		static void RenderDebugText();
-		static void RenderDubugTest(uint32_t length);
+		static void RenderText();
+		static void RenderText(uint32_t length);
 
 		// Loading textures
 		static void     LoadTextureAtlas();

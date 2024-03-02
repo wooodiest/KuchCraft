@@ -17,7 +17,7 @@ out flat int v_Index;
 void main()
 {
 	gl_Position = u_OrthoProjection * u_Transforms[gl_InstanceID] * vec4(a_Position.xy, 0.0, 1.0);
+
     v_Index = gl_InstanceID;
-    v_TexCoord = a_Position.xy;
-    v_TexCoord.y = 1.0 - v_TexCoord.y;
+	v_TexCoord = vec2(a_Position.x, 1.0 - a_Position.y);
 }

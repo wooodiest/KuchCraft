@@ -138,24 +138,25 @@ namespace KuchCraft {
 
 			auto& rendererStats = Renderer::GetStats();
 
-			std::string Text = "Player:"  
+			std::string text = "Player:"  
 							 "\n    Position: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z) + 
 							 "\n    Rotation: " + std::to_string(glm::degrees(rotation.x)) + ", " + std::to_string(glm::degrees(rotation.y)) +
 							 "\n    Chunk ID: " + std::to_string(GetChunkIndex(position)) +
 							 "\nWorld:"
 							 "\n    Seed: "			 + std::to_string((uint32_t)WorldGenerator::GetSeed()) +
 							 "\n    Chunks:" 
-							 "\n      - active: "   + std::to_string(m_WorldStats.ActiveChunks) +
+							 "\n      - active: "    + std::to_string(m_WorldStats.ActiveChunks) +
 							 "\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender) +
 						     "\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
 							 "\n      - built: "     + std::to_string(m_WorldStats.TotalBuiltChunks) +
 							 "\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks) +
 							 "\nRenderer:"
-							 "\n    Draw cals: " + std::to_string(rendererStats.DrawCalls) +
-							 "\n    Quads: "     + std::to_string(rendererStats.Quads);
+							 "\n    Draw cals: "   + std::to_string(rendererStats.DrawCalls) +
+							 "\n    Quads: "       + std::to_string(rendererStats.Quads) +
+							 "\n    Render time: " + std::to_string(rendererStats.RenderTime * 1000.0f) + "ms";
 
 
-			Renderer::AddTextToDrawList(Text);
+			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f });
 		}
 
 		Renderer::EndWorld();

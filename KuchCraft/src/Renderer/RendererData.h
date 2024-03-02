@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <map>
+#include <tuple>
 
 #include "World/Block.h"
 #include "World/WorldData.h"
@@ -12,9 +13,15 @@
 namespace KuchCraft {
 
 	// Constances
-	constexpr uint32_t max_texture_slots       = 32;
-	constexpr uint32_t default_texture_slot    = 0;
+	constexpr uint32_t max_texture_slots     = 32;
+	constexpr uint32_t default_texture_slot  = 0;
+
+	constexpr float default_font_size    = 24.0f;
+	constexpr float default_text_spacing = 1.3f;
+	constexpr glm::vec4 default_text_color{ 1.0f, 1.0f, 1.0f, 1.0f };
 	constexpr uint32_t max_uniform_array_limit = 200;
+	constexpr uint32_t font_characters_count   = 128;
+	constexpr uint32_t font_texture_size       = 256;
 
 	constexpr uint32_t triangle_index_count = 6;
 	constexpr uint32_t quad_index_count     = 6;
@@ -58,6 +65,9 @@ namespace KuchCraft {
 	{
 		uint32_t DrawCalls = 0;
 		uint32_t Quads     = 0;
+
+		float LastFrameTime = 0.0f;
+		float RenderTime = 0.0f;
 	};
 
 	struct UniformBuffer
@@ -110,32 +120,27 @@ namespace KuchCraft {
 		Shader   Shader;
 	};
 
-	struct RendererTextDataCharacter
+	struct RendererTextCharacter
 	{
 		uint32_t   ID;
+		uint32_t   Advance;
 		glm::ivec2 Size;
 		glm::ivec2 Bearing;
-		uint32_t   Advance;
 	};
 
 	struct RendererTextData
 	{
 		const char* FontPath  = "assets/fonts/Roboto-Regular.ttf";
-		float FontSize        = 24.0f;
-		std::vector<std::string> TextToRender;
+		std::vector<std::tuple<std::string, glm::vec2, glm::vec4, float, float>> Data;
 
-		uint32_t   CharactersCount = 128;
-		glm::ivec2 TextStartPadding{ 6, 25 };
-
-		uint32_t FontTexturePixelSize = 256;
-		uint32_t VertexArray          = 0;
-		uint32_t VertexBuffer         = 0;
-		uint32_t TextureArray         = 0;
+		uint32_t VertexArray     = 0;
+		uint32_t VertexBuffer    = 0;
+		uint32_t Texture         = 0;
 		Shader   Shader;
 	
-		std::map<char, RendererTextDataCharacter> Characters;
-		std::vector<glm::mat4> Transforms;
-		std::vector<int32_t>   LetterMap;
+		std::map<char, RendererTextCharacter> Characters;
+		glm::mat4 Transforms[max_uniform_array_limit];
+		int32_t   LetterMap[max_uniform_array_limit];
 	};
 
 	// Renderer data utils
