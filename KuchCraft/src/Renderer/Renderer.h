@@ -53,7 +53,7 @@ namespace KuchCraft {
 		// Utils
 		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
 		static void RenderText();
-		static void RenderText(uint32_t length);
+		static void RenderText(uint32_t length, UniformTextBuffer* buffer);
 
 		// Loading textures
 		static void     LoadTextureAtlas();

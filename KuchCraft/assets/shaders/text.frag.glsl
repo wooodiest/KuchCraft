@@ -3,14 +3,24 @@
 layout (location = 0) out vec4 color;
 
 uniform sampler2DArray u_Texture;
-uniform int u_LetterMap[400];
-uniform vec4 u_TextColor;
+
+struct TextData
+{
+	mat4 Transform;
+	vec4 Letter;
+};
+
+layout(std140, binding = 1) uniform UniformTextData
+{
+	TextData u_Text[400];
+	vec4 u_Color;
+};
 
 in vec2 v_TexCoord;
 in flat int v_Index;
 
 void main()
 {
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(u_Texture, vec3(v_TexCoord.xy, u_LetterMap[v_Index])).r);
-    color = u_TextColor * sampled;
+    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(u_Texture, vec3(v_TexCoord.xy, u_Text[v_Index].Letter.x)).r);
+    color = u_Color * sampled;
 }

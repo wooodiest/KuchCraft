@@ -401,12 +401,6 @@ namespace KuchCraft {
 			});
 		}
 
-		for (uint32_t i = 0; i < max_uniform_array_limit; i++)
-		{
-			s_TextData.LetterMap[0]  = 0;
-			s_TextData.Transforms[i] = glm::mat4(1.0f);
-		}
-
 		float vertices[] = {
 			0.0f, 1.0f,
 			0.0f, 0.0f,
@@ -426,6 +420,12 @@ namespace KuchCraft {
 
 		s_TextData.Shader.Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
 		s_TextData.Shader.Bind();
+
+		// Uniform buffer
+		constexpr uint32_t binding = 1;
+		glCreateBuffers(1, &s_TextData.UniformBuffer);
+		glNamedBufferData(s_TextData.UniformBuffer, sizeof(UniformTextBuffer), nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding, s_TextData.UniformBuffer);
 
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
@@ -476,6 +476,9 @@ namespace KuchCraft {
 		glBindVertexArray(s_TextData.VertexArray);
 		glBindBuffer(GL_ARRAY_BUFFER, s_TextData.VertexBuffer);
 
+		// Set uniform buffer
+		UniformTextBuffer buffer;
+		
 		for (const auto& [text, position, color, fontSize, spacing] : s_TextData.Data)
 		{
 			s_TextData.Shader.SetFloat4("u_TextColor", color);
@@ -501,29 +504,28 @@ namespace KuchCraft {
 					float xpos = currentPosition.x + ch.Bearing.x * scale;
 					float ypos = currentPosition.y - (font_texture_size - ch.Bearing.y) * scale;
 
-					s_TextData.Transforms[currentArrayIndex] = glm::translate(glm::mat4(1.0f), { xpos, ypos, 0 }) *
+					buffer.Text[currentArrayIndex].Transform = glm::translate(glm::mat4(1.0f), { xpos, ypos, 0 }) *
 						glm::scale(glm::mat4(1.0f), { font_texture_size * scale, font_texture_size * scale, 0 });
-					s_TextData.LetterMap[currentArrayIndex] = ch.ID;
+					buffer.Text[currentArrayIndex].Letter.x = (float)ch.ID;
 
 					currentPosition.x += (ch.Advance >> 6) * scale;
 					currentArrayIndex++;
 					if (currentArrayIndex == max_uniform_array_limit)
 					{
-						RenderText(currentArrayIndex);
+						RenderText(currentArrayIndex, &buffer);
 						currentArrayIndex = 0;
 					}
 				}
 			}
-			RenderText(currentArrayIndex);
+			RenderText(currentArrayIndex, &buffer);
 		}
 	}
 
-	void Renderer::RenderText(uint32_t length)
+	void Renderer::RenderText(uint32_t length, UniformTextBuffer* buffer)
 	{
 		if (length != 0) 
 		{
-			s_TextData.Shader.SetFloat4Array("u_Transforms", &s_TextData.Transforms[0][0][0], length);
-			s_TextData.Shader.SetIntArray("u_LetterMap", &s_TextData.LetterMap[0], length);
+			glNamedBufferSubData(s_TextData.UniformBuffer, 0, sizeof(UniformTextBuffer), buffer);
 			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, length);
 		}
 	}
