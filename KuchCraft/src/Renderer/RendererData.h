@@ -5,6 +5,8 @@
 #include <map>
 #include <tuple>
 
+#include "Core/Timer.h"
+
 #include "World/Block.h"
 #include "World/WorldData.h"
 
@@ -72,8 +74,11 @@ namespace KuchCraft {
 		uint32_t DrawCalls = 0;
 		uint32_t Quads     = 0;
 
-		float LastFrameTime = 0.0f;
-		float RenderTime = 0.0f;
+		Timer RenderTimer;
+		Timer ChunkTimer;
+		Timer SkyboxTimer;
+		Timer WaterTimer;
+		Timer TextTimer;
 	};
 
 	struct UniformWorldBuffer

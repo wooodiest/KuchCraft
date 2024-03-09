@@ -63,9 +63,10 @@ namespace KuchCraft {
 	void Renderer::OnUpdate(float dt)
 	{
 		ResetStats();
-		float time = (float)glfwGetTime();
-		s_Stats.RenderTime = time - s_Stats.LastFrameTime;
-		s_Stats.LastFrameTime = time;
+
+		Timer::OnUpdate(dt);
+		s_Stats.RenderTimer.End();
+		s_Stats.RenderTimer.Begin();
 	}
 
 	void Renderer::BeginWorld(const Camera& camera)
@@ -116,6 +117,7 @@ namespace KuchCraft {
 
 	void Renderer::BeginChunk()
 	{
+		s_Stats.ChunkTimer.Begin();
 		s_ChunkData.Shader.Bind();
 	}
 
@@ -155,10 +157,12 @@ namespace KuchCraft {
 
 	void Renderer::EndChunk()
 	{
+		s_Stats.ChunkTimer.End();
 	}
 
 	void Renderer::BeginSkybox()
 	{
+		s_Stats.SkyboxTimer.Begin();
 		s_SkyboxData.Shader.Bind();
 
 		glCullFace(GL_FRONT);
@@ -185,10 +189,14 @@ namespace KuchCraft {
 	{
 		glCullFace(GL_BACK);
 		glDepthFunc(GL_LESS);
+
+		s_Stats.SkyboxTimer.End();
 	}
 
 	void Renderer::BeginWater()
 	{
+		s_Stats.WaterTimer.Begin();
+
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
 
@@ -224,6 +232,8 @@ namespace KuchCraft {
 	{
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
+
+		s_Stats.WaterTimer.End();
 	}
 
 	void Renderer::PrepareRenderer()
@@ -477,6 +487,8 @@ namespace KuchCraft {
 
 	void Renderer::RenderText()
 	{
+		s_Stats.TextTimer.Begin();
+
 		s_TextData.Shader.Bind();
 		glBindTextureUnit(default_texture_slot, s_TextData.Texture);
 		glBindVertexArray(s_TextData.VertexArray);
@@ -525,6 +537,8 @@ namespace KuchCraft {
 			}
 			RenderText(currentArrayIndex, &buffer);
 		}
+
+		s_Stats.TextTimer.End();
 	}
 
 	void Renderer::RenderText(uint32_t length, UniformTextBuffer* buffer)

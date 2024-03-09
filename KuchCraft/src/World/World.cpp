@@ -156,8 +156,12 @@ namespace KuchCraft {
 							 "\nRenderer:"
 							 "\n    Draw cals: "   + std::to_string(rendererStats.DrawCalls) +
 							 "\n    Quads: "       + std::to_string(rendererStats.Quads) +
-							 "\n    Render time: " + std::to_string(rendererStats.RenderTime * 1000.0f) + "ms";
-
+							 "\n    Render time: " + std::to_string(rendererStats.RenderTimer.ElapsedMillis()) + "ms" + 
+							 "\n      - chunks:      "  + std::to_string(rendererStats.ChunkTimer.ElapsedMillis())  + "ms" +
+							 "\n      - skybox:      "  + std::to_string(rendererStats.SkyboxTimer.ElapsedMillis()) + "ms" +
+							 "\n      - water:         "   + std::to_string(rendererStats.WaterTimer.ElapsedMillis())  + "ms" +
+							 "\n      - text:            "    + std::to_string(rendererStats.TextTimer.ElapsedMillis())   + "ms";
+							 
 
 			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f });
 		}

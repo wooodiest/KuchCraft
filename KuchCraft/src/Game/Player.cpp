@@ -9,7 +9,7 @@ namespace KuchCraft {
 
 	Player::Player()
 	{
-		OnRenderDistanceChanged(8);
+		OnRenderDistanceChanged(m_GraphicalSettings.RenderDistance);
 	}
 
 	Player::~Player()
