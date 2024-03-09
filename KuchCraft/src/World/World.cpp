@@ -48,6 +48,7 @@ namespace KuchCraft {
 		m_ChunksToUpdate.reserve(surroundingChunksCount);
 
 		constexpr int max_chunks_to_Build = 1; // This is not a strict value, chunk Recreate() can also build surrounding chunks
+		bool breakStatus = false;
 		int totalChunksBuilded = 0;
 
 		for (float x  = playerPosition.x - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
@@ -75,13 +76,15 @@ namespace KuchCraft {
 
 						totalChunksBuilded++;
 						if (totalChunksBuilded == max_chunks_to_Build)
-							break;
+							breakStatus = true;
 					}
 
 					m_ChunksToUpdate.push_back(m_Chunks[chunkIndex]);
+					if (breakStatus)
+						break;
 				}
 			}
-			if (totalChunksBuilded == max_chunks_to_Build)
+			if (breakStatus)
 				break;
 		}
 		m_WorldStats.ActiveChunks = m_ChunksToUpdate.size();

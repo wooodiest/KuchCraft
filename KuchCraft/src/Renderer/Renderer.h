@@ -37,8 +37,8 @@ namespace KuchCraft {
 		static void EndWater();
 
 		// Text
-		static void RenderTextTopLeft(const std::string& text, const glm::vec2& margin, const glm::vec4& color = default_text_color, float fontSize = default_font_size, float spacing = default_text_spacing);
-		static void RenderText(const std::string& text, const glm::vec2& position, const glm::vec4& color = default_text_color, float fontSize = default_font_size, float spacing = default_text_spacing);
+		static void RenderTextTopLeft(const std::string& text, const glm::vec2& margin, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
+		static void RenderText(const std::string& text, const glm::vec2& position, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
 
 		// Utils
 		static void SetWaterTintStatus(bool status);

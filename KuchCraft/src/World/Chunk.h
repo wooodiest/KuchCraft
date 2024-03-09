@@ -5,7 +5,7 @@
 
 #include "KuchCraftData.h"
 #include "World/Block.h"
-#include "Renderer/RendererChunkData.h"
+#include "Renderer/ChunkData.h"
 
 namespace KuchCraft {
 

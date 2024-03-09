@@ -41,9 +41,9 @@ namespace KuchCraft {
 		// RendererData
 		glDeleteBuffers(1, &s_RendererData.QuadIndexBuffer);
 		glDeleteBuffers(1, &s_RendererData.UniformBuffer);
-		glDeleteFramebuffers(1, &s_RendererData.MainFrameBuffer.RendererID);
-		glDeleteTextures(1, &s_RendererData.MainFrameBuffer.ColorAttachment);
-		glDeleteTextures(1, &s_RendererData.MainFrameBuffer.DepthAttachment);
+		glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
+		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
+		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
 
 		// RendererChunkData
 		glDeleteBuffers(1, &s_ChunkData.VertexBuffer);
@@ -72,7 +72,7 @@ namespace KuchCraft {
 	void Renderer::BeginWorld(const Camera& camera)
 	{
 		// Set uniform buffer
-		UniformBuffer buffer{
+		UniformWorldBuffer buffer{
 			camera.GetViewProjection(),
 			camera.GetAbsoluteViewProjection(),
 			camera.GetOrthoProjection(),
@@ -81,7 +81,7 @@ namespace KuchCraft {
 		glNamedBufferSubData(s_RendererData.UniformBuffer, 0, sizeof(buffer), &buffer);
 
 		// Setup main frame buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.MainFrameBuffer.RendererID);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -92,7 +92,7 @@ namespace KuchCraft {
 	void Renderer::EndWorld()
 	{
 		// Setup deafult frame buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
 		glDisable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -100,10 +100,10 @@ namespace KuchCraft {
 		s_RendererData.Shader.Bind();
 		glBindVertexArray(s_RendererData.VertexArray);
 		glBindBuffer(GL_ARRAY_BUFFER, s_RendererData.VertexBuffer);
-		glBindTextureUnit(default_texture_slot, s_RendererData.MainFrameBuffer.ColorAttachment);
+		glBindTextureUnit(default_texture_slot, s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 
-		// Render dubug text
+		// Render text
 		glEnable(GL_BLEND);
 		RenderText();
 		glDisable(GL_BLEND);
@@ -265,7 +265,7 @@ namespace KuchCraft {
 		// Uniform buffer
 		constexpr uint32_t binding = 0;
 		glCreateBuffers(1, &s_RendererData.UniformBuffer);
-		glNamedBufferData(s_RendererData.UniformBuffer, sizeof(UniformBuffer), nullptr, GL_DYNAMIC_DRAW);
+		glNamedBufferData(s_RendererData.UniformBuffer, sizeof(UniformWorldBuffer), nullptr, GL_DYNAMIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding, s_RendererData.UniformBuffer);
 
 		// Prepare for rendering to screen
@@ -435,36 +435,36 @@ namespace KuchCraft {
 	{
 		InvalidateMainFrameBuffer(width, height);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.MainFrameBuffer.RendererID);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glViewport(0, 0, width, height);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
 		glViewport(0, 0, width, height);
 	}
 
 	void Renderer::InvalidateMainFrameBuffer(uint32_t width, uint32_t height)
 	{
-		if (s_RendererData.MainFrameBuffer.RendererID)
+		if (s_RendererData.RenderOutputFrameBuffer.RendererID)
 		{
-			glDeleteFramebuffers(1, &s_RendererData.MainFrameBuffer.RendererID);
-			glDeleteTextures(1, &s_RendererData.MainFrameBuffer.ColorAttachment);
-			glDeleteTextures(1, &s_RendererData.MainFrameBuffer.DepthAttachment);
+			glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
+			glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
+			glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
 		}
 
-		glCreateFramebuffers(1, &s_RendererData.MainFrameBuffer.RendererID);
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.MainFrameBuffer.RendererID);
+		glCreateFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.MainFrameBuffer.ColorAttachment);
-		glBindTexture(GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.ColorAttachment);
+		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
+		glBindTexture(GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.ColorAttachment, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.ColorAttachment, 0);
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.MainFrameBuffer.DepthAttachment);
-		glBindTexture(GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.DepthAttachment);
+		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
+		glBindTexture(GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, s_RendererData.MainFrameBuffer.DepthAttachment, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.DepthAttachment, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -510,7 +510,7 @@ namespace KuchCraft {
 
 					currentPosition.x += (ch.Advance >> 6) * scale;
 					currentArrayIndex++;
-					if (currentArrayIndex == max_uniform_array_limit)
+					if (currentArrayIndex == max_text_uniform_array_limit)
 					{
 						RenderText(currentArrayIndex, &buffer);
 						currentArrayIndex = 0;
