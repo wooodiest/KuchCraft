@@ -29,7 +29,6 @@ namespace KuchCraft {
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), glfwGetPrimaryMonitor(), nullptr);
-		KC_INFO("Created window : {0} : ({1}, {2})", m_Title.c_str(), m_Width, m_Height);
 		glfwMakeContextCurrent(m_Window);
 
 		// Glad

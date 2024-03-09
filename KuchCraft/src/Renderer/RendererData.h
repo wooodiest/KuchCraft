@@ -13,6 +13,8 @@
 namespace KuchCraft {
 
 	// Constances
+	constexpr bool opengl_logs = true;
+
 	// GPU
 	constexpr uint32_t max_texture_slots     = 32;
 	constexpr uint32_t default_texture_slot  = 0;

@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <glad/glad.h>
 
 #include "Game/Camera.h"
 #include "World/Chunk.h"
@@ -54,6 +55,7 @@ namespace KuchCraft {
 		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
 		static void RenderText();
 		static void RenderText(uint32_t length, UniformTextBuffer* buffer);
+		static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 		// Loading textures
 		static void     LoadTextureAtlas();

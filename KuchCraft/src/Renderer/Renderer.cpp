@@ -4,7 +4,6 @@
 #include <iostream>
 #include <GLFW/glfw3.h> // tmp
 #include <unordered_map>
-#include <glad/glad.h>
 #include <stb_image.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -230,6 +229,13 @@ namespace KuchCraft {
 	void Renderer::PrepareRenderer()
 	{
 		// Setup
+		if (opengl_logs)
+		{
+			glDebugMessageCallback(OpenGLLogMessage, nullptr);
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		}
+
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		OnViewportSizeChanged(width, height);
 
@@ -656,5 +662,23 @@ namespace KuchCraft {
 		s_RendererData.TintStatus = status;
 	}
 
+	void Renderer::OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	{
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:
+			KC_ERROR("[OpenGL] : {0}", (char*)message);
+			break;
+
+		case GL_DEBUG_SEVERITY_MEDIUM:
+		case GL_DEBUG_SEVERITY_LOW:
+			KC_WARN("[OpenGL] : {0}", (char*)message);
+			break;
+
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			KC_INFO("[OpenGL] : {0}", (char*)message);
+			break;
+		}
+	}
 
 }
