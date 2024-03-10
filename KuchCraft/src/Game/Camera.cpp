@@ -7,6 +7,7 @@
 
 #include "Core/Input.h"
 #include "Core/Application.h"
+#include "Core/Core.h"
 
 namespace KuchCraft {
 
@@ -15,7 +16,7 @@ namespace KuchCraft {
 		m_PrevMousePosition = Input::GetMousePosition();
 		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 
-		UpdateProjection();
+		UpdateProjection(width, height);
 		UpdateFront();
 		UpdateView();
 	}
@@ -30,14 +31,24 @@ namespace KuchCraft {
 		UpdateView(); 
 	}
 
-	void Camera::SetFarPlan(float far)
+	void Camera::OnEvent(Event& event)
 	{
-		m_Far = far; UpdateProjection();
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowResizeEvent>(KC_BIND_EVENT_FN(Camera::OnWindowResized));
 	}
 
-	void Camera::OnViewportSizeChanged()
+	void Camera::SetFarPlan(float far)
 	{
-		UpdateProjection();
+		m_Far = far; 
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		UpdateProjection(width, height);
+	}
+
+	bool Camera::OnWindowResized(WindowResizeEvent& e)
+	{
+		UpdateProjection(e.GetWidth(), e.GetHeight());
+
+		return false;
 	}
 
 	void Camera::OnKeyboardMovement(KeyboardMovement m, bool sprint)
@@ -76,9 +87,8 @@ namespace KuchCraft {
 		return m_Projection * glm::mat4(glm::mat3(glm::lookAt(glm::vec3(0.0f), m_Front, m_Up)));
 	}
 
-	void Camera::UpdateProjection()
+	void Camera::UpdateProjection(uint32_t width, uint32_t height)
 	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 		m_Projection = glm::perspective(m_Fov, m_AspectRatio, m_Near, m_Far);
 		m_OrthoProjection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
 	}

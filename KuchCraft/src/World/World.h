@@ -5,6 +5,8 @@
 #include <string>
 
 #include "World/Chunk.h"
+#include "Core/Events/Event.h"
+#include "Core/Events/KeyEvent.h"
 #include "Game/Player.h"
 
 namespace KuchCraft {
@@ -28,7 +30,9 @@ namespace KuchCraft {
 		void PreLoadWorld();
 
 		inline static World& Get() { return *s_Instance; }
-		void OnViewportSizeChanged() { m_Player.OnViewportSizeChanged(); };
+
+		void OnEvent(Event& event);
+		bool OnKeyPressed(KeyPressedEvent& e);
 
 		void OnUpdate(float dt);
 		void Render();

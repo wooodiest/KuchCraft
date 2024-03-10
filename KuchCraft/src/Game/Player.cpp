@@ -52,6 +52,11 @@ namespace KuchCraft {
 
 	}
 
+	void Player::OnEvent(Event& event)
+	{
+		m_Camera.OnEvent(event);
+	}
+
 	void Player::OnRenderDistanceChanged(int distance)
 	{
 		m_GraphicalSettings.RenderDistance = distance;

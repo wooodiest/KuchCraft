@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include "Core/Events/Event.h"
+#include "Core/Events/ApplicationEvent.h"
 
 namespace KuchCraft {
 
@@ -18,7 +20,9 @@ namespace KuchCraft {
 		~Camera();
 
 		void OnUpdate();
-		void OnViewportSizeChanged();
+		void OnEvent(Event& event);
+
+		bool OnWindowResized(WindowResizeEvent& e);
 		void OnKeyboardMovement(KeyboardMovement m, bool sprint = false);
 		void OnMouseMovement();
 
@@ -43,7 +47,7 @@ namespace KuchCraft {
 		const glm::vec4  GetAspectRatioFovNearFar() const { return { m_AspectRatio, m_Fov, m_Near, m_Far }; }
 
 	private:
-		void UpdateProjection();
+		void UpdateProjection(uint32_t width, uint32_t height);
 		void UpdateView();
 		void UpdateFront();
 

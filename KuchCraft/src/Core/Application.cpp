@@ -4,7 +4,9 @@
 
 #include "Core/Input.h"
 #include "Core/Random.h"
+#include "Renderer/Renderer.h"
 #include "Core/Log.h"
+#include "Core/Core.h"
 
 namespace KuchCraft {
 
@@ -18,6 +20,7 @@ namespace KuchCraft {
 		Log::Init();
 
 		m_Window = new Window("KuchCraft", 1920, 1080, false);
+		m_Window->SetEventCallback(KC_BIND_EVENT_FN(Application::OnEvent));
 		m_Game   = new KuchCraft();
 	}
 
@@ -39,15 +42,7 @@ namespace KuchCraft {
 				m_DeltaTime = m_DeltaTime > (1.0f / 60.0f) ? (1.0f / 60.0f) : m_DeltaTime;
 				m_LastFrametime = time;
 
-				// Update main game loop
-				if (m_WindowResized)
-				{
-					auto [width, height] = GetWindow().GetWindowSize();
-					m_Game->OnViewportSizeChanged(width, height);
-					m_WindowResized = false;
-				}
 				m_Game->OnUpdate(m_DeltaTime);
-
 			}
 
 			// Window swap buffers etc..
@@ -57,6 +52,35 @@ namespace KuchCraft {
 			if (Input::IsKeyPressed(KeyCode::Escape)) // temporary
 				m_Running = false;
 		}
+	}
+
+	void Application::OnEvent(Event& e)
+	{
+		EventDispatcher dispatcher(e);
+		dispatcher.Dispatch<WindowCloseEvent>(KC_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(KC_BIND_EVENT_FN(Application::OnWindowResize));
+
+		m_Game->OnEvent(e);
+	}
+
+	bool Application::OnWindowClose(WindowCloseEvent& e)
+	{
+		m_Running = false;
+		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& e)
+	{
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
+
+		m_Minimized = false;
+		Renderer::OnViewportSizeChanged(e.GetWidth(), e.GetHeight());
+
+		return false;
 	}
 
 }

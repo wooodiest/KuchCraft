@@ -2,12 +2,15 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer/FrustumCulling.h"
 #include "Renderer/Renderer.h"
 
 #include "World/WorldGenerator.h"
+
+#include "Core/Core.h"
 
 namespace KuchCraft {
 
@@ -32,9 +35,35 @@ namespace KuchCraft {
 		Shutdown();
 	}
 
+	void World::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(KC_BIND_EVENT_FN(World::OnKeyPressed));
+
+		m_Player.OnEvent(event);
+	}
+
+	bool World::OnKeyPressed(KeyPressedEvent& e)
+	{
+		if (e.IsRepeat())
+			return false;
+
+		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool shift   = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+
+		switch (e.GetKeyCode())
+		{
+		case Key::F3: Renderer::FlipShowStatsStatus(); break;
+			
+		}
+
+		return false;
+	}
+
 	void World::OnUpdate(float dt)
 	{
 		ClearStats();
+
 		// Update necessary stuff
 		m_Player.OnUpdate(dt);
 
@@ -135,6 +164,7 @@ namespace KuchCraft {
 		Renderer::EndWater();
 
 		// Text to render
+		if (Renderer::GetShowStatsStatus())
 		{
 			auto& position = m_Player.GetPosition();
 			auto& rotation = m_Player.GetRotation();

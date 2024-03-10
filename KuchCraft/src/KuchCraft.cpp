@@ -37,12 +37,10 @@ namespace KuchCraft {
 		}
 	}
 
-	void KuchCraft::OnViewportSizeChanged(uint32_t width, uint32_t height)
+	void KuchCraft::OnEvent(Event& event)
 	{
-		Renderer::OnViewportSizeChanged(width, height);
 		if (m_World)
-			m_World->OnViewportSizeChanged();
-		
+			m_World->OnEvent(event);
 	}
 
 	void KuchCraft::LoadWorld(const std::string& path)

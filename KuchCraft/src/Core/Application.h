@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 
 #include "Core/Window.h"
+#include "Core/Events/Event.h"
+#include "Core/Events/ApplicationEvent.h"
 
 #include "KuchCraft.h"
 
@@ -19,8 +21,10 @@ namespace KuchCraft {
 		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow() { return *m_Window; }
 
-		void SetWindowMinimized(bool status) { m_Minimized     = status; }
-		void SetWindowResized(bool status)   { m_WindowResized = status; }
+		void OnEvent(Event& e);
+
+		bool OnWindowClose(WindowCloseEvent& e);
+		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
 		float   m_DeltaTime     = 0.0f;

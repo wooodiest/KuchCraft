@@ -106,6 +106,7 @@ namespace KuchCraft {
 		uint32_t QuadIndexBuffer = 0;
 		uint32_t UniformBuffer   = 0;
 		bool     TintStatus      = false;
+		bool	 ShowStats       = true;
 
 		Shader   Shader;
 		uint32_t VertexBuffer = 0;

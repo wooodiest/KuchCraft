@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "Game/Camera.h"
 #include "Core/Input.h"
+#include "Core/Events/Event.h"
 
 namespace KuchCraft {
 
@@ -27,6 +28,7 @@ namespace KuchCraft {
 		~Player();
 
 		void OnUpdate(float dt);
+		void OnEvent(Event& event);
 
 		const Camera&    GetCamera()   const { return m_Camera; }
 		const glm::vec3& GetPosition() const { return m_Position; }
@@ -39,7 +41,6 @@ namespace KuchCraft {
 		PlayerMovementSettings&  GetPlayerMovementSettings() { return m_PlayerMovementSettings; }
 
 		void OnRenderDistanceChanged(int distance);
-		void OnViewportSizeChanged() { m_Camera.OnViewportSizeChanged(); }
 
 	private:
 		glm::vec3 m_Position{ 2000.0f, 90.0f, 2000.0f };

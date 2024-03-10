@@ -2,6 +2,7 @@
 
 #include "KuchCraftData.h"
 #include "World/World.h"
+#include "Core/Events/Event.h"
 
 namespace KuchCraft {
 
@@ -12,8 +13,7 @@ namespace KuchCraft {
 		~KuchCraft();
 
 		void OnUpdate(float dt);
-
-		void OnViewportSizeChanged(uint32_t width, uint32_t height);
+		void OnEvent(Event& event);
 		
 		void LoadWorld(const std::string& path);
 

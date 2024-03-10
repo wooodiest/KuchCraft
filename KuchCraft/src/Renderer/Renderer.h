@@ -49,8 +49,10 @@ namespace KuchCraft {
 
 		// Stats
 		static void ResetStats();
-		static RendererStatistics& GetStats() { return s_Stats; }
-		static GraphicalInfo& GetGraphicalInfo() { return s_GraphicalInfo; }
+		static RendererStatistics& GetStats()    { return s_Stats;                  }
+		static GraphicalInfo& GetGraphicalInfo() { return s_GraphicalInfo;          }
+		static bool GetShowStatsStatus()		 { return s_RendererData.ShowStats; }
+		static void FlipShowStatsStatus() { s_RendererData.ShowStats = !s_RendererData.ShowStats; }
 
 	private:
 		// Utils
