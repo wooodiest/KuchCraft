@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <iostream>
+#include "Renderer/Renderer.h"
 
 #include "Core/Log.h"
 
@@ -52,6 +53,8 @@ namespace KuchCraft {
 	{
 		std::string vertex   = ReadFile(vertexShaderPath);
 		std::string fragment = ReadFile(fragmentShaderPath);
+		PreProcess(vertex);
+		PreProcess(fragment);
 		const char* vertex_cstr   = vertex.c_str();
 		const char* fragment_cstr = fragment.c_str();
 
@@ -65,7 +68,7 @@ namespace KuchCraft {
 			if (!success)
 			{
 				glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-				KC_ERROR("Vertex shader compilation failed : {0}", infoLog);
+				KC_ERROR("Vertex shader compilation failed : {0}", (char*)infoLog);
 			}
 		}
 
@@ -79,7 +82,7 @@ namespace KuchCraft {
 			if (!success)
 			{
 				glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-				KC_ERROR("Fragment shader compilation failed : {0}", infoLog);
+				KC_ERROR("Fragment shader compilation failed : {0}", (char*)infoLog);
 			}
 		}
 
@@ -93,7 +96,7 @@ namespace KuchCraft {
 			char infoLog[512];
 			glGetProgramiv(m_RendererID, GL_LINK_STATUS, &success);
 			if (!success) {
-				glGetProgramInfoLog(m_RendererID, 512, NULL, infoLog);
+				glGetProgramInfoLog(m_RendererID, 512, NULL, (char*)infoLog);
 				KC_ERROR("Shader linking failed : {0}", infoLog);
 			}
 		}
@@ -131,6 +134,24 @@ namespace KuchCraft {
 		}
 
 		return result;
+	}
+
+	void Shader::PreProcess(std::string& file)
+	{
+		auto& strMap = Renderer::GetShaderStrMap();
+		auto& varMap = Renderer::GetShaderVarMap();
+
+		auto replace = [&](const std::string& from, const std::string& to) {
+			size_t pos = 0;
+			while ((pos = file.find(from, pos)) != std::string::npos)
+			{
+				file.replace(pos, from.length(), to);
+				pos += to.length();
+			}
+		};
+
+		std::for_each(strMap.begin(), strMap.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
+		std::for_each(varMap.begin(), varMap.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
 	}
 
 	void Shader::Bind() const

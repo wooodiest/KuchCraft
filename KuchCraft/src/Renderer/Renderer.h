@@ -47,6 +47,9 @@ namespace KuchCraft {
 		static void ShowTriangles(bool status);
 		static uint32_t GetTexture(BlockType type);
 
+		static std::unordered_map<std::string, std::string>& GetShaderStrMap() { return s_RendererData.ShaderStrData; }
+		static std::unordered_map<std::string, std::string>& GetShaderVarMap() { return s_RendererData.ShaderVarData; }
+
 		// Stats
 		static void ResetStats();
 		static RendererStatistics& GetStats()    { return s_Stats;                  }
@@ -67,6 +70,7 @@ namespace KuchCraft {
 		static uint32_t LoadSkyboxTexture();
 
 		// Prepare renderer for...
+		static void PrepareShaders();
 		static void PrepareRenderer();
 		static void PrepareChunkRendering();
 		static void PrepareSkyboxRendering();

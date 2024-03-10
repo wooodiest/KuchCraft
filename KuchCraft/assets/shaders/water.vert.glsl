@@ -3,13 +3,7 @@
 layout (location = 0) in vec3 a_Position;
 layout (location = 1) in vec2 a_TexCoord;
 
-layout(std140, binding = 0) uniform UniformData
-{
-	mat4 u_ViewProjection;
-	mat4 u_AbsoluteViewProjection;
-	mat4 u_OrthoProjection;
-	vec4 u_TintColor;
-};
+##world_data_uniform_buffer
 
 out vec2 v_TexCoord;
 

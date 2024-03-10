@@ -104,13 +104,19 @@ namespace KuchCraft {
 	{
 		uint32_t Textures[absolute_number_of_blocks];
 		uint32_t QuadIndexBuffer = 0;
-		uint32_t UniformBuffer   = 0;
-		bool     TintStatus      = false;
-		bool	 ShowStats       = true;
+		
+		bool TintStatus = false;
+		bool ShowStats  = true;
+
+		uint32_t WorldDataUniformBuffer        = 0;
+		uint32_t WorldDataUniformBufferBinding = 0;
 
 		Shader   Shader;
 		uint32_t VertexBuffer = 0;
 		uint32_t VertexArray  = 0;
+
+		std::unordered_map<std::string, std::string> ShaderStrData;
+		std::unordered_map<std::string, std::string> ShaderVarData;
 
 		struct FrameBuffer
 		{
@@ -157,7 +163,9 @@ namespace KuchCraft {
 		const char* FontPath  = "assets/fonts/Roboto-Regular.ttf";
 		std::vector<std::tuple<std::string, glm::vec2, glm::vec4, float, float>> Data;
 
-		uint32_t UniformBuffer   = 0;
+		uint32_t TextDataUniformBuffer        = 0;
+		uint32_t TextDataUniformBufferBinding = 1;
+
 		uint32_t VertexArray     = 0;
 		uint32_t VertexBuffer    = 0;
 		uint32_t Texture         = 0;

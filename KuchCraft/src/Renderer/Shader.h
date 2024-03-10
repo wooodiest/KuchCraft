@@ -2,6 +2,7 @@
 
 #include <string>
 #include <glm/glm.hpp>
+#include <unordered_map>
 
 namespace KuchCraft {
 
@@ -19,10 +20,12 @@ namespace KuchCraft {
 
 		uint32_t Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
 			
-		std::string ReadFile(const std::string& filepath);
-
 		void Bind() const;
 		void Unbind() const;
+
+	private:
+		std::string ReadFile(const std::string& filepath);
+		void PreProcess(std::string& file);
 
 	private:
 		uint32_t m_RendererID = 0;

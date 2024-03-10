@@ -26,6 +26,7 @@ namespace KuchCraft {
 
 	void Renderer::Init()
 	{
+		PrepareShaders();
 		PrepareRenderer();
 
 		PrepareChunkRendering();
@@ -40,7 +41,7 @@ namespace KuchCraft {
 	{
 		// RendererData
 		glDeleteBuffers(1, &s_RendererData.QuadIndexBuffer);
-		glDeleteBuffers(1, &s_RendererData.UniformBuffer);
+		glDeleteBuffers(1, &s_RendererData.WorldDataUniformBuffer);
 		glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
@@ -79,7 +80,7 @@ namespace KuchCraft {
 			camera.GetOrthoProjection(),
 			s_RendererData.TintStatus ? water_tint_color : white_color
 		};
-		glNamedBufferSubData(s_RendererData.UniformBuffer, 0, sizeof(buffer), &buffer);
+		glNamedBufferSubData(s_RendererData.WorldDataUniformBuffer, 0, sizeof(buffer), &buffer);
 
 		// Setup main frame buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
@@ -237,6 +238,34 @@ namespace KuchCraft {
 		s_Stats.WaterTimer.End();
 	}
 
+	void Renderer::PrepareShaders()
+	{
+		s_RendererData.ShaderStrData["##world_data_uniform_buffer"] =
+			R"(layout(std140, binding = ##world_data_uniform_buffer_binding) uniform UniformWorldData
+			   {
+			   	   mat4 u_ViewProjection;
+			   	   mat4 u_AbsoluteViewProjection;
+			   	   mat4 u_OrthoProjection;
+			   	   vec4 u_TintColor;
+			   };)";
+		s_RendererData.ShaderStrData["##text_data_uniform_buffer"] =
+			R"(struct TextData
+			   {
+					mat4 Transform;
+					vec4 Letter;
+			   };
+			   layout(std140, binding = ##text_data_uniform_buffer_binding) uniform UniformTextData
+			   {
+					TextData u_Text[##max_text_uniform_array_limit];
+					vec4 u_Color;
+			   };)";
+
+		s_RendererData.ShaderVarData["##max_texture_slots"]                 = std::to_string(max_texture_slots);
+		s_RendererData.ShaderVarData["##world_data_uniform_buffer_binding"] = std::to_string(s_RendererData.WorldDataUniformBufferBinding);
+		s_RendererData.ShaderVarData["##text_data_uniform_buffer_binding"]  = std::to_string(s_TextData.TextDataUniformBufferBinding);
+		s_RendererData.ShaderVarData["##max_text_uniform_array_limit"]      = std::to_string(max_text_uniform_array_limit);
+	}
+
 	void Renderer::PrepareRenderer()
 	{
 		// Setup
@@ -285,10 +314,9 @@ namespace KuchCraft {
 		delete[] indices;
 
 		// Uniform buffer
-		constexpr uint32_t binding = 0;
-		glCreateBuffers(1, &s_RendererData.UniformBuffer);
-		glNamedBufferData(s_RendererData.UniformBuffer, sizeof(UniformWorldBuffer), nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, binding, s_RendererData.UniformBuffer);
+		glCreateBuffers(1, &s_RendererData.WorldDataUniformBuffer);
+		glNamedBufferData(s_RendererData.WorldDataUniformBuffer, sizeof(UniformWorldBuffer), nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, s_RendererData.WorldDataUniformBufferBinding, s_RendererData.WorldDataUniformBuffer);
 
 		// Prepare for rendering to screen
 		glGenVertexArrays(1, &s_RendererData.VertexArray);
@@ -444,10 +472,9 @@ namespace KuchCraft {
 		s_TextData.Shader.Bind();
 
 		// Uniform buffer
-		constexpr uint32_t binding = 1;
-		glCreateBuffers(1, &s_TextData.UniformBuffer);
-		glNamedBufferData(s_TextData.UniformBuffer, sizeof(UniformTextBuffer), nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, binding, s_TextData.UniformBuffer);
+		glCreateBuffers(1, &s_TextData.TextDataUniformBuffer);
+		glNamedBufferData(s_TextData.TextDataUniformBuffer, sizeof(UniformTextBuffer), nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, s_TextData.TextDataUniformBufferBinding, s_TextData.TextDataUniformBuffer);
 
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
@@ -551,7 +578,7 @@ namespace KuchCraft {
 	{
 		if (length != 0) 
 		{
-			glNamedBufferSubData(s_TextData.UniformBuffer, 0, sizeof(UniformTextBuffer), buffer);
+			glNamedBufferSubData(s_TextData.TextDataUniformBuffer, 0, sizeof(UniformTextBuffer), buffer);
 			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, length);
 		}
 	}
