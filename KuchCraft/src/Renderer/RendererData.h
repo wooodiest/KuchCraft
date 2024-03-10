@@ -118,6 +118,7 @@ namespace KuchCraft {
 			uint32_t DepthAttachment = 0;
 		} RenderOutputFrameBuffer;
 		uint32_t DefaultFrameBufferRendererID = 0;
+
 	}; 
 
 	struct RendererChunkData
@@ -162,6 +163,14 @@ namespace KuchCraft {
 		Shader   Shader;
 	
 		std::map<char, RendererTextCharacter> Characters;
+	};
+
+	struct GraphicalInfo
+	{
+		std::string Vendor;
+		std::string Renderer;
+		std::string Version;
+		std::string ShadingLanguageVersion;
 	};
 
 	// Renderer data utils

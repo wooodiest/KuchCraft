@@ -40,6 +40,7 @@ namespace KuchCraft {
 		// Text
 		static void RenderTextTopLeft(const std::string& text, const glm::vec2& margin, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
 		static void RenderText(const std::string& text, const glm::vec2& position, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
+		static void RenderTextNorm(const std::string& text, const glm::vec2& positionNormalized, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
 
 		// Utils
 		static void SetWaterTintStatus(bool status);
@@ -49,6 +50,7 @@ namespace KuchCraft {
 		// Stats
 		static void ResetStats();
 		static RendererStatistics& GetStats() { return s_Stats; }
+		static GraphicalInfo& GetGraphicalInfo() { return s_GraphicalInfo; }
 
 	private:
 		// Utils
@@ -76,7 +78,8 @@ namespace KuchCraft {
 		static RendererSkyboxData s_SkyboxData;
 		static RendererWaterData  s_WaterData;
 		static RendererTextData   s_TextData;
-
+		static GraphicalInfo      s_GraphicalInfo;
+		 
 	private:
 		Renderer() = default;
 	};

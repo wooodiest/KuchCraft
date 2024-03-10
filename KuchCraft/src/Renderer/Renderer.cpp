@@ -22,6 +22,7 @@ namespace KuchCraft {
 	RendererSkyboxData  Renderer::s_SkyboxData;
 	RendererWaterData   Renderer::s_WaterData;
 	RendererTextData    Renderer::s_TextData;
+	GraphicalInfo       Renderer::s_GraphicalInfo;
 
 	void Renderer::Init()
 	{
@@ -245,6 +246,11 @@ namespace KuchCraft {
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		}
+
+		s_GraphicalInfo.Vendor = (char*)glGetString(GL_VENDOR);
+		s_GraphicalInfo.Renderer = (char*)glGetString(GL_RENDERER);
+		s_GraphicalInfo.Version = (char*)glGetString(GL_VERSION);
+		s_GraphicalInfo.ShadingLanguageVersion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		OnViewportSizeChanged(width, height);
@@ -559,6 +565,13 @@ namespace KuchCraft {
 	void Renderer::RenderText(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize, float spacing)
 	{
 		s_TextData.Data.emplace_back(text, position, color, fontSize, spacing);
+	}
+
+	void Renderer::RenderTextNorm(const std::string& text, const glm::vec2& positionNormalized, const glm::vec4& color, float fontSize, float spacing)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		glm::vec2 position{  width * positionNormalized.x, height * positionNormalized.y};
+		RenderText(text, position, color, fontSize, spacing);
 	}
 
 	void Renderer::LoadTextureAtlas()

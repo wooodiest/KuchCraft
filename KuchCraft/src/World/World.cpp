@@ -140,30 +140,35 @@ namespace KuchCraft {
 			auto& rotation = m_Player.GetRotation();
 
 			auto& rendererStats = Renderer::GetStats();
+			auto& graphicalInfo = Renderer::GetGraphicalInfo();
 
-			std::string text = "Player:"  
-							 "\n    Position: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z) + 
-							 "\n    Rotation: " + std::to_string(glm::degrees(rotation.x)) + ", " + std::to_string(glm::degrees(rotation.y)) +
-							 "\n    Chunk ID: " + std::to_string(GetChunkIndex(position)) +
-							 "\nWorld:"
-							 "\n    Seed: "			 + std::to_string((uint32_t)WorldGenerator::GetSeed()) +
-							 "\n    Chunks:" 
-							 "\n      - active: "    + std::to_string(m_WorldStats.ActiveChunks) +
-							 "\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender) +
-						     "\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
-							 "\n      - built: "     + std::to_string(m_WorldStats.TotalBuiltChunks) +
-							 "\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks) +
-							 "\nRenderer:"
-							 "\n    Draw cals: "   + std::to_string(rendererStats.DrawCalls) +
-							 "\n    Quads: "       + std::to_string(rendererStats.Quads) +
-							 "\n    Render time: " + std::to_string(rendererStats.RenderTimer.ElapsedMillis()) + "ms" + 
-							 "\n      - chunks:      "  + std::to_string(rendererStats.ChunkTimer.ElapsedMillis())  + "ms" +
-							 "\n      - skybox:      "  + std::to_string(rendererStats.SkyboxTimer.ElapsedMillis()) + "ms" +
-							 "\n      - water:         "   + std::to_string(rendererStats.WaterTimer.ElapsedMillis())  + "ms" +
-							 "\n      - text:            "    + std::to_string(rendererStats.TextTimer.ElapsedMillis())   + "ms";
+			std::string text = "Player:"
+				"\n    Position: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z) +
+				"\n    Rotation: " + std::to_string(glm::degrees(rotation.x)) + ", " + std::to_string(glm::degrees(rotation.y)) +
+				"\n    Chunk ID: " + std::to_string(GetChunkIndex(position)) +
+				"\nWorld:"
+				"\n    Seed: " + std::to_string((uint32_t)WorldGenerator::GetSeed()) +
+				"\n    Chunks:"
+				"\n      - active: " + std::to_string(m_WorldStats.ActiveChunks) +
+				"\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender) +
+				"\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
+				"\n      - built: " + std::to_string(m_WorldStats.TotalBuiltChunks) +
+				"\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks) +
+				"\nRenderer:"
+				"\n    Draw cals: " + std::to_string(rendererStats.DrawCalls) +
+				"\n    Quads: " + std::to_string(rendererStats.Quads) +
+				"\n    Render time: " + std::to_string(rendererStats.RenderTimer.ElapsedMillis()) + "ms" +
+				"\n      - chunks:      " + std::to_string(rendererStats.ChunkTimer.ElapsedMillis()) + "ms" +
+				"\n      - skybox:      " + std::to_string(rendererStats.SkyboxTimer.ElapsedMillis()) + "ms" +
+				"\n      - water:         " + std::to_string(rendererStats.WaterTimer.ElapsedMillis()) + "ms" +
+				"\n      - text:            " + std::to_string(rendererStats.TextTimer.ElapsedMillis()) + "ms";
 							 
 
 			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f });
+
+			std::string text2 = graphicalInfo.Renderer + "\n" + graphicalInfo.Version;
+
+			Renderer::RenderTextNorm(text2, {0.5f, 0.975f});
 		}
 
 		Renderer::EndWorld();
