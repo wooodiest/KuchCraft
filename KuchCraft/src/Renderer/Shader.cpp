@@ -68,7 +68,7 @@ namespace KuchCraft {
 			if (!success)
 			{
 				glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-				KC_ERROR("Vertex shader compilation failed : {0}", (char*)infoLog);
+				KC_ERROR("Vertex shader compilation failed : {0} : {1}", vertexShaderPath.c_str(), infoLog);
 			}
 		}
 
@@ -82,7 +82,7 @@ namespace KuchCraft {
 			if (!success)
 			{
 				glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-				KC_ERROR("Fragment shader compilation failed : {0}", (char*)infoLog);
+				KC_ERROR("Fragment shader compilation failed : {0} : {1}", fragmentShaderPath.c_str(), infoLog);
 			}
 		}
 
@@ -96,7 +96,7 @@ namespace KuchCraft {
 			char infoLog[512];
 			glGetProgramiv(m_RendererID, GL_LINK_STATUS, &success);
 			if (!success) {
-				glGetProgramInfoLog(m_RendererID, 512, NULL, (char*)infoLog);
+				glGetProgramInfoLog(m_RendererID, 512, NULL, infoLog);
 				KC_ERROR("Shader linking failed : {0}", infoLog);
 			}
 		}

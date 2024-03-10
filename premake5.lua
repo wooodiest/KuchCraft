@@ -4,7 +4,6 @@ workspace "KuchCraft"
     architecture "x64"
     configurations 
     { 
-        "Debug", 
         "Release",
         "Dist"
     }
@@ -19,7 +18,7 @@ group "Dependencies"
 group ""
 
 project "KuchCraft"
-    kind "ConsoleApp"
+    kind "WindowedApp"
     language "C++"
     cppdialect "C++17"
     location "KuchCraft"
@@ -65,17 +64,14 @@ project "KuchCraft"
 
     filter "system:windows"
         systemversion "latest"
+        links { "kernel32", "user32" }
+        entrypoint "WinMainCRTStartup"
 
     defines
     { 
         "GLFW_INCLUDE_NONE",
         "_CRT_SECURE_NO_WARNINGS"
      }
-
-    filter "configurations:Debug"
-	defines "KC_DEBUG"
-	runtime "Debug"
-	symbols "On"
 
 	filter "configurations:Release"
 	defines "KC_RELEASE"
