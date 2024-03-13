@@ -47,6 +47,9 @@ namespace KuchCraft {
 		const Camera& GetCamera() const { return m_Player.GetCamera(); }
 		bool GetQuitStatus()      const { return m_QuitStatus;         }
 
+		void ReloadAllChunks();
+		void ReloadChunks();
+
 	private:
 		// Managment
 		std::string filePath;

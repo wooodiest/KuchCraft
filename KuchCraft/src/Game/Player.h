@@ -4,13 +4,14 @@
 #include "Game/Camera.h"
 #include "Core/Input.h"
 #include "Core/Events/Event.h"
+#include "Core/Events/KeyEvent.h"
 
 namespace KuchCraft {
 
 	struct PlayerGraphicalSettings
 	{
 		uint32_t RenderDistance              = 8;
-		uint32_t ChunksKeptInMemoryDistance  = 30;
+		uint32_t ChunksKeptInMemoryDistance  = 16;
 	};
 
 	struct PlayerMovementSettings
@@ -29,6 +30,8 @@ namespace KuchCraft {
 
 		void OnUpdate(float dt);
 		void OnEvent(Event& event);
+
+		bool OnKeyPressed(KeyPressedEvent& e);
 
 		const Camera&    GetCamera()   const { return m_Camera; }
 		const glm::vec3& GetPosition() const { return m_Position; }

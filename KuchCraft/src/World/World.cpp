@@ -54,7 +54,7 @@ namespace KuchCraft {
 		switch (e.GetKeyCode())
 		{
 		case Key::F3: Renderer::FlipShowStatsStatus(); break;
-			
+		case Key::F1: ReloadAllChunks(); break;
 		}
 
 		return false;
@@ -304,6 +304,47 @@ namespace KuchCraft {
 		}
 
 		return nullptr;
+	}
+
+	void World::ReloadAllChunks()
+	{
+		for (int i = 0; i < m_Chunks.size(); i++)
+		{
+			if (m_Chunks[i])
+			{
+				delete m_Chunks[i];
+				m_Chunks[i] = nullptr;
+			}
+		}
+		m_WorldStats.ChunksInMemory = 0;
+	}
+
+	void World::ReloadChunks()
+	{
+		auto& position = m_Player.GetPosition();
+		const auto& renderDistance       = m_Player.GetGraphicalSettings().RenderDistance;
+		const auto& inMemoryKeptDistance = m_Player.GetGraphicalSettings().ChunksKeptInMemoryDistance;
+
+		const float position_min_x = position.x - (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
+		const float position_max_x = position.x + (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
+		const float position_min_z = position.z - (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
+		const float position_max_z = position.z + (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
+
+		for (int i = 0; i < m_Chunks.size(); i++)
+		{
+			if (m_Chunks[i])
+			{
+				auto& position = m_Chunks[i]->GetPosition();
+				
+				if (position.x < position_min_x || position.x > position_max_x || 
+				    position.z < position_min_z || position.z > position_max_z)
+				{
+					delete m_Chunks[i];
+					m_Chunks[i] = nullptr;
+					m_WorldStats.ChunksInMemory--;
+				}
+			}
+		}
 	}
 
 	void World::DeleteUnusedChunks(const glm::vec3& position)

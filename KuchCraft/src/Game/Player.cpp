@@ -3,6 +3,8 @@
 #include "Core/Random.h"
 #include "World/World.h"
 
+#include "Core/Core.h"
+
 #include <iostream>
 
 namespace KuchCraft {
@@ -54,7 +56,41 @@ namespace KuchCraft {
 
 	void Player::OnEvent(Event& event)
 	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(KC_BIND_EVENT_FN(Player::OnKeyPressed));
+
 		m_Camera.OnEvent(event);
+	}
+
+	bool Player::OnKeyPressed(KeyPressedEvent& e)
+	{
+		if (e.IsRepeat())
+			return false;
+
+		switch (e.GetKeyCode())
+		{
+		case KeyCode::KPSubtract:
+			if (m_GraphicalSettings.RenderDistance > 2)
+			{
+				m_GraphicalSettings.RenderDistance--;
+				OnRenderDistanceChanged(m_GraphicalSettings.RenderDistance);
+				World::Get().ReloadChunks();
+			}
+			break;
+		case KeyCode::KPAdd:
+			m_GraphicalSettings.RenderDistance++;
+			OnRenderDistanceChanged(m_GraphicalSettings.RenderDistance);
+			World::Get().ReloadChunks();
+			break;
+
+		case KeyCode::KP1: m_PlayerMovementSettings.Speed *= 1.1f; m_PlayerMovementSettings.SprintSpeed *= 1.1f; break;
+		case KeyCode::KP2: m_PlayerMovementSettings.Speed *= 0.9f; m_PlayerMovementSettings.SprintSpeed *= 0.9f; break;
+
+		default:
+			break;
+		}
+
+		return false;
 	}
 
 	void Player::OnRenderDistanceChanged(int distance)
