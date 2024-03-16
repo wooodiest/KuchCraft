@@ -194,7 +194,7 @@ namespace KuchCraft {
 				"\n      - text:            " + std::to_string(rendererStats.TextTimer.ElapsedMillis()) + "ms";
 							 
 
-			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f }, {1.0f, 0.0f, 0.0f, 1.0f});
+			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f });
 
 			std::string text2 = graphicalInfo.Renderer + "\n" + graphicalInfo.Version;
 

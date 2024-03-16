@@ -531,8 +531,7 @@ namespace KuchCraft {
 		
 		for (const auto& [text, position, color, fontSize, spacing] : s_TextData.Data)
 		{
-			s_TextData.Shader.SetFloat4("u_Color", color);
-
+			buffer.Color = color;
 			glm::vec2 currentPosition{ position };
 			float scale = fontSize / font_texture_size;
 
