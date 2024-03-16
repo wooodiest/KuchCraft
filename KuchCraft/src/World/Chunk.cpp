@@ -71,45 +71,45 @@ namespace KuchCraft {
 					if (x == 0)
 					{
 						checkLeft = false;
-						if (leftChunk && Block::IsTranspaent(leftChunk->Block[chunk_size_XZ - 1][y][z]))
+						if (leftChunk && Block::IsTransparent(leftChunk->Block[chunk_size_XZ - 1][y][z]))
 							m_DrawList.Add(transform, vertices_left, Block[x][y][z]);
 					}
 					else if (x == chunk_size_XZ - 1)
 					{
 						checkRight = false;
-						if (rightChunk && Block::IsTranspaent(rightChunk->Block[0][y][z]))
+						if (rightChunk && Block::IsTransparent(rightChunk->Block[0][y][z]))
 							m_DrawList.Add(transform, vertices_right, Block[x][y][z]);
 					}
 					if (z == 0)
 					{
 						checkBehind = false;
-						if (behindChunk && Block::IsTranspaent(behindChunk->Block[x][y][chunk_size_XZ - 1]))
+						if (behindChunk && Block::IsTransparent(behindChunk->Block[x][y][chunk_size_XZ - 1]))
 							m_DrawList.Add(transform, vertices_behind, Block[x][y][z]);
 					}
 					else if (z == chunk_size_XZ - 1)
 					{
 						checkFront = false;
-						if (frontChunk && Block::IsTranspaent(frontChunk->Block[x][y][0]))
+						if (frontChunk && Block::IsTransparent(frontChunk->Block[x][y][0]))
 							m_DrawList.Add(transform, vertices_front, Block[x][y][z]);
 					}
 
 					// Rest of bloks
-					if (checkBottom && Block::IsTranspaent(Block[x][y - 1][z]))
+					if (checkBottom && Block::IsTransparent(Block[x][y - 1][z]))
 						m_DrawList.Add(transform, vertices_bottom, Block[x][y][z]);
 
-					if (checkTop    && Block::IsTranspaent(Block[x][y + 1][z]))
+					if (checkTop    && Block::IsTransparent(Block[x][y + 1][z]))
 						m_DrawList.Add(transform, vertices_top, Block[x][y][z]);
 
-					if (checkFront  && Block::IsTranspaent(Block[x][y][z + 1]))
+					if (checkFront  && Block::IsTransparent(Block[x][y][z + 1]))
 						m_DrawList.Add(transform, vertices_front, Block[x][y][z]);
 
-					if (checkRight  && Block::IsTranspaent(Block[x + 1][y][z]))
+					if (checkRight  && Block::IsTransparent(Block[x + 1][y][z]))
 						m_DrawList.Add(transform, vertices_right, Block[x][y][z]);
 
-					if (checkBehind && Block::IsTranspaent(Block[x][y][z - 1]))
+					if (checkBehind && Block::IsTransparent(Block[x][y][z - 1]))
 						m_DrawList.Add(transform, vertices_behind, Block[x][y][z]);
 
-					if (checkLeft   && Block::IsTranspaent(Block[x - 1][y][z]))
+					if (checkLeft   && Block::IsTransparent(Block[x - 1][y][z]))
 						m_DrawList.Add(transform, vertices_left, Block[x][y][z]);
 
 				}

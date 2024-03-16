@@ -4,6 +4,7 @@
 #include "World/World.h"
 
 #include "Core/Core.h"
+#include "Core/Log.h"
 
 #include <iostream>
 
@@ -12,6 +13,7 @@ namespace KuchCraft {
 	Player::Player()
 	{
 		OnRenderDistanceChanged(m_GraphicalSettings.RenderDistance);
+		m_PrevMousePosition = Input::GetMousePosition();
 	}
 
 	Player::~Player()
@@ -20,38 +22,64 @@ namespace KuchCraft {
 
 	void Player::OnUpdate(float dt)
 	{
-		// Movement
-		bool sprint = false;
-		if (Input::IsKeyPressed(KeyCode::LeftShift))
-			sprint = true;
+		// Movement	
+		glm::vec3 prevPosition = m_Position;
 
-		m_Camera.SetData({ m_Position.x, m_Position.y + m_PlayerMovementSettings.Height, m_Position.z },
-						   m_Rotation,
-						   m_PlayerMovementSettings.Speed, m_PlayerMovementSettings.SprintSpeed, 
-						   dt);
+		// Mouse
+		{
+			auto position       = Input::GetMousePosition();
+			auto positionDiff   = position - m_PrevMousePosition;
+			m_PrevMousePosition = position;
 
+			m_Rotation.x += positionDiff.x * m_PlayerMovementSettings.CameraSensitivity * dt;
+			m_Rotation.y -= positionDiff.y * m_PlayerMovementSettings.CameraSensitivity * dt;
+
+			constexpr double min_pitch = glm::radians(-89.9);
+			constexpr double max_pitch = glm::radians( 89.9);
+
+			if (m_Rotation.y < min_pitch)
+				m_Rotation.y = min_pitch;
+
+			if (m_Rotation.y > max_pitch)
+				m_Rotation.y = max_pitch;
+		}
+
+		// Keyboard
 		if (Input::IsKeyPressed(KeyCode::W))
-			m_Camera.OnKeyboardMovement(KeyboardMovement::Forward, sprint);
+		{
+			float speed = Input::IsKeyPressed(KeyCode::LeftShift) ? m_PlayerMovementSettings.SprintSpeed : m_PlayerMovementSettings.Speed;
+			m_Position += speed * m_Camera.GetAbsoluteFront() * dt;
+		}
 		if (Input::IsKeyPressed(KeyCode::S))
-			m_Camera.OnKeyboardMovement(KeyboardMovement::Backward);
+		{
+			m_Position -= m_PlayerMovementSettings.Speed * m_Camera.GetAbsoluteFront() * dt;
+		}
 
 		if (Input::IsKeyPressed(KeyCode::A))
-			m_Camera.OnKeyboardMovement(KeyboardMovement::Left);
+		{
+			m_Position -= m_PlayerMovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
+		}
 		if (Input::IsKeyPressed(KeyCode::D))
-			m_Camera.OnKeyboardMovement(KeyboardMovement::Right);
+		{
+			m_Position += m_PlayerMovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
+		}
 
 		if (Input::IsKeyPressed(KeyCode::Space))
-			m_Camera.OnKeyboardMovement(KeyboardMovement::Up);
+		{
+			m_Position.y += m_PlayerMovementSettings.Speed * dt;
+		}
 		if (Input::IsKeyPressed(KeyCode::LeftControl))
-			m_Camera.OnKeyboardMovement(KeyboardMovement::Down);
+		{
+			m_Position.y -= m_PlayerMovementSettings.Speed * dt;
+		}
+
+		if (m_PlayerMovementSettings.CheckForCollisions)
+		{
+			if (CollisionCheck())
+				m_Position = prevPosition;
+		}
 		
-		m_Camera.OnMouseMovement();
-		m_Camera.OnUpdate();
-
-		auto& pos  = m_Camera.GetPosition();
-		m_Position = { pos.x, pos.y - m_PlayerMovementSettings.Height, pos.z };
-		m_Rotation = m_Camera.GetRotation();	
-
+		m_Camera.OnUpdate(GetHeadPosition(), m_Rotation);
 	}
 
 	void Player::OnEvent(Event& event)
@@ -104,6 +132,39 @@ namespace KuchCraft {
 			m_Camera.SetFarPlan(horizontalDistane);
 		else
 			m_Camera.SetFarPlan(verticalDistance);
+	}
+
+	bool Player::CollisionCheck()
+	{
+		glm::ivec3 position{ m_Position };
+
+		glm::vec3 playerMinCorner{ m_Position.x - player_half_width, m_Position.y,                          m_Position.z - player_half_width };
+		glm::vec3 playerMaxCorner{ m_Position.x + player_half_width, m_Position.y + player_absolute_height, m_Position.z + player_half_width };
+
+		for (int y = 0; y <= player_absolute_height; y++)
+		{
+			for (int x = -player_absolute_width; x <= player_absolute_width; x++)
+			{
+				for (int z = -player_absolute_width; z <= player_absolute_width; z++)
+				{
+					glm::vec3 blockPositionMin = { position.x + x, position.y + y, position.z + z };
+					Block block = World::Get().GetBlock(blockPositionMin);
+
+					if (block.IsSolid())
+					{
+						constexpr float block_size = 1.0f;
+						glm::vec3 blockPositionMax = { blockPositionMin.x + block_size, blockPositionMin.y + block_size, blockPositionMin.z + block_size };
+
+						if (playerMinCorner.x < blockPositionMax.x && playerMaxCorner.x > blockPositionMin.x &&
+							playerMinCorner.y < blockPositionMax.y && playerMaxCorner.y > blockPositionMin.y &&
+							playerMinCorner.z < blockPositionMax.z && playerMaxCorner.z > blockPositionMin.z)
+							return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 }

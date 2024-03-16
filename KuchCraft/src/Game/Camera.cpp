@@ -13,22 +13,18 @@ namespace KuchCraft {
 
 	Camera::Camera()
 	{
-		m_PrevMousePosition = Input::GetMousePosition();
 		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
 		UpdateProjection(width, height);
-		UpdateFront();
-		UpdateView();
 	}
 
 	Camera::~Camera()
 	{
 	}
 
-	void Camera::OnUpdate()
+	void Camera::OnUpdate(const glm::vec3& position, const glm::vec2& rotation)
 	{
-		UpdateFront();
-		UpdateView(); 
+		UpdateFront(rotation);
+		UpdateView(position);
 	}
 
 	void Camera::OnEvent(Event& event)
@@ -51,37 +47,6 @@ namespace KuchCraft {
 		return false;
 	}
 
-	void Camera::OnKeyboardMovement(KeyboardMovement m, bool sprint)
-	{
-		float speed = sprint ? m_SprintSpeed : m_Speed;
-		switch (m)
-		{
-			case KeyboardMovement::Forward:  m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
-			case KeyboardMovement::Backward: m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up))); break;
-			case KeyboardMovement::Left:     m_Position   -= speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
-			case KeyboardMovement::Right:    m_Position   += speed * m_DeltaTime * glm::normalize(glm::cross(m_Front, m_Up));                   break;
-			case KeyboardMovement::Up:       m_Position.y += speed * m_DeltaTime;                                                               break;
-			case KeyboardMovement::Down:     m_Position.y -= speed * m_DeltaTime;                                                               break;
-			default: break;
-		}
-	}
-
-	void Camera::OnMouseMovement()
-	{
-		auto position       = Input::GetMousePosition();
-		auto deltaPosition  = position - m_PrevMousePosition;
-		m_PrevMousePosition = position;
-
-		m_Yaw   += (float)(m_Sensitivity * m_DeltaTime * deltaPosition.x);
-		m_Pitch -= (float)(m_Sensitivity * m_DeltaTime * deltaPosition.y);
-
-		if (m_Pitch > glm::radians(89.9f))
-			m_Pitch = glm::radians(89.9f);
-
-		if (m_Pitch < glm::radians(-89.9f))
-			m_Pitch = glm::radians(-89.9f);
-	}
-
 	const glm::mat4 Camera::GetAbsoluteViewProjection() const
 	{
 		return m_Projection * glm::mat4(glm::mat3(glm::lookAt(glm::vec3(0.0f), m_Front, m_Up)));
@@ -93,18 +58,21 @@ namespace KuchCraft {
 		m_OrthoProjection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
 	}
 
-	void Camera::UpdateView()
+	void Camera::UpdateView(const glm::vec3& position)
 	{
-		m_View = glm::lookAt(m_Position, m_Position + m_Front, m_Up);
+		m_View = glm::lookAt(position, position + m_Front, m_Up);
 	}
 
-	void Camera::UpdateFront()
+	void Camera::UpdateFront(const glm::vec2& rotation)
 	{
 		glm::vec3 front;
-		front.x = glm::cos(m_Yaw) * glm::cos(m_Pitch);
-		front.y = glm::sin(m_Pitch);
-		front.z = glm::sin(m_Yaw) * glm::cos(m_Pitch);
+		front.x = glm::cos(rotation.x) * glm::cos(rotation.y);
+		front.y = glm::sin(rotation.y);
+		front.z = glm::sin(rotation.x) * glm::cos(rotation.y);
 		m_Front = glm::normalize(front);
+
+		m_AbsoluteFront = glm::normalize(glm::cross(m_Up, glm::cross(m_Front, m_Up)));
+		m_AbsoluteRight = glm::normalize(glm::cross(m_Front, m_Up));
 	}
 
 }

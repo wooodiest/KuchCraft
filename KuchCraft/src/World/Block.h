@@ -1,5 +1,8 @@
 #pragma once
 
+#include <unordered_map>
+#include <string>
+
 namespace KuchCraft {
 
 	enum class BlockType
@@ -34,7 +37,16 @@ namespace KuchCraft {
 		bool operator ==(const BlockType& other) const { return  blockType == other;           }
 		bool operator !=(const BlockType& other) const { return !(*this == other);             }
 
-		static bool IsTranspaent(const Block& block);
+		bool IsTransparent() const { return IsTransparent(blockType); }
+		bool IsSolid()       const { return IsSolid(blockType);      }
+
+		const std::string& GetName() const { return s_BlockNames[blockType]; };
+
+		static bool IsTransparent(const Block& block);
+		static bool IsSolid(const Block& block);
+
+	private:
+		static std::unordered_map<BlockType, std::string> s_BlockNames;
 	};
 
 }

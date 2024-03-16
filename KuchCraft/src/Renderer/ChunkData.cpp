@@ -6,7 +6,6 @@ namespace KuchCraft {
 
 	ChunkDrawList::ChunkDrawList()
 	{
-		m_IndexCount.push_back(0);
 	}
 
 	ChunkDrawList::~ChunkDrawList()
@@ -20,9 +19,18 @@ namespace KuchCraft {
 
 	void ChunkDrawList::StartRecreating()
 	{
+		m_DrawCalls = 1;
 		m_TextureSlotHelper = new TextureSlotHelper();
+
 		m_Vertices.clear();
 		m_Vertices.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_vertex_count);
+
+		m_Textures.clear();
+		m_Textures.reserve(max_texture_slots);
+
+		m_IndexCount.clear();
+		m_IndexCount.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_index_count);
+		m_IndexCount.push_back(0);
 
 		m_WaterVertices.clear();
 		m_WaterVertices.reserve(chunk_size_XZ * chunk_size_XZ);
@@ -33,7 +41,10 @@ namespace KuchCraft {
 		if (m_TextureSlotHelper)
 			delete m_TextureSlotHelper;
 
-		m_Vertices.shrink_to_fit();
+		m_Vertices.     shrink_to_fit();
+		m_IndexCount.   shrink_to_fit();
+		m_Textures.     shrink_to_fit();
+		m_WaterVertices.shrink_to_fit();
 	}
 
 	void ChunkDrawList::NewDrawCall()

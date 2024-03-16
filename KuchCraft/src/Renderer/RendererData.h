@@ -36,6 +36,7 @@ namespace KuchCraft {
 	constexpr uint32_t quad_vertex_count    = 4;
 	constexpr uint32_t quad_vertex_count_a  = 6;
 	constexpr uint32_t cube_vertex_count    = 24;
+	constexpr uint32_t cube_index_count     = 36;
 	constexpr uint32_t cube_face_cout       = 6;
 
 	// Utils

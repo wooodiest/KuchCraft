@@ -147,7 +147,7 @@ namespace KuchCraft {
 	void World::Render()
 	{
 		Renderer::BeginWorld(m_Player.GetCamera());
-		Renderer::SetWaterTintStatus(GetBlock(m_Player.GetCamera().GetPosition()) == BlockType::Water);
+		Renderer::SetWaterTintStatus(GetBlock(m_Player.GetHeadPosition()) == BlockType::Water);
 
 		Renderer::BeginChunk();
 		for (const auto& c : m_ChunksToRender)
@@ -194,11 +194,11 @@ namespace KuchCraft {
 				"\n      - text:            " + std::to_string(rendererStats.TextTimer.ElapsedMillis()) + "ms";
 							 
 
-			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f });
+			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f }, {1.0f, 0.0f, 0.0f, 1.0f});
 
 			std::string text2 = graphicalInfo.Renderer + "\n" + graphicalInfo.Version;
 
-			Renderer::RenderTextNorm(text2, {0.5f, 0.975f});
+			Renderer::RenderTextNorm(text2, { 0.5f, 0.975f });
 		}
 
 		Renderer::EndWorld();
