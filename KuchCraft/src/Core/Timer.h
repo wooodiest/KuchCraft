@@ -17,15 +17,8 @@ namespace KuchCraft {
 		void Begin();
 		void End();
 
-		float Elapsed()
-		{
-			return m_LastTime;
-		}
-
-		float ElapsedMillis()
-		{
-			return m_LastTime * 1000.0f;
-		}
+		float Elapsed()       const { return m_LastTime;           }
+		float ElapsedMillis() const { return m_LastTime * 1000.0f; }
 
 	private:
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_Start;

@@ -31,8 +31,6 @@ namespace KuchCraft {
 		const glm::vec3& GetAbsoluteFront() const { return m_AbsoluteFront; }
 		const glm::vec3& GetAbsoluteRight() const { return m_AbsoluteRight; }
 
-		const glm::vec4  GetAspectRatioFovNearFar() const { return { m_AspectRatio, m_Fov, m_Near, m_Far }; }
-
 	private:
 		void UpdateProjection(uint32_t width, uint32_t height);
 		void UpdateView(const glm::vec3& position);
@@ -48,7 +46,6 @@ namespace KuchCraft {
 
 		glm::vec3 m_AbsoluteFront{ 0.0f, 0.0f, 0.0f };
 		glm::vec3 m_AbsoluteRight{ 0.0f, 0.0f, 0.0f };
-
 
 		float m_Fov         = glm::radians(45.0f);
 		float m_Near        = 0.01f;

@@ -16,42 +16,12 @@ namespace KuchCraft {
 	public:
 		static bool IsKeyPressed(KeyCode keycode);
 		static bool IsMouseButtonPressed(MouseCode button);
-		static glm::vec<2, double> GetMousePosition();
+		static glm::highp_dvec2 GetMousePosition();
 		static double GetMousePositionX();
 		static double GetMousePositionY();
 
 	private:
 		Input() = default;
-	};
-
-	class InputKeyboardHandler
-	{
-	public:
-		InputKeyboardHandler(KeyCode key, bool repeat = false, float time = 0.5f);
-		void OnUpdate(float dt);
-		bool PerformAction() const { return m_PerformAction; }
-
-	private:
-		KeyCode m_Key;
-		bool    m_Repeat;
-		float   m_Time;
-		bool    m_PerformAction = false;
-		float   m_CurrentTime = 0.0f;
-	};
-
-	class InputMouseHandler
-	{
-	public:
-		InputMouseHandler(MouseCode button, bool repeat = false, float time = 0.5f);
-		void OnUpdate(float dt);
-		bool PerformAction() const { return m_PerformAction; }
-
-	private:
-		MouseCode m_Button;
-		bool    m_Repeat;
-		float   m_Time;
-		bool    m_PerformAction = false;
-		float   m_CurrentTime = 0.0f;
 	};
 
 }
