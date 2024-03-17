@@ -27,16 +27,15 @@ namespace KuchCraft {
 
 		// Mouse
 		{
-			auto position       = Input::GetMousePosition();
-			auto positionDiff   = position - m_PrevMousePosition;
+			glm::vec2 position     = Input::GetMousePosition();
+			glm::vec2 positionDiff = position - m_PrevMousePosition;
+			m_PrevMousePosition    = position;
 
-			m_PrevMousePosition = position;
+			m_Rotation.x += positionDiff.x * m_PlayerMovementSettings.CameraSensitivity * 0.001f;
+			m_Rotation.y -= positionDiff.y * m_PlayerMovementSettings.CameraSensitivity * 0.001f;
 
-			m_Rotation.x += positionDiff.x * m_PlayerMovementSettings.CameraSensitivity * dt;
-			m_Rotation.y -= positionDiff.y * m_PlayerMovementSettings.CameraSensitivity * dt;
-
-			constexpr double min_pitch = glm::radians(-89.9);
-			constexpr double max_pitch = glm::radians( 89.9);
+			constexpr float min_pitch = glm::radians(-89.9f);
+			constexpr float max_pitch = glm::radians( 89.9f);
 
 			if (m_Rotation.y < min_pitch)
 				m_Rotation.y = min_pitch;

@@ -24,6 +24,7 @@ namespace KuchCraft {
 
 		// Set data
 		WorldGenerator::Init(4206999);
+		m_Player.SetPosition({ 2000.0f, 65.0f, 2000.0f });
 
 		// Loading stuff
 		PreLoadWorld();
@@ -148,7 +149,7 @@ namespace KuchCraft {
 	void World::Render()
 	{
 		Renderer::BeginWorld(m_Player.GetCamera());
-		Renderer::SetWaterTintStatus(GetBlock(m_Player.GetHeadPosition()) == BlockType::Water);
+		Renderer::SetWaterTintStatus(GetBlock(m_Player.GetEyePosition()) == BlockType::Water);
 
 		Renderer::BeginChunk();
 		for (const auto& c : m_ChunksToRender)

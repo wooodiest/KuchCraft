@@ -20,25 +20,25 @@ namespace KuchCraft {
 		return state == GLFW_PRESS;
 	}
 
-	glm::highp_dvec2 Input::GetMousePosition()
+	glm::vec2 Input::GetMousePosition()
 	{
 		auto window = Application::Get().GetWindow().GetWindow();
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 
-		return { xpos, ypos };
+		return { (float)xpos, (float)ypos };
 	}
 
-	double Input::GetMousePositionX()
+	float Input::GetMousePositionX()
 	{
 		auto position = GetMousePosition();
-		return position.x;
+		return (float)position.x;
 	}
 
-	double Input::GetMousePositionY()
+	float Input::GetMousePositionY()
 	{
 		auto position = GetMousePosition();
-		return position.y;
+		return (float)position.y;
 	}
 
 }

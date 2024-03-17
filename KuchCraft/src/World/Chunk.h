@@ -32,7 +32,7 @@ namespace KuchCraft {
 		void SetRecreateStatus(bool status) { m_NeedToRecreate = status; }
 
 		// Utils
-		const glm::vec3&     GetPosition()  const { return Position;   }
+		const glm::vec3&     GetPosition()  const { return m_Position; }
 		const ChunkDrawList& GetDrawList()  const { return m_DrawList; } 
 
 		static glm::vec3 CalculatePosition(const glm::vec3& position);
@@ -40,7 +40,7 @@ namespace KuchCraft {
 
 	private:
 		// Chunk position starts at (0, 0, 0) and continue along the axis + (chunk_size_XZ, 0, chunk_size_XZ)
-		glm::vec3 Position{ 0.0f };
+		const glm::vec3 m_Position;
 
 		bool m_NeedToRecreate = true;
 		bool m_NeedToBuild    = true;
