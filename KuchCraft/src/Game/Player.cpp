@@ -23,8 +23,6 @@ namespace KuchCraft {
 	void Player::OnUpdate(float dt)
 	{
 		// Movement	
-		glm::vec3 prevPosition = m_Position;
-
 		// Mouse
 		{
 			glm::vec2 position     = Input::GetMousePosition();
@@ -45,40 +43,37 @@ namespace KuchCraft {
 		}
 
 		// Keyboard
+		glm::vec3 prevPosition = m_Position;
+
 		if (Input::IsKeyPressed(KeyCode::W))
-		{
-			float speed = Input::IsKeyPressed(KeyCode::LeftShift) ? m_MovementSettings.SprintSpeed : m_MovementSettings.Speed;
-			m_Position += speed * m_Camera.GetAbsoluteFront() * dt;
-		}
+			m_MovementVector += m_Camera.GetAbsoluteFront();	
 		if (Input::IsKeyPressed(KeyCode::S))
-		{
-			m_Position -= m_MovementSettings.Speed * m_Camera.GetAbsoluteFront() * dt;
-		}
-
+			m_MovementVector -= m_Camera.GetAbsoluteFront();
+		
 		if (Input::IsKeyPressed(KeyCode::A))
-		{
-			m_Position -= m_MovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
-		}
+			m_MovementVector -= m_Camera.GetAbsoluteRight();
 		if (Input::IsKeyPressed(KeyCode::D))
-		{
-			m_Position += m_MovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
-		}
-
+			m_MovementVector += m_Camera.GetAbsoluteRight();
+		
 		if (Input::IsKeyPressed(KeyCode::Space))
-		{
-			m_Position.y += m_MovementSettings.Speed * dt;
-		}
+			m_MovementVector += m_Camera.GetUp();
 		if (Input::IsKeyPressed(KeyCode::LeftControl))
-		{
-			m_Position.y -= m_MovementSettings.Speed * dt;
-		}
+			m_MovementVector -= m_Camera.GetUp();
+		
+		if (glm::length(m_MovementVector) > 0.0f)
+			m_MovementVector = glm::normalize(m_MovementVector);
+
+		m_Position += m_MovementVector * m_MovementSettings.Speed * dt;
 
 		if (m_MovementSettings.CheckForCollisions)
 		{
 			if (CollisionCheck())
+			{
 				m_Position = prevPosition;
+			}		
 		}
 		
+		m_MovementVector = { 0.0f, 0.0f, 0.0f };
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
 	}
 
@@ -127,6 +122,7 @@ namespace KuchCraft {
 
 	bool Player::CollisionCheck()
 	{
+		bool colided = false;
 		glm::ivec3 position{ m_Position };
 
 		glm::vec3 playerMinCorner{ m_Position.x - player_half_width, m_Position.y,        m_Position.z - player_half_width };
@@ -149,13 +145,16 @@ namespace KuchCraft {
 						if (playerMinCorner.x < blockPositionMax.x && playerMaxCorner.x > blockPositionMin.x &&
 							playerMinCorner.y < blockPositionMax.y && playerMaxCorner.y > blockPositionMin.y &&
 							playerMinCorner.z < blockPositionMax.z && playerMaxCorner.z > blockPositionMin.z)
-							return true;
+
+						{
+							colided = true;
+						}
 					}
 				}
 			}
 		}
 
-		return false;
+		return colided;
 	}
 
 }

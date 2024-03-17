@@ -63,6 +63,7 @@ namespace KuchCraft {
 	private:
 		glm::vec3 m_Position{ 0.0f };
 		glm::vec2 m_Rotation{ 0.0f }; // yaw, pitch
+		glm::vec3 m_MovementVector{ 0.0f };
 		glm::vec2 m_PrevMousePosition{ 0.0f };
 
 		PlayerMovementSettings  m_MovementSettings;
