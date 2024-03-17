@@ -25,7 +25,7 @@ namespace KuchCraft {
 	{
 		bool  CheckForCollisions = true;
 		float CameraSensitivity  = 0.25f;
-		float Speed       = 5.0f;
+		float Speed       = 7.0f;
 		float SprintSpeed = 50.0f;
 		float HandRange   = 3.0f;
 	};
@@ -58,7 +58,7 @@ namespace KuchCraft {
 		const PlayerMovementSettings&  GetMovementSettings()  const { return m_MovementSettings;  }
 
 	private:
-		bool CollisionCheck(glm::vec3& collisionNormal);
+		bool CollisionCheck(const glm::vec3& newPosition, glm::vec3& collisionNormal);
 
 	private:
 		glm::vec3 m_Position{ 0.0f };
