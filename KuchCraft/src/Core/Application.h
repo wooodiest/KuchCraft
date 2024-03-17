@@ -16,11 +16,11 @@ namespace KuchCraft {
 		Application();
 		~Application();
 
+		static Application& Get() { return *s_Instance; }
+
+		Window& GetWindow() { return *m_Window; }
+
 		void Run();
-
-		inline static Application& Get() { return *s_Instance; }
-		inline Window& GetWindow() { return *m_Window; }
-
 		void OnEvent(Event& e);
 
 		bool OnWindowClose(WindowCloseEvent& e);

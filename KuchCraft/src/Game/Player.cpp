@@ -31,8 +31,8 @@ namespace KuchCraft {
 			glm::vec2 positionDiff = position - m_PrevMousePosition;
 			m_PrevMousePosition    = position;
 
-			m_Rotation.x += positionDiff.x * m_PlayerMovementSettings.CameraSensitivity * 0.001f;
-			m_Rotation.y -= positionDiff.y * m_PlayerMovementSettings.CameraSensitivity * 0.001f;
+			m_Rotation.x += positionDiff.x * m_MovementSettings.CameraSensitivity * 0.001f;
+			m_Rotation.y -= positionDiff.y * m_MovementSettings.CameraSensitivity * 0.001f;
 
 			constexpr float min_pitch = glm::radians(-89.9f);
 			constexpr float max_pitch = glm::radians( 89.9f);
@@ -47,33 +47,33 @@ namespace KuchCraft {
 		// Keyboard
 		if (Input::IsKeyPressed(KeyCode::W))
 		{
-			float speed = Input::IsKeyPressed(KeyCode::LeftShift) ? m_PlayerMovementSettings.SprintSpeed : m_PlayerMovementSettings.Speed;
+			float speed = Input::IsKeyPressed(KeyCode::LeftShift) ? m_MovementSettings.SprintSpeed : m_MovementSettings.Speed;
 			m_Position += speed * m_Camera.GetAbsoluteFront() * dt;
 		}
 		if (Input::IsKeyPressed(KeyCode::S))
 		{
-			m_Position -= m_PlayerMovementSettings.Speed * m_Camera.GetAbsoluteFront() * dt;
+			m_Position -= m_MovementSettings.Speed * m_Camera.GetAbsoluteFront() * dt;
 		}
 
 		if (Input::IsKeyPressed(KeyCode::A))
 		{
-			m_Position -= m_PlayerMovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
+			m_Position -= m_MovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
 		}
 		if (Input::IsKeyPressed(KeyCode::D))
 		{
-			m_Position += m_PlayerMovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
+			m_Position += m_MovementSettings.Speed * m_Camera.GetAbsoluteRight() * dt;
 		}
 
 		if (Input::IsKeyPressed(KeyCode::Space))
 		{
-			m_Position.y += m_PlayerMovementSettings.Speed * dt;
+			m_Position.y += m_MovementSettings.Speed * dt;
 		}
 		if (Input::IsKeyPressed(KeyCode::LeftControl))
 		{
-			m_Position.y -= m_PlayerMovementSettings.Speed * dt;
+			m_Position.y -= m_MovementSettings.Speed * dt;
 		}
 
-		if (m_PlayerMovementSettings.CheckForCollisions)
+		if (m_MovementSettings.CheckForCollisions)
 		{
 			if (CollisionCheck())
 				m_Position = prevPosition;
@@ -97,8 +97,8 @@ namespace KuchCraft {
 
 		switch (e.GetKeyCode())
 		{
-			default:
-				return false;;
+			case KeyCode::CapsLock: m_MovementSettings.CheckForCollisions = !m_MovementSettings.CheckForCollisions; return false;
+			default: return false;
 		}
 	}
 

@@ -47,7 +47,6 @@ namespace KuchCraft {
 
 			// Window swap buffers etc..
 			m_Window->OnUpdate();
-			m_Running = !m_Window->ShouldClose();
 			
 			if (Input::IsKeyPressed(KeyCode::Escape)) // temporary
 				m_Running = false;

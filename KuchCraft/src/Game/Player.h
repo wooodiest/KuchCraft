@@ -54,8 +54,8 @@ namespace KuchCraft {
 		void SetRenderDistance(uint32_t distance, bool reloadWorld = true);
 		void SetKeptInMemoryChunksDistance(uint32_t distance, bool reloadWorld = true);
 
-		const PlayerGraphicalSettings& GetGraphicalSettings()      const { return m_GraphicalSettings;      }
-		const PlayerMovementSettings&  GetPlayerMovementSettings() const { return m_PlayerMovementSettings; }
+		const PlayerGraphicalSettings& GetGraphicalSettings() const { return m_GraphicalSettings; }
+		const PlayerMovementSettings&  GetMovementSettings()  const { return m_MovementSettings;  }
 
 	private:
 		bool CollisionCheck();
@@ -65,7 +65,7 @@ namespace KuchCraft {
 		glm::vec2 m_Rotation{ 0.0f }; // yaw, pitch
 		glm::vec2 m_PrevMousePosition{ 0.0f };
 
-		PlayerMovementSettings  m_PlayerMovementSettings;
+		PlayerMovementSettings  m_MovementSettings;
 		PlayerGraphicalSettings m_GraphicalSettings;
 		Camera m_Camera;
 
