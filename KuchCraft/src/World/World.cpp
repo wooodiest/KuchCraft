@@ -11,6 +11,7 @@
 #include "World/WorldGenerator.h"
 
 #include "Core/Core.h"
+#include "Core/Utils.h"
 
 namespace KuchCraft {
 
@@ -175,25 +176,25 @@ namespace KuchCraft {
 			const auto& graphicalInfo = Renderer::GetGraphicalInfo();
 
 			std::string text = "Player:"
-				"\n    Position: " + std::to_string(position.x) + ", " + std::to_string(position.y) + ", " + std::to_string(position.z) +
-				"\n    Rotation: " + std::to_string(glm::degrees(rotation.x)) + ", " + std::to_string(glm::degrees(rotation.y)) +
-				"\n    Chunk ID: " + std::to_string(GetChunkIndex(position)) +
+				"\n    Position: " + position +
+				"\n    Rotation: " + glm::vec2(glm::degrees(rotation.x), glm::degrees(rotation.y)) +
+				"\n    Chunk ID: " + GetChunkIndex(position) +
 				"\nWorld:"
-				"\n    Seed: " + std::to_string((uint32_t)WorldGenerator::GetSeed()) +
+				"\n    Seed: " + WorldGenerator::GetSeed() +
 				"\n    Chunks:"
-				"\n      - active: " + std::to_string(m_WorldStats.ActiveChunks) +
-				"\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender) +
-				"\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
-				"\n      - built: " + std::to_string(m_WorldStats.TotalBuiltChunks) +
-				"\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks) +
+				"\n      - active: "    + m_WorldStats.ActiveChunks         +
+				"\n      - to render: " + m_WorldStats.ChunksToRender       +
+				"\n      - in memory: " + m_WorldStats.ChunksInMemory       +
+				"\n      - built: "     + m_WorldStats.TotalBuiltChunks     +
+				"\n      - recreated: " + m_WorldStats.TotalRecreatedChunks +
 				"\nRenderer:"
-				"\n    Draw cals: " + std::to_string(rendererStats.DrawCalls) +
-				"\n    Quads: " + std::to_string(rendererStats.Quads) +
-				"\n    Render time: " + std::to_string(rendererStats.RenderTimer.ElapsedMillis()) + "ms" +
-				"\n      - chunks:      " + std::to_string(rendererStats.ChunkTimer.ElapsedMillis()) + "ms" +
-				"\n      - skybox:      " + std::to_string(rendererStats.SkyboxTimer.ElapsedMillis()) + "ms" +
-				"\n      - water:         " + std::to_string(rendererStats.WaterTimer.ElapsedMillis()) + "ms" +
-				"\n      - text:            " + std::to_string(rendererStats.TextTimer.ElapsedMillis()) + "ms";
+				"\n    Draw cals: " + rendererStats.DrawCalls +
+				"\n    Quads: "     + rendererStats.Quads +
+				"\n    Render time: "         + rendererStats.RenderTimer.ElapsedMillis() + "ms" +
+				"\n      - chunks:      "     + rendererStats.ChunkTimer.ElapsedMillis()  + "ms" +
+				"\n      - skybox:      "     + rendererStats.SkyboxTimer.ElapsedMillis() + "ms" +
+				"\n      - water:         "   + rendererStats.WaterTimer.ElapsedMillis()  + "ms" +
+				"\n      - text:            " + rendererStats.TextTimer.ElapsedMillis()   + "ms";
 							 
 
 			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f });

@@ -156,12 +156,13 @@ namespace KuchCraft {
 							float yOverlap = glm::min(playerMaxCorner.y, blockPositionMax.y) - glm::max(playerMinCorner.y, blockPositionMin.y);
 							float zOverlap = glm::min(playerMaxCorner.z, blockPositionMax.z) - glm::max(playerMinCorner.z, blockPositionMin.z);
 
+							constexpr float normal_direction = 1.0f;
 							if (xOverlap < glm::min(yOverlap, zOverlap))
-								normal.x = (playerMaxCorner.x - blockPositionMin.x < blockPositionMax.x - playerMinCorner.x) ? -1.0f : 1.0f;
+								normal.x = (playerMaxCorner.x - blockPositionMin.x < blockPositionMax.x - playerMinCorner.x) ? -normal_direction : normal_direction;
 							else if (yOverlap < glm::min(xOverlap, zOverlap)) 
-								normal.y = (playerMaxCorner.y - blockPositionMin.y < blockPositionMax.y - playerMinCorner.y) ? -1.0f : 1.0f;
+								normal.y = (playerMaxCorner.y - blockPositionMin.y < blockPositionMax.y - playerMinCorner.y) ? -normal_direction : normal_direction;
 							else 
-								normal.z = (playerMaxCorner.z - blockPositionMin.z < blockPositionMax.z - playerMinCorner.z) ? -1.0f : 1.0f;
+								normal.z = (playerMaxCorner.z - blockPositionMin.z < blockPositionMax.z - playerMinCorner.z) ? -normal_direction : normal_direction;
 					
 						}
 					}
