@@ -69,9 +69,11 @@ namespace KuchCraft {
 
 		if (m_MovementSettings.CheckForCollisions)
 		{
-			if (CollisionCheck())
+			glm::vec3 collisionNormal{ 0.0f };
+			if (CollisionCheck(collisionNormal) && glm::length(collisionNormal) > 0.0f)
 			{
-				m_Position = prevPosition;
+				glm::vec3 responseDirection = m_MovementVector - collisionNormal * glm::dot(m_MovementVector, collisionNormal);
+				m_Position = prevPosition + responseDirection * m_MovementSettings.Speed * dt;
 			}		
 		}
 		
@@ -122,7 +124,7 @@ namespace KuchCraft {
 			World::Get().ReloadChunks();
 	}
 
-	bool Player::CollisionCheck()
+	bool Player::CollisionCheck(glm::vec3& collisionNormal)
 	{
 		bool colided = false;
 		glm::ivec3 position{ m_Position };
@@ -151,24 +153,26 @@ namespace KuchCraft {
 						{
 							colided = true;
 
-							glm::vec3 normal{ 0.0f };
 							float xOverlap = glm::min(playerMaxCorner.x, blockPositionMax.x) - glm::max(playerMinCorner.x, blockPositionMin.x);
 							float yOverlap = glm::min(playerMaxCorner.y, blockPositionMax.y) - glm::max(playerMinCorner.y, blockPositionMin.y);
 							float zOverlap = glm::min(playerMaxCorner.z, blockPositionMax.z) - glm::max(playerMinCorner.z, blockPositionMin.z);
 
 							constexpr float normal_direction = 1.0f;
 							if (xOverlap < glm::min(yOverlap, zOverlap))
-								normal.x = (playerMaxCorner.x - blockPositionMin.x < blockPositionMax.x - playerMinCorner.x) ? -normal_direction : normal_direction;
+								collisionNormal.x += (playerMaxCorner.x - blockPositionMin.x < blockPositionMax.x - playerMinCorner.x) ? -normal_direction : normal_direction;
 							else if (yOverlap < glm::min(xOverlap, zOverlap)) 
-								normal.y = (playerMaxCorner.y - blockPositionMin.y < blockPositionMax.y - playerMinCorner.y) ? -normal_direction : normal_direction;
+								collisionNormal.y += (playerMaxCorner.y - blockPositionMin.y < blockPositionMax.y - playerMinCorner.y) ? -normal_direction : normal_direction;
 							else 
-								normal.z = (playerMaxCorner.z - blockPositionMin.z < blockPositionMax.z - playerMinCorner.z) ? -normal_direction : normal_direction;
+								collisionNormal.z += (playerMaxCorner.z - blockPositionMin.z < blockPositionMax.z - playerMinCorner.z) ? -normal_direction : normal_direction;
 					
 						}
 					}
 				}
 			}
 		}
+		if (colided)
+			collisionNormal = glm::normalize(collisionNormal);
+		
 
 		return colided;
 	}

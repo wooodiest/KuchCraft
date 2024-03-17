@@ -58,7 +58,7 @@ namespace KuchCraft {
 		const PlayerMovementSettings&  GetMovementSettings()  const { return m_MovementSettings;  }
 
 	private:
-		bool CollisionCheck();
+		bool CollisionCheck(glm::vec3& collisionNormal);
 
 	private:
 		glm::vec3 m_Position{ 0.0f };
