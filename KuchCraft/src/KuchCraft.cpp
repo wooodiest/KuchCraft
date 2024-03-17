@@ -22,6 +22,7 @@ namespace KuchCraft {
 
 	void KuchCraft::OnUpdate(float dt)
 	{
+		Renderer::BeginFrame();
 		Renderer::OnUpdate(dt);
 		if (m_World)
 		{
@@ -35,6 +36,7 @@ namespace KuchCraft {
 				m_World = nullptr;
 			}
 		}
+		Renderer::EndFrame();
 	}
 
 	void KuchCraft::OnEvent(Event& event)

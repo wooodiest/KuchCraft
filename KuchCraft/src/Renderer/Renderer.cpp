@@ -70,6 +70,20 @@ namespace KuchCraft {
 		s_Stats.RenderTimer.Begin();
 	}
 
+	void Renderer::BeginFrame()
+	{
+		// Clear text buffer
+		s_TextData.Data.clear();
+	}
+
+	void Renderer::EndFrame()
+	{
+		// Render text
+		glEnable(GL_BLEND);
+		RenderText();
+		glDisable(GL_BLEND);
+	}
+
 	void Renderer::BeginWorld(const Camera& camera)
 	{
 		// Set uniform buffer
@@ -85,9 +99,6 @@ namespace KuchCraft {
 		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Clear text buffer
-		s_TextData.Data.clear();
 	}
 
 	void Renderer::EndWorld()
@@ -103,11 +114,6 @@ namespace KuchCraft {
 		glBindBuffer(GL_ARRAY_BUFFER, s_RendererData.VertexBuffer);
 		glBindTextureUnit(default_texture_slot, s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
-
-		// Render text
-		glEnable(GL_BLEND);
-		RenderText();
-		glDisable(GL_BLEND);
 	}
 
 	void Renderer::ResetStats()

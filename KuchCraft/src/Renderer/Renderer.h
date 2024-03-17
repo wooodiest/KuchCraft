@@ -18,6 +18,10 @@ namespace KuchCraft {
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 		static void OnUpdate(float dt);
 
+		// Renderer
+		static void BeginFrame();
+		static void EndFrame();
+
 		// Scene
 		static void BeginWorld(const Camera& camera);
 		static void EndWorld();
