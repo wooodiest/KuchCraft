@@ -6,6 +6,8 @@
 #include "Core/Core.h"
 #include "Core/Log.h"
 
+#include "Renderer/Renderer.h"
+
 #include <iostream>
 
 namespace KuchCraft {
@@ -148,6 +150,19 @@ namespace KuchCraft {
 
 						{
 							colided = true;
+
+							glm::vec3 normal{ 0.0f };
+							float xOverlap = glm::min(playerMaxCorner.x, blockPositionMax.x) - glm::max(playerMinCorner.x, blockPositionMin.x);
+							float yOverlap = glm::min(playerMaxCorner.y, blockPositionMax.y) - glm::max(playerMinCorner.y, blockPositionMin.y);
+							float zOverlap = glm::min(playerMaxCorner.z, blockPositionMax.z) - glm::max(playerMinCorner.z, blockPositionMin.z);
+
+							if (xOverlap < glm::min(yOverlap, zOverlap))
+								normal.x = (playerMaxCorner.x - blockPositionMin.x < blockPositionMax.x - playerMinCorner.x) ? -1.0f : 1.0f;
+							else if (yOverlap < glm::min(xOverlap, zOverlap)) 
+								normal.y = (playerMaxCorner.y - blockPositionMin.y < blockPositionMax.y - playerMinCorner.y) ? -1.0f : 1.0f;
+							else 
+								normal.z = (playerMaxCorner.z - blockPositionMin.z < blockPositionMax.z - playerMinCorner.z) ? -1.0f : 1.0f;
+					
 						}
 					}
 				}
