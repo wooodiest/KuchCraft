@@ -5,6 +5,7 @@
 #include "Core/Input.h"
 #include "Core/Events/Event.h"
 #include "Core/Events/KeyEvent.h"
+#include "Game/PhysicsBody.h"
 
 namespace KuchCraft {
 
@@ -58,9 +59,6 @@ namespace KuchCraft {
 		const PlayerMovementSettings&  GetMovementSettings()  const { return m_MovementSettings;  }
 
 	private:
-		bool CollisionCheck(const glm::vec3& newPosition, glm::vec3& collisionNormal);
-
-	private:
 		glm::vec3 m_Position{ 0.0f };
 		glm::vec2 m_Rotation{ 0.0f }; // yaw, pitch
 		glm::vec3 m_MovementVector{ 0.0f };
@@ -69,6 +67,7 @@ namespace KuchCraft {
 		PlayerMovementSettings  m_MovementSettings;
 		PlayerGraphicalSettings m_GraphicalSettings;
 		Camera m_Camera;
+		PlayerPhysicsBody m_PhysicsBody{ player_width, player_height };
 
 	};
 

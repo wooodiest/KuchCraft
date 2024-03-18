@@ -46,52 +46,26 @@ namespace KuchCraft {
 		}
 
 		// Keyboard
-		glm::vec3 prevPosition = m_Position;
+		m_PhysicsBody.SetData(m_Position, m_Camera.GetAbsoluteFront(), m_Camera.GetAbsoluteRight());
 
 		if (Input::IsKeyPressed(KeyCode::W))
-			m_MovementVector += m_Camera.GetAbsoluteFront();	
+			m_PhysicsBody.MoveForward();
 		if (Input::IsKeyPressed(KeyCode::S))
-			m_MovementVector -= m_Camera.GetAbsoluteFront();
+			m_PhysicsBody.MoveBackward();
 		
 		if (Input::IsKeyPressed(KeyCode::A))
-			m_MovementVector -= m_Camera.GetAbsoluteRight();
+			m_PhysicsBody.MoveLeft();
 		if (Input::IsKeyPressed(KeyCode::D))
-			m_MovementVector += m_Camera.GetAbsoluteRight();
+			m_PhysicsBody.MoveRight();
 		
 		if (Input::IsKeyPressed(KeyCode::Space))
-			m_MovementVector += m_Camera.GetUp();
+			m_PhysicsBody.FlyUp();
 		if (Input::IsKeyPressed(KeyCode::LeftControl))
-			m_MovementVector -= m_Camera.GetUp();
+			m_PhysicsBody.FlyDown();
 		
-		if (glm::length(m_MovementVector) > 0.0f)
-			m_MovementVector = glm::normalize(m_MovementVector);
+		m_PhysicsBody.OnUpdate(dt);
 
-		glm::vec3 newPosition = m_Position + m_MovementVector * m_MovementSettings.Speed * dt;
-		if (m_MovementSettings.CheckForCollisions)
-		{
-			glm::vec3 collisionNormal{ 0.0f };
-			if (CollisionCheck(newPosition, collisionNormal) && glm::length(collisionNormal) > 0.0f)
-			{
-				constexpr int maxCorrectionAttempts = 25;
-				constexpr float epsilon = 0.001f;
-
-				glm::vec3 correctedPosition = newPosition;
-				if (CollisionCheck(correctedPosition, collisionNormal) && glm::length(collisionNormal) > 0.0f)
-				{
-					int attempts = 0;
-					correctedPosition -= collisionNormal * epsilon;
-					while (CollisionCheck(correctedPosition, collisionNormal) && attempts < maxCorrectionAttempts && glm::length(collisionNormal) > 0.0f)
-					{
-						correctedPosition -= collisionNormal * epsilon;
-						attempts++;
-					}
-					newPosition = correctedPosition;
-				}
-			}		
-		}
-		m_Position = newPosition;
-
-		m_MovementVector = { 0.0f, 0.0f, 0.0f };
+		m_Position = m_PhysicsBody.GetNewPosition();
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
 	}
 
@@ -136,68 +110,6 @@ namespace KuchCraft {
 		m_GraphicalSettings.ChunksKeptInMemoryDistance = distance;
 		if (reloadWorld)
 			World::Get().ReloadChunks();
-	}
-
-	bool Player::CollisionCheck(const glm::vec3& newPosition, glm::vec3& collisionNormal)
-	{
-		bool colided = false;
-
-		const glm::ivec3 position{ newPosition };
-		const glm::vec3  playerMinCorner{ newPosition.x - player_half_width, newPosition.y,       newPosition.z - player_half_width };
-		const glm::vec3  playerMaxCorner{ newPosition.x + player_half_width, GetHeadPosition().y, newPosition.z + player_half_width};
-
-		for (int y = 0; y <= player_absolute_height; y++)
-		{
-			for (int x = -player_absolute_width; x <= player_absolute_width; x++)
-			{
-				for (int z = -player_absolute_width; z <= player_absolute_width; z++)
-				{
-					const glm::vec3 blockPositionMin = { position.x + x, position.y + y, position.z + z };
-					const Block block = World::Get().GetBlock(blockPositionMin);
-
-					if (block.IsSolid())
-					{
-						constexpr float block_size = 1.0f;
-						const glm::vec3 blockPositionMax = { blockPositionMin.x + block_size, blockPositionMin.y + block_size, blockPositionMin.z + block_size };
-
-						if (playerMinCorner.x < blockPositionMax.x && playerMaxCorner.x > blockPositionMin.x &&
-							playerMinCorner.y < blockPositionMax.y && playerMaxCorner.y > blockPositionMin.y &&
-							playerMinCorner.z < blockPositionMax.z && playerMaxCorner.z > blockPositionMin.z)
-
-						{
-							colided = true;
-
-							const float xOverlap = glm::min(playerMaxCorner.x, blockPositionMax.x) - glm::max(playerMinCorner.x, blockPositionMin.x);
-							const float yOverlap = glm::min(playerMaxCorner.y, blockPositionMax.y) - glm::max(playerMinCorner.y, blockPositionMin.y);
-							const float zOverlap = glm::min(playerMaxCorner.z, blockPositionMax.z) - glm::max(playerMinCorner.z, blockPositionMin.z);
-
-							constexpr float normal = 1.0f;
-							if (xOverlap < glm::min(yOverlap, zOverlap))
-								collisionNormal.x += (playerMaxCorner.x - blockPositionMin.x < blockPositionMax.x - playerMinCorner.x) ? normal : -normal;
-							else if (zOverlap < glm::min(xOverlap, yOverlap))
-								collisionNormal.z += (playerMaxCorner.z - blockPositionMin.z < blockPositionMax.z - playerMinCorner.z) ? normal : -normal;
-							else
-							{
-								if (playerMaxCorner.y - blockPositionMin.y < blockPositionMax.y - playerMinCorner.y)
-								{
-									//TODO: Change state
-									collisionNormal.y += normal;
-								}
-								else
-								{
-									//TODO: Change state
-									collisionNormal.y -= normal;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (colided)
-			collisionNormal = glm::normalize(collisionNormal);
-		
-		return colided;
 	}
 
 }

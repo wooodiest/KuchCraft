@@ -37,7 +37,7 @@ namespace KuchCraft {
 		glfwSetErrorCallback(GLFWErrorCallback);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), glfwGetPrimaryMonitor(), nullptr);
+		m_Window = glfwCreateWindow(m_Data.Width, m_Data.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
 
 		// Glad
