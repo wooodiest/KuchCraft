@@ -1,6 +1,8 @@
 #include "PhysicsBody.h"
 
+#include <glm/gtx/norm.hpp>
 #include <glm/gtc/integer.hpp>
+
 #include "Core/Log.h"
 #include "World/Block.h"
 #include "Renderer/Renderer.h"
@@ -8,6 +10,12 @@
 #include "Core/Utils.h"
 
 namespace KuchCraft {
+
+	constexpr float gravity = 9.8f;
+	constexpr float speed = 5.0f;
+	constexpr float sprint_speed = 9.0f;
+
+	constexpr float vertical_max_speed   = 30.0f;
 
 	PlayerPhysicsBody::PlayerPhysicsBody(float width, float height)
 	{
@@ -33,52 +41,43 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::OnUpdate(float dt)
 	{
-		constexpr float gravity = 9.8f;
+		m_IsOnGround = IsOnGround();
 
-		m_IsGrounded = IsOnGround();
-
-		if (!m_IsGrounded) 
-			m_MovementVector.y = -1.0f;
-		
 		if (glm::length(m_MovementVector) > 0.0f)
-			m_MovementVector = glm::normalize(m_MovementVector);
-
-		if (!m_IsGrounded)
 		{
-			const float movement_speed = 7.0f;
-			const glm::vec3 speed = { movement_speed, gravity, movement_speed };
-			m_NewPosition = m_Position + m_MovementVector * speed * dt;
+			m_MovementVector = glm::normalize(m_MovementVector);
+			m_HorizontalSpeed = m_Sprint ? sprint_speed : speed;
+		}
+		
+		if (m_IsOnGround)
+		{
+			m_VerticalSpeed = 0.0f;	
+			m_NewPosition = m_Position + m_MovementVector * m_HorizontalSpeed * dt;
 		}
 		else
 		{
-			const float movement_speed = 7.0f;
-			const glm::vec3 horizontal_speed = { m_MovementVector.x * movement_speed, m_MovementVector.y * movement_speed, m_MovementVector.z * movement_speed };
-			m_NewPosition = m_Position + horizontal_speed * dt;
+			m_MovementVector.y = -1.0f;
+			m_VerticalSpeed -= gravity * dt;
+
+			glm::clamp(m_VerticalSpeed, -vertical_max_speed, vertical_max_speed);
+
+			constexpr float not_on_ground_horizontal_muliplier = 0.6f;
+			const glm::vec3 speed = {  m_HorizontalSpeed * not_on_ground_horizontal_muliplier,
+									  -m_VerticalSpeed,
+									   m_HorizontalSpeed * not_on_ground_horizontal_muliplier };
+
+			m_NewPosition = m_Position + m_MovementVector * speed * dt;
 		}
 
 		constexpr bool checkForCollision = true; // temporarily;
 		if (checkForCollision)
-		{
-			glm::vec3 collisionVector{ 0.0f };
+			PerformCollsionCheck();
 
-			if (CheckForCollisions(m_NewPosition, collisionVector))
-			{
-				constexpr uint32_t max_correction_attempts = 1000;
-				constexpr float correction_epsilon = 0.001f;
+		std::string text;
+		text += "vertical speed: " + std::to_string(m_VerticalSpeed) + "\n";
+		text += "horizontal speed: " + std::to_string(m_HorizontalSpeed) + "\n";
 
-				glm::vec3 correctedPosition = m_NewPosition;
-				if (CheckForCollisions(m_NewPosition, collisionVector))
-				{
-					uint32_t attempts = 0;
-					while (CheckForCollisions(correctedPosition, collisionVector) && attempts < max_correction_attempts)
-					{
-						correctedPosition -= collisionVector * correction_epsilon;
-						attempts++;
-					}
-					m_NewPosition = correctedPosition;;
-				}
-			}
-		}
+		Renderer::RenderTextNorm(text, { 0.5f, 0.9f });
 
 		ResetMovementVector();
 	}
@@ -90,11 +89,14 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::SprintForward()
 	{
+		m_MovementVector += m_FrontDirection;
+		m_Sprint = true;
 	}
 
 	void PlayerPhysicsBody::MoveBackward()
 	{
 		m_MovementVector -= m_FrontDirection;
+		m_Sprint = false;
 	}
 
 	void PlayerPhysicsBody::MoveLeft()
@@ -109,17 +111,41 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::Jump()
 	{
+		m_IsOnGround = false;
 	}
 
 	void PlayerPhysicsBody::FlyUp()
 	{
 		m_MovementVector += m_UpDirection;
-		m_IsGrounded = false;
+		m_IsOnGround = false;
 	}
 
 	void PlayerPhysicsBody::FlyDown()
 	{
 		m_MovementVector -= m_UpDirection;
+	}
+
+	void PlayerPhysicsBody::PerformCollsionCheck()
+	{
+		glm::vec3 collisionVector{ 0.0f };
+
+		if (CheckForCollisions(m_NewPosition, collisionVector))
+		{
+			constexpr uint32_t max_correction_attempts = 1000;
+			constexpr float correction_epsilon = 0.001f;
+
+			glm::vec3 correctedPosition = m_NewPosition;
+			if (CheckForCollisions(m_NewPosition, collisionVector))
+			{
+				uint32_t attempts = 0;
+				while (CheckForCollisions(correctedPosition, collisionVector) && attempts < max_correction_attempts)
+				{
+					correctedPosition -= collisionVector * correction_epsilon;
+					attempts++;
+				}
+				m_NewPosition = correctedPosition;;
+			}
+		}
 	}
 
 	bool PlayerPhysicsBody::CheckForCollisions(const glm::vec3 position, glm::vec3& out_CollisionVector)
@@ -190,6 +216,8 @@ namespace KuchCraft {
 	void PlayerPhysicsBody::ResetMovementVector()
 	{
 		m_MovementVector = { 0.0f, 0.0f, 0.0f };
+		m_HorizontalSpeed = 0.0f;
+		m_Sprint = false;
 	}
 
 	bool PlayerPhysicsBody::IsOnGround()
@@ -200,10 +228,8 @@ namespace KuchCraft {
 		const glm::ivec3 absolutePosition{ downPosition };
 		AABB playerAABB = m_PlayerAbsoluteAABB.MoveTo(downPosition);
 
-		// Find blocks near player
 		for (int x = -m_CollisionCheckRadius.x; x <= m_CollisionCheckRadius.x; x++)
 		{
-			
 			for (int z = -m_CollisionCheckRadius.z; z <= m_CollisionCheckRadius.z; z++)
 			{
 				constexpr float block_size = 1.0f;

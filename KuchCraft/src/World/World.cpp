@@ -25,7 +25,7 @@ namespace KuchCraft {
 
 		// Set data
 		WorldGenerator::Init(4206999);
-		m_Player.SetPosition({ 2000.0f, 90.0f, 2000.0f });
+		m_Player.SetPosition({ 2000.0f, 75.0f, 2000.0f });
 
 		// Loading stuff
 		PreLoadWorld();

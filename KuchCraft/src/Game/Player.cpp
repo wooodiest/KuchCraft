@@ -49,7 +49,12 @@ namespace KuchCraft {
 		m_PhysicsBody.SetData(m_Position, m_Camera.GetAbsoluteFront(), m_Camera.GetAbsoluteRight());
 
 		if (Input::IsKeyPressed(KeyCode::W))
-			m_PhysicsBody.MoveForward();
+		{
+			if (Input::IsKeyPressed(KeyCode::LeftShift))
+				m_PhysicsBody.SprintForward();
+			else
+				m_PhysicsBody.MoveForward();
+		}
 		if (Input::IsKeyPressed(KeyCode::S))
 			m_PhysicsBody.MoveBackward();
 		

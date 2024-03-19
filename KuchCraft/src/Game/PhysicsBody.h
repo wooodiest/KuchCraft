@@ -29,6 +29,7 @@ namespace KuchCraft {
 		void FlyDown();
 
 	private:
+		void PerformCollsionCheck();
 		bool CheckForCollisions(const glm::vec3 position, glm::vec3& out_CollisionVector);
 		void ResetMovementVector();
 		bool IsOnGround();
@@ -44,7 +45,12 @@ namespace KuchCraft {
 		AABB m_PlayerAbsoluteAABB;
 
 		glm::vec3 m_MovementVector{ 0.0f };
-		bool m_IsGrounded = false;
+
+		float m_HorizontalSpeed = 0.0f;
+		float m_VerticalSpeed   = 0.0f;
+		bool m_Sprint = false;
+
+		bool m_IsOnGround = false;
 	};
 
 }
