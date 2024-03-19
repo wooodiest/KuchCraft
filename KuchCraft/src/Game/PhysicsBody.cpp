@@ -3,15 +3,17 @@
 #include <glm/gtc/integer.hpp>
 #include "Core/Log.h"
 #include "World/Block.h"
+#include "Renderer/Renderer.h"
 #include "World/World.h"
+#include "Core/Utils.h"
 
 namespace KuchCraft {
 
 	PlayerPhysicsBody::PlayerPhysicsBody(float width, float height)
 	{
 		const float halfWidth = width / 2.0f;
-		m_ColideBox.Min = { -halfWidth, 0.0f,   -halfWidth };
-		m_ColideBox.Max = {  halfWidth, height,  halfWidth };
+		m_PlayerAbsoluteAABB.Min = { -halfWidth, 0.0f,   -halfWidth };
+		m_PlayerAbsoluteAABB.Max = {  halfWidth, height,  halfWidth };
 
 		m_CollisionCheckRadius.x = static_cast<int>(glm::ceil(width));
 		m_CollisionCheckRadius.y = static_cast<int>(glm::ceil(height));
@@ -31,13 +33,30 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::OnUpdate(float dt)
 	{
+		constexpr float gravity = 9.8f;
+
+		m_IsGrounded = IsOnGround();
+
+		if (!m_IsGrounded) 
+			m_MovementVector.y = -1.0f;
+		
 		if (glm::length(m_MovementVector) > 0.0f)
 			m_MovementVector = glm::normalize(m_MovementVector);
 
-		constexpr float movement_speed = 7.0f; // temporarily
-		m_NewPosition = m_Position + m_MovementVector * movement_speed * dt;;
+		if (!m_IsGrounded)
+		{
+			const float movement_speed = 7.0f;
+			const glm::vec3 speed = { movement_speed, gravity, movement_speed };
+			m_NewPosition = m_Position + m_MovementVector * speed * dt;
+		}
+		else
+		{
+			const float movement_speed = 7.0f;
+			const glm::vec3 horizontal_speed = { m_MovementVector.x * movement_speed, m_MovementVector.y * movement_speed, m_MovementVector.z * movement_speed };
+			m_NewPosition = m_Position + horizontal_speed * dt;
+		}
 
-		constexpr bool checkForCollision = true; // temporarily
+		constexpr bool checkForCollision = true; // temporarily;
 		if (checkForCollision)
 		{
 			glm::vec3 collisionVector{ 0.0f };
@@ -56,7 +75,7 @@ namespace KuchCraft {
 						correctedPosition -= collisionVector * correction_epsilon;
 						attempts++;
 					}
-					m_NewPosition = correctedPosition;
+					m_NewPosition = correctedPosition;;
 				}
 			}
 		}
@@ -95,6 +114,7 @@ namespace KuchCraft {
 	void PlayerPhysicsBody::FlyUp()
 	{
 		m_MovementVector += m_UpDirection;
+		m_IsGrounded = false;
 	}
 
 	void PlayerPhysicsBody::FlyDown()
@@ -105,10 +125,10 @@ namespace KuchCraft {
 	bool PlayerPhysicsBody::CheckForCollisions(const glm::vec3 position, glm::vec3& out_CollisionVector)
 	{
 		bool colided = false;
+		out_CollisionVector = { 0.0f, 0.0f, 0.0f };
 
 		const glm::ivec3 absolutePosition{ position };
-		const glm::vec3 playerMinCorner = m_ColideBox.Min + position;
-		const glm::vec3 playerMaxCorner = m_ColideBox.Max + position;
+		AABB playerAABB = m_PlayerAbsoluteAABB.MoveTo(position);
 
 		// Find blocks near player
 		for (int x = -m_CollisionCheckRadius.x; x <= m_CollisionCheckRadius.x; x++)
@@ -117,56 +137,53 @@ namespace KuchCraft {
 			{
 				for (int z = -m_CollisionCheckRadius.z; z <= m_CollisionCheckRadius.z; z++)
 				{
-					const glm::vec3  blockMinCorner = { absolutePosition.x + x, absolutePosition.y + y, absolutePosition.z + z };
-					const glm::vec3& blockPosition  = blockMinCorner;
+					constexpr float block_size = 1.0f;
+					AABB blockAABB = { glm::vec3{ absolutePosition.x + x, absolutePosition.y + y, absolutePosition.z + z },
+						glm::vec3{ absolutePosition.x + x + block_size, absolutePosition.y + y + block_size, absolutePosition.z + z + block_size} };
 
+					const glm::vec3& blockPosition = blockAABB.Min;
 					const Block block = World::Get().GetBlock(blockPosition);
 
 					if (!block.IsSolid())
 						continue;
 
-					constexpr float block_size = 1.0f;
-					const glm::vec3 blockMaxCorner{ blockMinCorner.x + block_size, blockMinCorner.y + block_size, blockMinCorner.z + block_size };
-
 					// Check intersection status
-					if (playerMinCorner.x >= blockMaxCorner.x || playerMaxCorner.x <= blockMinCorner.x ||
-						playerMinCorner.y >= blockMaxCorner.y || playerMaxCorner.y <= blockMinCorner.y ||
-						playerMinCorner.z >= blockMaxCorner.z || playerMaxCorner.z <= blockMinCorner.z)
+					if (!playerAABB.IsColliding(blockAABB))
 						continue;
 
 					colided = true;
 
-					const float xOverlap = glm::min(playerMaxCorner.x, blockMaxCorner.x) - glm::max(playerMinCorner.x, blockMinCorner.x);
-					const float yOverlap = glm::min(playerMaxCorner.y, blockMaxCorner.y) - glm::max(playerMinCorner.y, blockMinCorner.y);
-					const float zOverlap = glm::min(playerMaxCorner.z, blockMaxCorner.z) - glm::max(playerMinCorner.z, blockMinCorner.z);
+					const float xOverlap = glm::min(playerAABB.Max.x, blockAABB.Max.x) - glm::max(playerAABB.Min.x, blockAABB.Min.x);
+					const float yOverlap = glm::min(playerAABB.Max.y, blockAABB.Max.y) - glm::max(playerAABB.Min.y, blockAABB.Min.y);
+					const float zOverlap = glm::min(playerAABB.Max.z, blockAABB.Max.z) - glm::max(playerAABB.Min.z, blockAABB.Min.z);
 
 					if (xOverlap < glm::min(yOverlap, zOverlap))
 					{
-						out_CollisionVector.x += (playerMaxCorner.x - blockMinCorner.x < blockMaxCorner.x - playerMinCorner.x) ? 1.0f : -1.0f;
+						out_CollisionVector.x = (playerAABB.Max.x - blockAABB.Min.x < blockAABB.Max.x - playerAABB.Min.x) ? 1.0f : -1.0f;
 					}
 					else if (zOverlap < glm::min(xOverlap, yOverlap))
 					{
-						out_CollisionVector.z += (playerMaxCorner.z - blockMinCorner.z < blockMaxCorner.z - playerMinCorner.z) ? 1.0f : -1.0f;
+						out_CollisionVector.z = (playerAABB.Max.z - blockAABB.Min.z < blockAABB.Max.z - playerAABB.Min.z) ? 1.0f : -1.0f;
 					}
 					else
 					{
 						// TODO: Add more stuff to y collision detection
-						if (playerMaxCorner.y - blockMinCorner.y < blockMaxCorner.y - playerMinCorner.y)
+						if (playerAABB.Max.y - blockAABB.Min.y < blockAABB.Max.y - playerAABB.Min.y)
 						{
-							out_CollisionVector.y += 1.0f;
+							out_CollisionVector.y = 1.0f;
 						}
 						else
 						{
-							out_CollisionVector.y += -1.0f;
+							out_CollisionVector.y = -1.0f;
 						}
 					}
 				}
 			}
 		}
 
-		if (colided && glm::length(out_CollisionVector))
+		if (colided)
 			out_CollisionVector = glm::normalize(out_CollisionVector);
-		
+
 		return colided;
 	}
 
@@ -175,4 +192,46 @@ namespace KuchCraft {
 		m_MovementVector = { 0.0f, 0.0f, 0.0f };
 	}
 
+	bool PlayerPhysicsBody::IsOnGround()
+	{
+		constexpr float down_position_diff = 0.001f;
+		const glm::vec3 downPosition = m_Position + glm::vec3(0.0f, -down_position_diff, 0.0f);
+
+		const glm::ivec3 absolutePosition{ downPosition };
+		AABB playerAABB = m_PlayerAbsoluteAABB.MoveTo(downPosition);
+
+		// Find blocks near player
+		for (int x = -m_CollisionCheckRadius.x; x <= m_CollisionCheckRadius.x; x++)
+		{
+			
+			for (int z = -m_CollisionCheckRadius.z; z <= m_CollisionCheckRadius.z; z++)
+			{
+				constexpr float block_size = 1.0f;
+				AABB blockAABB = { glm::vec3{ absolutePosition.x + x, absolutePosition.y, absolutePosition.z + z },
+					glm::vec3{ absolutePosition.x + x + block_size, absolutePosition.y + block_size, absolutePosition.z + z + block_size} };
+
+				const glm::vec3& blockPosition = blockAABB.Min;
+				const Block block = World::Get().GetBlock(blockPosition);
+
+				if (!block.IsSolid())
+					continue;
+
+				if (!playerAABB.IsColliding(blockAABB))
+					continue;
+
+				const float xOverlap = glm::min(playerAABB.Max.x, blockAABB.Max.x) - glm::max(playerAABB.Min.x, blockAABB.Min.x);
+				const float yOverlap = glm::min(playerAABB.Max.y, blockAABB.Max.y) - glm::max(playerAABB.Min.y, blockAABB.Min.y);
+				const float zOverlap = glm::min(playerAABB.Max.z, blockAABB.Max.z) - glm::max(playerAABB.Min.z, blockAABB.Min.z);
+
+				if (yOverlap < glm::min(xOverlap, zOverlap))
+				{
+					if (playerAABB.Max.y - blockAABB.Min.y >= blockAABB.Max.y - playerAABB.Min.y)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 }
