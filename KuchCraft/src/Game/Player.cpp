@@ -63,10 +63,15 @@ namespace KuchCraft {
 		if (Input::IsKeyPressed(KeyCode::D))
 			m_PhysicsBody.MoveRight();
 		
-		if (Input::IsKeyPressed(KeyCode::Space))
-			m_PhysicsBody.FlyUp();
-		if (Input::IsKeyPressed(KeyCode::LeftControl))
-			m_PhysicsBody.FlyDown();
+		//if (Input::IsKeyPressed(KeyCode::Space))
+			//m_PhysicsBody.Jump();
+		if (m_WillJump)
+		{
+			m_PhysicsBody.Jump();
+			m_WillJump = false;
+		}
+		//if (Input::IsKeyPressed(KeyCode::LeftControl))
+			//m_PhysicsBody.FlyDown();
 		
 		m_PhysicsBody.OnUpdate(dt);
 
@@ -90,6 +95,7 @@ namespace KuchCraft {
 		switch (e.GetKeyCode())
 		{
 			case KeyCode::CapsLock: m_MovementSettings.CheckForCollisions = !m_MovementSettings.CheckForCollisions; return false;
+			case KeyCode::Space: m_WillJump = true; return false;
 			default: return false;
 		}
 	}

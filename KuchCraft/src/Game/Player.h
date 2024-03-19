@@ -64,6 +64,8 @@ namespace KuchCraft {
 		glm::vec3 m_MovementVector{ 0.0f };
 		glm::vec2 m_PrevMousePosition{ 0.0f };
 
+		bool m_WillJump = false;
+
 		PlayerMovementSettings  m_MovementSettings;
 		PlayerGraphicalSettings m_GraphicalSettings;
 		Camera m_Camera;

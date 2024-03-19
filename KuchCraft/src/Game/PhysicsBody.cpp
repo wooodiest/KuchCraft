@@ -14,6 +14,7 @@ namespace KuchCraft {
 	constexpr float gravity = 9.8f;
 	constexpr float speed = 5.0f;
 	constexpr float sprint_speed = 9.0f;
+	constexpr float jump_speed = 5.0f;
 
 	constexpr float vertical_max_speed   = 30.0f;
 
@@ -41,8 +42,6 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::OnUpdate(float dt)
 	{
-		m_IsOnGround = IsOnGround();
-
 		if (glm::length(m_MovementVector) > 0.0f)
 		{
 			m_MovementVector = glm::normalize(m_MovementVector);
@@ -73,12 +72,7 @@ namespace KuchCraft {
 		if (checkForCollision)
 			PerformCollsionCheck();
 
-		std::string text;
-		text += "vertical speed: " + std::to_string(m_VerticalSpeed) + "\n";
-		text += "horizontal speed: " + std::to_string(m_HorizontalSpeed) + "\n";
-
-		Renderer::RenderTextNorm(text, { 0.5f, 0.9f });
-
+		m_IsOnGround = IsOnGround();
 		ResetMovementVector();
 	}
 
@@ -102,16 +96,23 @@ namespace KuchCraft {
 	void PlayerPhysicsBody::MoveLeft()
 	{
 		m_MovementVector -= m_RightDirection;
+		m_Sprint = false;
 	}
 
 	void PlayerPhysicsBody::MoveRight()
 	{
-		m_MovementVector += m_RightDirection;
+		m_MovementVector +=  m_RightDirection;
+		m_Sprint = false;
 	}
 
 	void PlayerPhysicsBody::Jump()
 	{
-		m_IsOnGround = false;
+		if (m_IsOnGround)
+		{
+			m_IsOnGround = false;
+			m_VerticalSpeed = jump_speed;
+			m_MovementVector += m_UpDirection;
+		}
 	}
 
 	void PlayerPhysicsBody::FlyUp()
@@ -223,7 +224,7 @@ namespace KuchCraft {
 	bool PlayerPhysicsBody::IsOnGround()
 	{
 		constexpr float down_position_diff = 0.001f;
-		const glm::vec3 downPosition = m_Position + glm::vec3(0.0f, -down_position_diff, 0.0f);
+		const glm::vec3 downPosition = m_NewPosition + glm::vec3(0.0f, -down_position_diff, 0.0f);
 
 		const glm::ivec3 absolutePosition{ downPosition };
 		AABB playerAABB = m_PlayerAbsoluteAABB.MoveTo(downPosition);
