@@ -13,7 +13,8 @@ namespace KuchCraft {
 		~PlayerPhysicsBody();
 
 		void SetData(const glm::vec3& position, const glm::vec3& frontDirection, const glm::vec3& rightDirection);
-		glm::vec3 GetNewPosition() { return m_NewPosition; }
+		void SetFlyingStatus(bool status) { m_Flying = status; m_VerticalSpeed = 0.0f; }
+		glm::vec3 GetPosition() { return m_Position; }
 
 		void OnUpdate(float dt);
 
@@ -39,7 +40,6 @@ namespace KuchCraft {
 		glm::vec3 m_UpDirection{ 0.0f, 1.0f, 0.0f };
 
 		glm::vec3 m_Position{ 0.0f };
-		glm::vec3 m_NewPosition{ 0.0f };
 
 		glm::ivec3 m_CollisionCheckRadius{ 0 };
 		AABB m_PlayerAbsoluteAABB;
@@ -49,6 +49,7 @@ namespace KuchCraft {
 		float m_HorizontalSpeed = 0.0f;
 		float m_VerticalSpeed   = 0.0f;
 		bool m_Sprint = false;
+		bool m_Flying = false;
 
 		bool m_IsOnGround = false;
 	};

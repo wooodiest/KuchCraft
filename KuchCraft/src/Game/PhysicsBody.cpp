@@ -12,9 +12,6 @@
 namespace KuchCraft {
 
 	constexpr float gravity = 9.8f;
-	constexpr float speed = 5.0f;
-	constexpr float sprint_speed = 9.0f;
-	constexpr float jump_speed = 5.0f;
 
 	constexpr float vertical_max_speed   = 30.0f;
 
@@ -45,18 +42,24 @@ namespace KuchCraft {
 		if (glm::length(m_MovementVector) > 0.0f)
 		{
 			m_MovementVector = glm::normalize(m_MovementVector);
-			m_HorizontalSpeed = m_Sprint ? sprint_speed : speed;
+			if (m_Flying)
+				m_HorizontalSpeed = m_Sprint ? player_sprint_flying_speed : player_flying_speed;
+			else
+				m_HorizontalSpeed = m_Sprint ? player_sprint_speed : player_speed;
 		}
 		
 		if (m_IsOnGround)
 		{
 			m_VerticalSpeed = 0.0f;	
-			m_NewPosition = m_Position + m_MovementVector * m_HorizontalSpeed * dt;
+			m_Position += m_MovementVector * m_HorizontalSpeed * dt;
 		}
 		else
 		{
-			m_MovementVector.y = -1.0f;
-			m_VerticalSpeed -= gravity * dt;
+			if (!m_Flying)
+			{
+				m_MovementVector.y = -1.0f;
+				m_VerticalSpeed -= gravity * dt;
+			}
 
 			glm::clamp(m_VerticalSpeed, -vertical_max_speed, vertical_max_speed);
 
@@ -65,7 +68,7 @@ namespace KuchCraft {
 									  -m_VerticalSpeed,
 									   m_HorizontalSpeed * not_on_ground_horizontal_muliplier };
 
-			m_NewPosition = m_Position + m_MovementVector * speed * dt;
+			m_Position += m_MovementVector * speed * dt;
 		}
 
 		constexpr bool checkForCollision = true; // temporarily;
@@ -110,33 +113,37 @@ namespace KuchCraft {
 		if (m_IsOnGround)
 		{
 			m_IsOnGround = false;
-			m_VerticalSpeed = jump_speed;
+			m_VerticalSpeed = player_jump_speed;
 			m_MovementVector += m_UpDirection;
 		}
 	}
 
 	void PlayerPhysicsBody::FlyUp()
 	{
+		if (m_IsOnGround)
+			m_IsOnGround = false;
 		m_MovementVector += m_UpDirection;
-		m_IsOnGround = false;
+
+		m_VerticalSpeed = -player_flying_speed;
 	}
 
 	void PlayerPhysicsBody::FlyDown()
 	{
 		m_MovementVector -= m_UpDirection;
+		m_VerticalSpeed = -player_flying_speed;
 	}
 
 	void PlayerPhysicsBody::PerformCollsionCheck()
 	{
 		glm::vec3 collisionVector{ 0.0f };
 
-		if (CheckForCollisions(m_NewPosition, collisionVector))
+		if (CheckForCollisions(m_Position, collisionVector))
 		{
 			constexpr uint32_t max_correction_attempts = 1000;
 			constexpr float correction_epsilon = 0.001f;
 
-			glm::vec3 correctedPosition = m_NewPosition;
-			if (CheckForCollisions(m_NewPosition, collisionVector))
+			glm::vec3 correctedPosition = m_Position - collisionVector * correction_epsilon;
+			if (CheckForCollisions(correctedPosition, collisionVector))
 			{
 				uint32_t attempts = 0;
 				while (CheckForCollisions(correctedPosition, collisionVector) && attempts < max_correction_attempts)
@@ -144,7 +151,7 @@ namespace KuchCraft {
 					correctedPosition -= collisionVector * correction_epsilon;
 					attempts++;
 				}
-				m_NewPosition = correctedPosition;;
+				m_Position = correctedPosition;;
 			}
 		}
 	}
@@ -198,6 +205,7 @@ namespace KuchCraft {
 						if (playerAABB.Max.y - blockAABB.Min.y < blockAABB.Max.y - playerAABB.Min.y)
 						{
 							out_CollisionVector.y = 1.0f;
+							m_VerticalSpeed = 0.0f;
 						}
 						else
 						{
@@ -224,7 +232,7 @@ namespace KuchCraft {
 	bool PlayerPhysicsBody::IsOnGround()
 	{
 		constexpr float down_position_diff = 0.001f;
-		const glm::vec3 downPosition = m_NewPosition + glm::vec3(0.0f, -down_position_diff, 0.0f);
+		const glm::vec3 downPosition = m_Position + glm::vec3(0.0f, -down_position_diff, 0.0f);
 
 		const glm::ivec3 absolutePosition{ downPosition };
 		AABB playerAABB = m_PlayerAbsoluteAABB.MoveTo(downPosition);

@@ -63,19 +63,27 @@ namespace KuchCraft {
 		if (Input::IsKeyPressed(KeyCode::D))
 			m_PhysicsBody.MoveRight();
 		
-		//if (Input::IsKeyPressed(KeyCode::Space))
-			//m_PhysicsBody.Jump();
-		if (m_WillJump)
+		if (m_PerformJump)
 		{
 			m_PhysicsBody.Jump();
-			m_WillJump = false;
+			m_PerformJump = false;
 		}
-		//if (Input::IsKeyPressed(KeyCode::LeftControl))
-			//m_PhysicsBody.FlyDown();
+
+		if (Input::IsKeyPressed(KeyCode::Space))
+		{
+			if (m_FlyingStatus)
+				m_PhysicsBody.FlyUp();
+		}
+		
+		if (Input::IsKeyPressed(KeyCode::LeftControl))
+		{
+			if (m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator)
+				m_PhysicsBody.FlyDown();
+		}
 		
 		m_PhysicsBody.OnUpdate(dt);
 
-		m_Position = m_PhysicsBody.GetNewPosition();
+		m_Position = m_PhysicsBody.GetPosition();
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
 	}
 
@@ -94,8 +102,14 @@ namespace KuchCraft {
 
 		switch (e.GetKeyCode())
 		{
-			case KeyCode::CapsLock: m_MovementSettings.CheckForCollisions = !m_MovementSettings.CheckForCollisions; return false;
-			case KeyCode::Space: m_WillJump = true; return false;
+			case KeyCode::Space: m_PerformJump = true; return false;
+			case KeyCode::CapsLock:
+				if (m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator)
+				{
+					m_FlyingStatus = !m_FlyingStatus;
+					m_PhysicsBody.SetFlyingStatus(m_FlyingStatus);
+				}
+				return false;
 			default: return false;
 		}
 	}

@@ -16,6 +16,15 @@ namespace KuchCraft {
 	constexpr float player_half_width      = player_width / 2.0f;
 	constexpr int   player_absolute_width  = (int)player_width + 1;
 
+	constexpr float hand_range          = 3.0f;
+
+	constexpr float player_speed        = 5.0f;
+	constexpr float player_sprint_speed = 9.0f;
+	constexpr float player_jump_speed   = 5.0f;
+
+	constexpr float player_flying_speed        = 20.0f;
+	constexpr float player_sprint_flying_speed = 50.0f;
+
 	struct PlayerGraphicalSettings
 	{
 		uint32_t RenderDistance              = 8;
@@ -24,11 +33,14 @@ namespace KuchCraft {
 
 	struct PlayerMovementSettings
 	{
-		bool  CheckForCollisions = true;
 		float CameraSensitivity  = 0.25f;
-		float Speed       = 7.0f;
-		float SprintSpeed = 50.0f;
-		float HandRange   = 3.0f;
+	};
+
+	enum class GameMode
+	{
+		Survival  = 0,
+		Creative  = 1,
+		Spectator = 2
 	};
 
 	class Player
@@ -64,11 +76,13 @@ namespace KuchCraft {
 		glm::vec3 m_MovementVector{ 0.0f };
 		glm::vec2 m_PrevMousePosition{ 0.0f };
 
-		bool m_WillJump = false;
+		bool m_PerformJump = false;
+		bool m_FlyingStatus = false;
 
 		PlayerMovementSettings  m_MovementSettings;
 		PlayerGraphicalSettings m_GraphicalSettings;
 		Camera m_Camera;
+		GameMode m_GameMode = GameMode::Creative;
 		PlayerPhysicsBody m_PhysicsBody{ player_width, player_height };
 
 	};
