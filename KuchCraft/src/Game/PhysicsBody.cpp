@@ -51,6 +51,8 @@ namespace KuchCraft {
 		{
 			m_VerticalSpeed = 0.0f;	
 			m_Position += m_MovementVector * m_HorizontalSpeed * dt;
+
+			m_JumpVector = m_MovementVector * (m_Sprint ? 0.8f : 0.3f);
 		}
 		else
 		{
@@ -67,7 +69,7 @@ namespace KuchCraft {
 									  -m_VerticalSpeed,
 									   m_HorizontalSpeed * not_on_ground_horizontal_muliplier };
 
-			m_Position += m_MovementVector * speed * dt;
+			m_Position += (m_MovementVector + m_JumpVector) * speed * dt;
 		}
 
 		constexpr bool checkForCollision = true; // temporarily;
@@ -86,7 +88,7 @@ namespace KuchCraft {
 	void PlayerPhysicsBody::SprintForward()
 	{
 		m_MovementVector += m_FrontDirection;
-		m_Sprint = true;
+		m_Sprint = true;	
 	}
 
 	void PlayerPhysicsBody::MoveBackward()
@@ -114,6 +116,7 @@ namespace KuchCraft {
 			m_IsOnGround = false;
 			m_VerticalSpeed = player_jump_speed;
 			m_MovementVector += m_UpDirection;
+
 		}
 	}
 
@@ -221,9 +224,12 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::ResetMovementVector()
 	{
-		m_MovementVector = { 0.0f, 0.0f, 0.0f };
-		m_HorizontalSpeed = 0.0f;
-		m_Sprint = false;
+		if (m_IsOnGround)
+		{
+			m_MovementVector = { 0.0f, 0.0f, 0.0f };
+			m_HorizontalSpeed = 0.0f;
+			m_Sprint = false;
+		}
 	}
 
 	bool PlayerPhysicsBody::IsOnGround()

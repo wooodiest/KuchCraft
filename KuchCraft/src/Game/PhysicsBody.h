@@ -45,6 +45,7 @@ namespace KuchCraft {
 		AABB m_PlayerAbsoluteAABB;
 
 		glm::vec3 m_MovementVector{ 0.0f };
+		glm::vec3 m_JumpVector{ 0.0f };
 
 		float m_HorizontalSpeed = 0.0f;
 		float m_VerticalSpeed   = 0.0f;
