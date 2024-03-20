@@ -62,12 +62,6 @@ namespace KuchCraft {
 			m_PhysicsBody.MoveLeft();
 		if (Input::IsKeyPressed(KeyCode::D))
 			m_PhysicsBody.MoveRight();
-		
-		if (m_PerformJump)
-		{
-			m_PhysicsBody.Jump();
-			m_PerformJump = false;
-		}
 
 		if (Input::IsKeyPressed(KeyCode::Space))
 		{
@@ -102,7 +96,7 @@ namespace KuchCraft {
 
 		switch (e.GetKeyCode())
 		{
-			case KeyCode::Space: m_PerformJump = true; return false;
+			case KeyCode::Space: m_PhysicsBody.Jump();; return false;
 			case KeyCode::CapsLock:
 				if (m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator)
 				{

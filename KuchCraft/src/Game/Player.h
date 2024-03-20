@@ -76,7 +76,6 @@ namespace KuchCraft {
 		glm::vec3 m_MovementVector{ 0.0f };
 		glm::vec2 m_PrevMousePosition{ 0.0f };
 
-		bool m_PerformJump = false;
 		bool m_FlyingStatus = false;
 
 		PlayerMovementSettings  m_MovementSettings;

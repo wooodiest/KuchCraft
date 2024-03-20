@@ -12,8 +12,7 @@
 namespace KuchCraft {
 
 	constexpr float gravity = 9.8f;
-
-	constexpr float vertical_max_speed   = 30.0f;
+	constexpr float vertical_max_speed = 30.0f;
 
 	PlayerPhysicsBody::PlayerPhysicsBody(float width, float height)
 	{
@@ -63,7 +62,7 @@ namespace KuchCraft {
 
 			glm::clamp(m_VerticalSpeed, -vertical_max_speed, vertical_max_speed);
 
-			constexpr float not_on_ground_horizontal_muliplier = 0.6f;
+			constexpr float not_on_ground_horizontal_muliplier = 0.6f; //TODO: 
 			const glm::vec3 speed = {  m_HorizontalSpeed * not_on_ground_horizontal_muliplier,
 									  -m_VerticalSpeed,
 									   m_HorizontalSpeed * not_on_ground_horizontal_muliplier };
@@ -104,7 +103,7 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::MoveRight()
 	{
-		m_MovementVector +=  m_RightDirection;
+		m_MovementVector += m_RightDirection;
 		m_Sprint = false;
 	}
 
@@ -120,10 +119,8 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::FlyUp()
 	{
-		if (m_IsOnGround)
-			m_IsOnGround = false;
+		m_IsOnGround = false;
 		m_MovementVector += m_UpDirection;
-
 		m_VerticalSpeed = -player_flying_speed;
 	}
 
