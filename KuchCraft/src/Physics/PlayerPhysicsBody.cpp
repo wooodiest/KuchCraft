@@ -1,4 +1,4 @@
-#include "PhysicsBody.h"
+#include "PlayerPhysicsBody.h"
 
 #include <glm/gtx/norm.hpp>
 #include <glm/gtc/integer.hpp>
@@ -8,19 +8,24 @@
 
 namespace KuchCraft {
 
-	PlayerPhysicsBody::PlayerPhysicsBody(float width, float height)
+	PlayerPhysicsBody::PlayerPhysicsBody()
 	{
-		const float halfWidth    = width / 2.0f;
-		m_PlayerAbsoluteAABB.Min = { -halfWidth, 0.0f,   -halfWidth };
-		m_PlayerAbsoluteAABB.Max = {  halfWidth, height,  halfWidth };
 
-		m_CollisionCheckRadius.x = static_cast<int>(glm::ceil(width));
-		m_CollisionCheckRadius.y = static_cast<int>(glm::ceil(height));
-		m_CollisionCheckRadius.z = static_cast<int>(glm::ceil(width));
 	}
 
 	PlayerPhysicsBody::~PlayerPhysicsBody()
 	{
+	}
+
+	void PlayerPhysicsBody::Init(float width, float height)
+	{
+		const float halfWidth    = width / 2.0f;
+		m_PlayerAbsoluteAABB.Min = { -halfWidth, 0.0f,   -halfWidth };
+		m_PlayerAbsoluteAABB.Max = { halfWidth, height,  halfWidth };
+
+		m_CollisionCheckRadius.x = static_cast<int>(glm::ceil(width));
+		m_CollisionCheckRadius.y = static_cast<int>(glm::ceil(height));
+		m_CollisionCheckRadius.z = static_cast<int>(glm::ceil(width));
 	}
 
 	void PlayerPhysicsBody::SetData(const glm::vec3& position, const glm::vec3& frontDirection, const glm::vec3& rightDirection)
@@ -87,6 +92,8 @@ namespace KuchCraft {
 
 		m_IsOnGround = IsOnGround();
 		m_IsInWater  = IsInWater();
+
+		m_MovementVectorCpy = m_MovementVector;
 
 		if (m_IsOnGround || m_Flying || !m_IsInWater)
 			m_MovementVector  = { 0.0f, 0.0f, 0.0f };	

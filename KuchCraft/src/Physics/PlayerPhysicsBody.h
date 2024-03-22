@@ -9,13 +9,16 @@ namespace KuchCraft {
 	class PlayerPhysicsBody
 	{
 	public:
-		PlayerPhysicsBody(float width, float height);
+		PlayerPhysicsBody();
 		~PlayerPhysicsBody();
+
+		void Init(float width, float height);
 
 		void SetData(const glm::vec3& position, const glm::vec3& frontDirection, const glm::vec3& rightDirection);
 		void SetFlyingStatus(bool status);
 		void SetCollidingStatus(bool status);
 
+		bool GetFlyingStatus()         const { return m_Flying;   }
 		const glm::vec3& GetPosition() const { return m_Position; }
 
 		void OnUpdate(float dt);
@@ -46,9 +49,10 @@ namespace KuchCraft {
 		glm::ivec3 m_CollisionCheckRadius{ 0 };
 		AABB       m_PlayerAbsoluteAABB;
 
-		glm::vec3 m_Position       { 0.0f };
-		glm::vec3 m_MovementVector { 0.0f };
-		glm::vec3 m_JumpVector     { 0.0f };
+		glm::vec3 m_Position          { 0.0f };
+		glm::vec3 m_MovementVector    { 0.0f };
+		glm::vec3 m_MovementVectorCpy { 0.0f };
+		glm::vec3 m_JumpVector        { 0.0f };
 
 		float m_HorizontalSpeed = 0.0f;
 		float m_VerticalSpeed   = 0.0f;
@@ -56,9 +60,9 @@ namespace KuchCraft {
 		bool m_Flying     = false;
 		bool m_Colliding  = true;
 
-		bool  m_Sprint          = false;
-		bool  m_IsOnGround      = false;
-		bool  m_IsInWater       = false;
+		bool m_Sprint     = false;
+		bool m_IsOnGround = false;
+		bool m_IsInWater  = false;
 	};
 
 }

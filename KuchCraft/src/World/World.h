@@ -61,6 +61,7 @@ namespace KuchCraft {
 
 		// Data
 		Player m_Player;
+		std::string m_DebugText;
 
 		// Chunk data
 		std::vector<Chunk*> m_Chunks{ world_chunk_size * world_chunk_size, nullptr }; // Temporary
@@ -70,6 +71,7 @@ namespace KuchCraft {
 	private:
 		void Shutdown();
 		void DeleteUnusedChunks(const glm::vec3& position);
+		std::string& GetDebugText();
 
 	private:
 		static World* s_Instance;

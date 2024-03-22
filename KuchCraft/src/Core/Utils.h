@@ -11,4 +11,6 @@ namespace KuchCraft {
 
 	std::string VecToString(const glm::vec4& vec);
 
+	std::string BoolToString(bool value);
+
 }

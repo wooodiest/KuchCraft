@@ -17,4 +17,9 @@ namespace KuchCraft {
 		return std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ", " + std::to_string(vec.w);
 	}
 
+	std::string BoolToString(bool value)
+	{
+		return value ? "true" : "false";
+	}
+
 }

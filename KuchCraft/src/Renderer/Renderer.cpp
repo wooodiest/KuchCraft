@@ -116,6 +116,21 @@ namespace KuchCraft {
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 	}
 
+	std::string& Renderer::GetDebugText()
+	{
+		s_Stats.DebugText = 				
+			"\nRenderer:"
+			"\n    Draw cals: " + std::to_string(s_Stats.DrawCalls) +
+			"\n    Quads: " + std::to_string(s_Stats.Quads) +
+			"\n    Render time: " + std::to_string(s_Stats.RenderTimer.ElapsedMillis()) + "ms" +
+			"\n      - chunks:      " + std::to_string(s_Stats.ChunkTimer.ElapsedMillis()) + "ms" +
+			"\n      - skybox:      " + std::to_string(s_Stats.SkyboxTimer.ElapsedMillis()) + "ms" +
+			"\n      - water:         " + std::to_string(s_Stats.WaterTimer.ElapsedMillis()) + "ms" +
+			"\n      - text:            " + std::to_string(s_Stats.TextTimer.ElapsedMillis()) + "ms";
+
+		return s_Stats.DebugText;
+	}
+
 	void Renderer::ResetStats()
 	{
 		s_Stats.DrawCalls = 0;

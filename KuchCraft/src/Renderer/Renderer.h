@@ -55,6 +55,7 @@ namespace KuchCraft {
 		static std::unordered_map<std::string, std::string>& GetShaderVarMap() { return s_RendererData.ShaderVarData; }
 
 		// Stats
+		static std::string& GetDebugText();
 		static void ResetStats();
 		static RendererStatistics& GetStats()    { return s_Stats;                  }
 		static GraphicalInfo& GetGraphicalInfo() { return s_GraphicalInfo;          }

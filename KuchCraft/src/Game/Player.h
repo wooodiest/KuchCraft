@@ -1,11 +1,12 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+
 #include "Game/Camera.h"
 #include "Core/Input.h"
 #include "Core/Events/Event.h"
 #include "Core/Events/KeyEvent.h"
-#include "Game/PhysicsBody.h"
+#include "Physics/PlayerPhysicsBody.h"
 
 namespace KuchCraft {
 
@@ -48,6 +49,7 @@ namespace KuchCraft {
 	{
 	public:
 		Player();
+		Player(const glm::vec3& position, const glm::vec2& rotation, GameMode gameMode);
 		~Player();
 
 		void OnUpdate(float dt);
@@ -56,6 +58,8 @@ namespace KuchCraft {
 		const Camera&    GetCamera()   const { return m_Camera;   }
 		const glm::vec3& GetPosition() const { return m_Position; }
 		const glm::vec2& GetRotation() const { return m_Rotation; }
+
+		std::string& GetDebugText();
 
 		void SetPosition(const glm::vec3& position) { m_Position = position; }
 		void SetRotation(const glm::vec2& rotation) { m_Rotation = rotation; }
@@ -71,21 +75,22 @@ namespace KuchCraft {
 		const PlayerMovementSettings&  GetMovementSettings()  const { return m_MovementSettings;  }
 
 	private:
+		void Init();
 		bool OnKeyPressed(KeyPressedEvent& e);
 
 	private:
 		glm::vec3 m_Position{ 0.0f };
 		glm::vec2 m_Rotation{ 0.0f }; // yaw, pitch
-		glm::vec3 m_MovementVector{ 0.0f };
 		glm::vec2 m_PrevMousePosition{ 0.0f };
-
-		bool m_FlyingStatus = false;
 
 		PlayerMovementSettings  m_MovementSettings;
 		PlayerGraphicalSettings m_GraphicalSettings;
-		Camera m_Camera;
-		GameMode m_GameMode = GameMode::Creative;
-		PlayerPhysicsBody m_PhysicsBody{ player_width, player_height };
+
+		Camera			  m_Camera;
+		GameMode		  m_GameMode;
+		PlayerPhysicsBody m_PhysicsBody;
+
+		std::string m_DebugText;
 
 	};
 

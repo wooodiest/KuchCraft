@@ -80,6 +80,8 @@ namespace KuchCraft {
 		Timer SkyboxTimer;
 		Timer WaterTimer;
 		Timer TextTimer;
+
+		std::string DebugText;
 	};
 
 	struct UniformWorldBuffer

@@ -25,7 +25,7 @@ namespace KuchCraft {
 
 		// Set data
 		WorldGenerator::Init(4206999);
-		m_Player.SetPosition({ 2000.0f, 75.0f, 2000.0f });
+		m_Player = Player({ 2000.0f, 75.0f, 2000.0f }, { 0.0f, 0.0f }, GameMode::Creative);
 
 		// Loading stuff
 		PreLoadWorld();
@@ -168,42 +168,8 @@ namespace KuchCraft {
 
 		// Text to render
 		if (Renderer::GetShowStatsStatus())
-		{
-			const auto& position = m_Player.GetPosition();
-			const auto& rotation = m_Player.GetRotation();
-
-			const auto& rendererStats = Renderer::GetStats();
-			const auto& graphicalInfo = Renderer::GetGraphicalInfo();
-
-			std::string text = "Player:"
-				"\n    Position: " + VecToString(position) +
-				"\n    Rotation: " + VecToString(glm::vec2(glm::degrees(rotation.x), glm::degrees(rotation.y))) +
-				"\n    Chunk ID: " + std::to_string(GetChunkIndex(position)) +
-				"\nWorld:"
-				"\n    Seed: " + std::to_string(WorldGenerator::GetSeed()) +
-				"\n    Chunks:"
-				"\n      - active: "    + std::to_string(m_WorldStats.ActiveChunks        ) +
-				"\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender      ) +
-				"\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory      ) +
-				"\n      - built: "     + std::to_string(m_WorldStats.TotalBuiltChunks    ) +
-				"\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks) +
-				"\nRenderer:"
-				"\n    Draw cals: " + std::to_string(rendererStats.DrawCalls) +
-				"\n    Quads: "     + std::to_string(rendererStats.Quads) +
-				"\n    Render time: "         + std::to_string(rendererStats.RenderTimer.ElapsedMillis()) + "ms" +
-				"\n      - chunks:      "     + std::to_string(rendererStats.ChunkTimer.ElapsedMillis()) + "ms" +
-				"\n      - skybox:      "     + std::to_string(rendererStats.SkyboxTimer.ElapsedMillis()) + "ms" +
-				"\n      - water:         "   + std::to_string(rendererStats.WaterTimer.ElapsedMillis())  + "ms" +
-				"\n      - text:            " + std::to_string(rendererStats.TextTimer.ElapsedMillis())   + "ms";
-							 
-
-			Renderer::RenderTextTopLeft(text, { 6.0f, 25.0f });
-
-			std::string text2 = graphicalInfo.Renderer + "\n" + graphicalInfo.Version;
-
-			Renderer::RenderTextNorm(text2, { 0.5f, 0.975f });
-		}
-
+			Renderer::RenderTextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDebugText(), { 6.0f, 25.0f });
+		
 		Renderer::EndWorld();
 	}
 
@@ -401,6 +367,20 @@ namespace KuchCraft {
 				m_WorldStats.ChunksInMemory--;
 			}
 		}
+	}
+
+	std::string& World::GetDebugText()
+	{
+		m_DebugText =
+			"\nWorld:"
+			"\n    Seed: " + std::to_string(WorldGenerator::GetSeed()) +
+			"\n    Chunk ID: " + std::to_string(GetChunkIndex(m_Player.GetPosition())) +
+			"\n    Chunks:"
+			"\n      - active: " + std::to_string(m_WorldStats.ActiveChunks) +
+			"\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender) +
+			"\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
+			"\n      - built: " + std::to_string(m_WorldStats.TotalBuiltChunks) +
+			"\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks);
 	}
 
 	void World::ClearStats()

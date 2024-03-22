@@ -5,6 +5,7 @@
 
 #include "Core/Core.h"
 #include "Core/Log.h"
+#include "Core/Utils.h"
 
 #include "Renderer/Renderer.h"
 
@@ -15,9 +16,24 @@ namespace KuchCraft {
 
 	Player::Player()
 	{
+		Init();
+	}
+
+	Player::Player(const glm::vec3& position, const glm::vec2& rotation, GameMode gameMode)
+		: m_Position(position), m_Rotation(rotation), m_GameMode(gameMode)
+	{
+		Init();
+	}
+
+	void Player::Init()
+	{
 		SetRenderDistance(m_GraphicalSettings.RenderDistance, false);
 		m_PrevMousePosition = Input::GetMousePosition();
+
+		m_PhysicsBody.Init(player_width, player_height);
+		SetGameMode(m_GameMode);
 	}
+
 
 	Player::~Player()
 	{
@@ -66,7 +82,7 @@ namespace KuchCraft {
 		if (Input::IsKeyPressed(KeyCode::Space))
 			m_PhysicsBody.SwimUp();
 
-		if ((m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator) && m_FlyingStatus)
+		if ((m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator) && m_PhysicsBody.GetFlyingStatus())
 		{
 			if (Input::IsKeyPressed(KeyCode::Space))
 				m_PhysicsBody.FlyUp();
@@ -87,6 +103,24 @@ namespace KuchCraft {
 		m_Camera.OnEvent(event);
 	}
 
+	std::string& Player::GetDebugText()
+	{
+		std::string gameMode;
+		switch (m_GameMode)
+		{
+			case KuchCraft::GameMode::Survival:  gameMode = "Survival"; break;
+			case KuchCraft::GameMode::Creative:  gameMode = "Creative"; break;
+			case KuchCraft::GameMode::Spectator: gameMode = "Spectator"; break;
+		}
+		m_DebugText =
+			  "\nPlayer:"
+			  "\n   Position: "  + VecToString(m_Position) 
+			+ "\n   Rotation: "  + VecToString(glm::vec2(glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y)))
+			+ "\n   Gamemode: "  + gameMode;
+
+		return m_DebugText;
+	}
+
 	bool Player::OnKeyPressed(KeyPressedEvent& e)
 	{
 		if (e.IsRepeat())
@@ -101,11 +135,9 @@ namespace KuchCraft {
 			}
 			case KeyCode::CapsLock:
 			{
-				if (m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator)
-				{
-					m_FlyingStatus = !m_FlyingStatus;
-					m_PhysicsBody.SetFlyingStatus(m_FlyingStatus);
-				}
+				if (m_GameMode == GameMode::Creative)
+					m_PhysicsBody.SetFlyingStatus(!m_PhysicsBody.GetFlyingStatus());
+				
 				return false;
 			}	
 			case KeyCode::F4:
@@ -134,7 +166,6 @@ namespace KuchCraft {
 		{
 			case KuchCraft::GameMode::Survival:
 			{
-				m_FlyingStatus = false;
 				m_PhysicsBody.SetFlyingStatus(false);
 				m_PhysicsBody.SetCollidingStatus(true);
 				break;
@@ -146,7 +177,6 @@ namespace KuchCraft {
 			}
 			case KuchCraft::GameMode::Spectator:
 			{
-				m_FlyingStatus = true;
 				m_PhysicsBody.SetFlyingStatus(true);
 				m_PhysicsBody.SetCollidingStatus(false);
 				break;
