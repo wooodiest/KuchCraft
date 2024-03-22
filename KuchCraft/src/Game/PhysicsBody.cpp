@@ -3,20 +3,14 @@
 #include <glm/gtx/norm.hpp>
 #include <glm/gtc/integer.hpp>
 
-#include "Core/Log.h"
 #include "World/Block.h"
-#include "Renderer/Renderer.h"
 #include "World/World.h"
-#include "Core/Utils.h"
 
 namespace KuchCraft {
 
-	constexpr float gravity = 9.8f;
-	constexpr float vertical_max_speed = 30.0f;
-
 	PlayerPhysicsBody::PlayerPhysicsBody(float width, float height)
 	{
-		const float halfWidth = width / 2.0f;
+		const float halfWidth    = width / 2.0f;
 		m_PlayerAbsoluteAABB.Min = { -halfWidth, 0.0f,   -halfWidth };
 		m_PlayerAbsoluteAABB.Max = {  halfWidth, height,  halfWidth };
 
@@ -36,101 +30,129 @@ namespace KuchCraft {
 		m_RightDirection = rightDirection;
 	}
 
+	void PlayerPhysicsBody::SetFlyingStatus(bool status)
+	{
+		m_JumpVector     = { 0.0f, 0.0f, 0.0f };
+		m_MovementVector = { 0.0f, 0.0f ,0.0f };
+		m_Flying         = status;
+		m_VerticalSpeed  = 0.0f;
+	}
+
+	void PlayerPhysicsBody::SetCollidingStatus(bool status)
+	{
+		m_Colliding = status;
+	}
+
 	void PlayerPhysicsBody::OnUpdate(float dt)
 	{
 		if (glm::length(m_MovementVector) > 0.0f)
 		{
 			m_MovementVector = glm::normalize(m_MovementVector);
+
 			if (m_Flying)
 				m_HorizontalSpeed = m_Sprint ? player_sprint_flying_speed : player_flying_speed;
 			else
-				m_HorizontalSpeed = m_Sprint ? player_sprint_speed : player_speed;
+				m_HorizontalSpeed = m_Sprint ? player_sprint_speed        : player_speed;
 		}
 		
 		if (m_IsOnGround)
 		{
 			m_VerticalSpeed = 0.0f;	
-			m_Position += m_MovementVector * m_HorizontalSpeed * dt;
-
-			m_JumpVector = m_MovementVector * (m_Sprint ? 0.8f : 0.3f);
+			m_Position     += m_MovementVector * m_HorizontalSpeed * dt;
+			m_JumpVector    = m_MovementVector * (m_Sprint ? 0.8f : 0.3f);
 		}
 		else
 		{
 			if (!m_Flying)
 			{
+				constexpr float gravity = 14.0f;
+
 				m_MovementVector.y = -1.0f;
-				m_VerticalSpeed -= gravity * dt;
+				m_VerticalSpeed   -= m_IsInWater ? gravity / 5.0f * dt : gravity * dt;
 			}
 
+			constexpr float vertical_max_speed = 30.0f;
 			glm::clamp(m_VerticalSpeed, -vertical_max_speed, vertical_max_speed);
 
-			constexpr float not_on_ground_horizontal_muliplier = 0.6f; //TODO: 
-			const glm::vec3 speed = {  m_HorizontalSpeed * not_on_ground_horizontal_muliplier,
+			float speedMultiplier = m_Sprint ? 0.5f : 0.6f;
+			const glm::vec3 speed = {  m_HorizontalSpeed * speedMultiplier,
 									  -m_VerticalSpeed,
-									   m_HorizontalSpeed * not_on_ground_horizontal_muliplier };
+									   m_HorizontalSpeed * speedMultiplier };
 
 			m_Position += (m_MovementVector + m_JumpVector) * speed * dt;
 		}
 
-		constexpr bool checkForCollision = true; // temporarily;
-		if (checkForCollision)
+		if (m_Colliding)
 			PerformCollsionCheck();
 
 		m_IsOnGround = IsOnGround();
-		ResetMovementVector();
+		m_IsInWater  = IsInWater();
+
+		if (m_IsOnGround || m_Flying || !m_IsInWater)
+			m_MovementVector  = { 0.0f, 0.0f, 0.0f };	
 	}
 
 	void PlayerPhysicsBody::MoveForward()
 	{
 		m_MovementVector += m_FrontDirection;
+		m_Sprint          = false;
 	}
 
 	void PlayerPhysicsBody::SprintForward()
 	{
 		m_MovementVector += m_FrontDirection;
-		m_Sprint = true;	
+		m_Sprint          = true;	
 	}
 
 	void PlayerPhysicsBody::MoveBackward()
 	{
 		m_MovementVector -= m_FrontDirection;
-		m_Sprint = false;
+		m_Sprint          = false;
 	}
 
 	void PlayerPhysicsBody::MoveLeft()
 	{
 		m_MovementVector -= m_RightDirection;
-		m_Sprint = false;
+		m_Sprint          = false;
 	}
 
 	void PlayerPhysicsBody::MoveRight()
 	{
 		m_MovementVector += m_RightDirection;
-		m_Sprint = false;
+		m_Sprint          = false;
 	}
 
 	void PlayerPhysicsBody::Jump()
 	{
-		if (m_IsOnGround)
+		if (m_IsOnGround && !m_IsInWater)
 		{
-			m_IsOnGround = false;
-			m_VerticalSpeed = player_jump_speed;
 			m_MovementVector += m_UpDirection;
-
+			m_IsOnGround      = false;
+			m_VerticalSpeed   = player_jump_speed;
 		}
 	}
 
 	void PlayerPhysicsBody::FlyUp()
 	{
-		m_IsOnGround = false;
 		m_MovementVector += m_UpDirection;
-		m_VerticalSpeed = -player_flying_speed;
+		m_VerticalSpeed   = -player_flying_speed;
+		m_IsOnGround      = false;
 	}
 
 	void PlayerPhysicsBody::FlyDown()
 	{
-		m_MovementVector -= m_UpDirection;
-		m_VerticalSpeed = -player_flying_speed;
+		m_MovementVector -=  m_UpDirection;
+		m_VerticalSpeed   = -player_flying_speed;
+	}
+
+	void PlayerPhysicsBody::SwimUp()
+	{
+		if (!m_Flying && m_IsInWater)
+		{
+			m_MovementVector += m_UpDirection;
+			m_IsOnGround      = false;
+			m_VerticalSpeed   = player_swim_speed;
+		}
 	}
 
 	void PlayerPhysicsBody::PerformCollsionCheck()
@@ -140,19 +162,19 @@ namespace KuchCraft {
 		if (CheckForCollisions(m_Position, collisionVector))
 		{
 			constexpr uint32_t max_correction_attempts = 1000;
-			constexpr float correction_epsilon = 0.001f;
+			constexpr float    correction_epsilon      = 0.001f;
 
-			glm::vec3 correctedPosition = m_Position - collisionVector * correction_epsilon;
-			if (CheckForCollisions(correctedPosition, collisionVector))
+			glm::vec3 correctedPosition = m_Position;
+			uint32_t  attempts          = 0;
+
+			do
 			{
-				uint32_t attempts = 0;
-				while (CheckForCollisions(correctedPosition, collisionVector) && attempts < max_correction_attempts)
-				{
-					correctedPosition -= collisionVector * correction_epsilon;
-					attempts++;
-				}
-				m_Position = correctedPosition;;
-			}
+				correctedPosition -= collisionVector * correction_epsilon;
+				attempts++;
+			} 
+			while (CheckForCollisions(correctedPosition, collisionVector) && attempts < max_correction_attempts);
+
+			m_Position = correctedPosition;
 		}
 	}
 
@@ -187,49 +209,37 @@ namespace KuchCraft {
 
 					colided = true;
 
-					const float xOverlap = glm::min(playerAABB.Max.x, blockAABB.Max.x) - glm::max(playerAABB.Min.x, blockAABB.Min.x);
-					const float yOverlap = glm::min(playerAABB.Max.y, blockAABB.Max.y) - glm::max(playerAABB.Min.y, blockAABB.Min.y);
-					const float zOverlap = glm::min(playerAABB.Max.z, blockAABB.Max.z) - glm::max(playerAABB.Min.z, blockAABB.Min.z);
+					// Find overlaping plane
+					const glm::vec3 overlaping   = playerAABB.GetOverlaping(blockAABB);
+					constexpr float plane_normal = 1.0f;
 
-					if (xOverlap < glm::min(yOverlap, zOverlap))
-					{
-						out_CollisionVector.x = (playerAABB.Max.x - blockAABB.Min.x < blockAABB.Max.x - playerAABB.Min.x) ? 1.0f : -1.0f;
-					}
-					else if (zOverlap < glm::min(xOverlap, yOverlap))
-					{
-						out_CollisionVector.z = (playerAABB.Max.z - blockAABB.Min.z < blockAABB.Max.z - playerAABB.Min.z) ? 1.0f : -1.0f;
-					}
+					if (overlaping.x < glm::min(overlaping.y, overlaping.z))
+						out_CollisionVector.x = (playerAABB.Max.x - blockAABB.Min.x < blockAABB.Max.x - playerAABB.Min.x) ? plane_normal : -plane_normal;
+					
+					else if (overlaping.z < glm::min(overlaping.x, overlaping.y))
+						out_CollisionVector.z = (playerAABB.Max.z - blockAABB.Min.z < blockAABB.Max.z - playerAABB.Min.z) ? plane_normal : -plane_normal;
+					
 					else
 					{
-						// TODO: Add more stuff to y collision detection
 						if (playerAABB.Max.y - blockAABB.Min.y < blockAABB.Max.y - playerAABB.Min.y)
 						{
-							out_CollisionVector.y = 1.0f;
-							m_VerticalSpeed = 0.0f;
+							out_CollisionVector.y =  plane_normal;
+							m_VerticalSpeed       =  0.0f;
 						}
 						else
-						{
-							out_CollisionVector.y = -1.0f;
-						}
+							out_CollisionVector.y = -plane_normal;
 					}
 				}
 			}
 		}
 
 		if (colided)
+		{
 			out_CollisionVector = glm::normalize(out_CollisionVector);
+			m_JumpVector        = { 0.0f, 0.0f, 0.0f };
+		}
 
 		return colided;
-	}
-
-	void PlayerPhysicsBody::ResetMovementVector()
-	{
-		if (m_IsOnGround)
-		{
-			m_MovementVector = { 0.0f, 0.0f, 0.0f };
-			m_HorizontalSpeed = 0.0f;
-			m_Sprint = false;
-		}
 	}
 
 	bool PlayerPhysicsBody::IsOnGround()
@@ -253,23 +263,22 @@ namespace KuchCraft {
 
 				if (!block.IsSolid())
 					continue;
-
+				
 				if (!playerAABB.IsColliding(blockAABB))
 					continue;
 
-				const float xOverlap = glm::min(playerAABB.Max.x, blockAABB.Max.x) - glm::max(playerAABB.Min.x, blockAABB.Min.x);
-				const float yOverlap = glm::min(playerAABB.Max.y, blockAABB.Max.y) - glm::max(playerAABB.Min.y, blockAABB.Min.y);
-				const float zOverlap = glm::min(playerAABB.Max.z, blockAABB.Max.z) - glm::max(playerAABB.Min.z, blockAABB.Min.z);
-
-				if (yOverlap < glm::min(xOverlap, zOverlap))
+				const glm::vec3 overlaping = playerAABB.GetOverlaping(blockAABB);
+				if (overlaping.y < glm::min(overlaping.x, overlaping.z))
 				{
 					if (playerAABB.Max.y - blockAABB.Min.y >= blockAABB.Max.y - playerAABB.Min.y)
-					{
 						return true;
-					}
 				}
 			}
 		}
 		return false;
+	}
+	bool PlayerPhysicsBody::IsInWater()
+	{
+		return World::Get().GetBlock(m_Position) == BlockType::Water;
 	}
 }

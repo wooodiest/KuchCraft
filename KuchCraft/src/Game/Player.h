@@ -20,7 +20,8 @@ namespace KuchCraft {
 
 	constexpr float player_speed        = 5.0f;
 	constexpr float player_sprint_speed = 9.0f;
-	constexpr float player_jump_speed   = 5.0f;
+	constexpr float player_jump_speed   = 5.5f;
+	constexpr float player_swim_speed   = 2.5f;
 
 	constexpr float player_flying_speed        = 20.0f;
 	constexpr float player_sprint_flying_speed = 50.0f;
@@ -52,8 +53,6 @@ namespace KuchCraft {
 		void OnUpdate(float dt);
 		void OnEvent(Event& event);
 
-		bool OnKeyPressed(KeyPressedEvent& e);
-
 		const Camera&    GetCamera()   const { return m_Camera;   }
 		const glm::vec3& GetPosition() const { return m_Position; }
 		const glm::vec2& GetRotation() const { return m_Rotation; }
@@ -64,11 +63,15 @@ namespace KuchCraft {
 		const glm::vec3 GetHeadPosition() const { return glm::vec3(m_Position.x, m_Position.y + player_height,     m_Position.z); }
 		const glm::vec3 GetEyePosition()  const { return glm::vec3(m_Position.x, m_Position.y + player_eye_height, m_Position.z); }
 
+		void SetGameMode(GameMode gameMode);
 		void SetRenderDistance(uint32_t distance, bool reloadWorld = true);
 		void SetKeptInMemoryChunksDistance(uint32_t distance, bool reloadWorld = true);
 
 		const PlayerGraphicalSettings& GetGraphicalSettings() const { return m_GraphicalSettings; }
 		const PlayerMovementSettings&  GetMovementSettings()  const { return m_MovementSettings;  }
+
+	private:
+		bool OnKeyPressed(KeyPressedEvent& e);
 
 	private:
 		glm::vec3 m_Position{ 0.0f };

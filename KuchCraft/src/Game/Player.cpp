@@ -64,17 +64,15 @@ namespace KuchCraft {
 			m_PhysicsBody.MoveRight();
 
 		if (Input::IsKeyPressed(KeyCode::Space))
+			m_PhysicsBody.SwimUp();
+
+		if ((m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator) && m_FlyingStatus)
 		{
-			if (m_FlyingStatus)
+			if (Input::IsKeyPressed(KeyCode::Space))
 				m_PhysicsBody.FlyUp();
-		}
-		
-		if (Input::IsKeyPressed(KeyCode::LeftControl))
-		{
-			if (m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator)
+			if (Input::IsKeyPressed(KeyCode::LeftControl))
 				m_PhysicsBody.FlyDown();
 		}
-		
 		m_PhysicsBody.OnUpdate(dt);
 
 		m_Position = m_PhysicsBody.GetPosition();
@@ -96,15 +94,63 @@ namespace KuchCraft {
 
 		switch (e.GetKeyCode())
 		{
-			case KeyCode::Space: m_PhysicsBody.Jump();; return false;
+			case KeyCode::Space:
+			{
+				m_PhysicsBody.Jump();
+				return false;
+			}
 			case KeyCode::CapsLock:
+			{
 				if (m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator)
 				{
 					m_FlyingStatus = !m_FlyingStatus;
 					m_PhysicsBody.SetFlyingStatus(m_FlyingStatus);
 				}
 				return false;
-			default: return false;
+			}	
+			case KeyCode::F4:
+			{
+				SetGameMode(GameMode::Survival);
+				return false;
+			}
+			case KeyCode::F5:
+			{
+				SetGameMode(GameMode::Creative);
+				return false;
+			}
+			case KeyCode::F6:
+			{
+				SetGameMode(GameMode::Spectator);
+				return false;
+			}
+		}
+		return false;
+	}
+
+	void Player::SetGameMode(GameMode gameMode)
+	{
+		m_GameMode = gameMode;
+		switch (m_GameMode)
+		{
+			case KuchCraft::GameMode::Survival:
+			{
+				m_FlyingStatus = false;
+				m_PhysicsBody.SetFlyingStatus(false);
+				m_PhysicsBody.SetCollidingStatus(true);
+				break;
+			}
+			case KuchCraft::GameMode::Creative:
+			{
+				m_PhysicsBody.SetCollidingStatus(true);
+				break;
+			}
+			case KuchCraft::GameMode::Spectator:
+			{
+				m_FlyingStatus = true;
+				m_PhysicsBody.SetFlyingStatus(true);
+				m_PhysicsBody.SetCollidingStatus(false);
+				break;
+			}
 		}
 	}
 
