@@ -5,10 +5,13 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "KuchCraft.h"
+
 #include "Renderer/FrustumCulling.h"
 #include "Renderer/Renderer.h"
 
 #include "World/WorldGenerator.h"
+#include "KuchCraft.h"
 
 #include "Core/Core.h"
 #include "Core/Utils.h"
@@ -55,8 +58,7 @@ namespace KuchCraft {
 
 		switch (e.GetKeyCode())
 		{
-		case Key::F3: Renderer::FlipShowStatsStatus(); break;
-		case Key::F1: ReloadAllChunks(); break;
+			case Key::F3: Renderer::FlipShowStatsStatus(); return false;
 		}
 
 		return false;
@@ -70,11 +72,11 @@ namespace KuchCraft {
 		m_Player.OnUpdate(dt);
 
 		// Useful extracted variables
-		const auto& playerPosition          = m_Player.GetPosition();
-		const auto& playerGraphicalSettings = m_Player.GetGraphicalSettings();
+		const auto& playerPosition    = m_Player.GetPosition();
+		const auto& graphicalSettings = KuchCraft::GetSettings();
 
 		// Find surrounding chunks to update
-		size_t surroundingChunksCount = (2 * playerGraphicalSettings.RenderDistance + 1) * (2 * playerGraphicalSettings.RenderDistance + 1);
+		size_t surroundingChunksCount = (2 * graphicalSettings.RenderDistance + 1) * (2 * graphicalSettings.RenderDistance + 1);
 		m_ChunksToUpdate.clear();
 		m_ChunksToUpdate.reserve(surroundingChunksCount);
 
@@ -82,12 +84,12 @@ namespace KuchCraft {
 		bool breakStatus = false;
 		int totalChunksBuilded = 0;
 
-		for (float x  = playerPosition.x - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
-				   x <= playerPosition.x + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+		for (float x  = playerPosition.x - graphicalSettings.RenderDistance * chunk_size_XZ;
+				   x <= playerPosition.x + graphicalSettings.RenderDistance * chunk_size_XZ;
 				   x += chunk_size_XZ)
 		{
-			for (float z =  playerPosition.z - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
-				       z <= playerPosition.z + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+			for (float z =  playerPosition.z - graphicalSettings.RenderDistance * chunk_size_XZ;
+				       z <= playerPosition.z + graphicalSettings.RenderDistance * chunk_size_XZ;
 				       z += chunk_size_XZ)
 			{
 				const int chunkIndex = GetChunkIndex({ x, 0.0f, z });
@@ -275,29 +277,15 @@ namespace KuchCraft {
 		return nullptr;
 	}
 
-	void World::ReloadAllChunks()
-	{
-		for (int i = 0; i < m_Chunks.size(); i++)
-		{
-			if (m_Chunks[i])
-			{
-				delete m_Chunks[i];
-				m_Chunks[i] = nullptr;
-			}
-		}
-		m_WorldStats.ChunksInMemory = 0;
-	}
-
 	void World::ReloadChunks()
 	{
-		const auto& position             = m_Player.GetPosition();
-		const auto& renderDistance       = m_Player.GetGraphicalSettings().RenderDistance;
-		const auto& inMemoryKeptDistance = m_Player.GetGraphicalSettings().ChunksKeptInMemoryDistance;
+		const auto& position          = m_Player.GetPosition();
+		const auto& graphicalSettings = KuchCraft::GetSettings();
 
-		const float position_min_x = position.x - (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
-		const float position_max_x = position.x + (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
-		const float position_min_z = position.z - (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
-		const float position_max_z = position.z + (renderDistance + inMemoryKeptDistance) * chunk_size_XZ;
+		const float position_min_x = position.x - (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance) * chunk_size_XZ;
+		const float position_max_x = position.x + (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance) * chunk_size_XZ;
+		const float position_min_z = position.z - (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance) * chunk_size_XZ;
+		const float position_max_z = position.z + (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance) * chunk_size_XZ;
 
 		for (int i = 0; i < m_Chunks.size(); i++)
 		{
@@ -318,14 +306,13 @@ namespace KuchCraft {
 
 	void World::DeleteUnusedChunks(const glm::vec3& position)
 	{
-		const auto& renderDistance       = m_Player.GetGraphicalSettings().RenderDistance;
-		const auto& inMemoryKeptDistance = m_Player.GetGraphicalSettings().ChunksKeptInMemoryDistance;
+		const auto& graphicalSettings = KuchCraft::GetSettings();
 
 		// Get rid of chunks whose position is equal to
-		const float distance_minus_x = position.x - (renderDistance + inMemoryKeptDistance + 1) * chunk_size_XZ;
-		const float distance_plus_x  = position.x + (renderDistance + inMemoryKeptDistance + 1) * chunk_size_XZ;
-		const float distance_minus_z = position.z - (renderDistance + inMemoryKeptDistance + 1) * chunk_size_XZ;
-		const float distance_plus_z  = position.z + (renderDistance + inMemoryKeptDistance + 1) * chunk_size_XZ;
+		const float distance_plus_x  = position.x + (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
+		const float distance_minus_z = position.z - (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
+		const float distance_minus_x = position.x - (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
+		const float distance_plus_z  = position.z + (graphicalSettings.RenderDistance + graphicalSettings.ChunksKeptInMemoryDistance + 1) * chunk_size_XZ;
 
 		for (float z = distance_minus_z; z <= distance_plus_z; z += chunk_size_XZ)
 		{
@@ -381,6 +368,8 @@ namespace KuchCraft {
 			"\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
 			"\n      - built: " + std::to_string(m_WorldStats.TotalBuiltChunks) +
 			"\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks);
+
+		return m_DebugText;
 	}
 
 	void World::ClearStats()
@@ -413,16 +402,16 @@ namespace KuchCraft {
 
 	void World::PreLoadWorld()
 	{
-		const auto& playerPosition = m_Player.GetPosition();
-		const auto& playerGraphicalSettings = m_Player.GetGraphicalSettings();
+		const auto& playerPosition    = m_Player.GetPosition();
+		const auto& graphicalSettings = KuchCraft::GetSettings();
 
 		// Find surrounding chunks to update
-		for (float x  = playerPosition.x - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
-				   x <= playerPosition.x + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+		for (float x  = playerPosition.x - graphicalSettings.RenderDistance * chunk_size_XZ;
+				   x <= playerPosition.x + graphicalSettings.RenderDistance * chunk_size_XZ;
 				   x += chunk_size_XZ)
 		{
-			for (float z  = playerPosition.z - playerGraphicalSettings.RenderDistance * chunk_size_XZ;
-					   z <= playerPosition.z + playerGraphicalSettings.RenderDistance * chunk_size_XZ;
+			for (float z  = playerPosition.z - graphicalSettings.RenderDistance * chunk_size_XZ;
+					   z <= playerPosition.z + graphicalSettings.RenderDistance * chunk_size_XZ;
 					   z += chunk_size_XZ)
 			{
 				const int chunkIndex = GetChunkIndex({ x, 0.0f, z });

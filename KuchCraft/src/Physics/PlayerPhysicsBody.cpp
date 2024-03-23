@@ -8,6 +8,17 @@
 
 namespace KuchCraft {
 
+	constexpr float player_speed        = 5.0f;
+	constexpr float player_sprint_speed = 9.0f;
+	constexpr float player_jump_speed   = 5.5f;
+	constexpr float player_swim_speed   = 2.5f;
+
+	constexpr float player_flying_speed        = 20.0f;
+	constexpr float player_flying_sprint_speed = 100.0f;
+
+	constexpr int player_absolute_height = (int)player_height + 1;
+	constexpr int player_absolute_width  = (int)player_width  + 1;
+
 	PlayerPhysicsBody::PlayerPhysicsBody()
 	{
 
@@ -55,7 +66,7 @@ namespace KuchCraft {
 			m_MovementVector = glm::normalize(m_MovementVector);
 
 			if (m_Flying)
-				m_HorizontalSpeed = m_Sprint ? player_sprint_flying_speed : player_flying_speed;
+				m_HorizontalSpeed = m_Sprint ? player_flying_sprint_speed : player_flying_speed;
 			else
 				m_HorizontalSpeed = m_Sprint ? player_sprint_speed        : player_speed;
 		}

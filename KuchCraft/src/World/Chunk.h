@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#include "KuchCraftData.h"
 #include "World/Block.h"
 #include "Renderer/ChunkData.h"
 

@@ -27,7 +27,6 @@ namespace KuchCraft {
 
 	void Player::Init()
 	{
-		SetRenderDistance(m_GraphicalSettings.RenderDistance, false);
 		m_PrevMousePosition = Input::GetMousePosition();
 
 		m_PhysicsBody.Init(player_width, player_height);
@@ -48,8 +47,9 @@ namespace KuchCraft {
 			glm::vec2 positionDiff = position - m_PrevMousePosition;
 			m_PrevMousePosition    = position;
 
-			m_Rotation.x += positionDiff.x * m_MovementSettings.CameraSensitivity * 0.001f;
-			m_Rotation.y -= positionDiff.y * m_MovementSettings.CameraSensitivity * 0.001f;
+			constexpr float camera_sensitivity = 0.25f;
+			m_Rotation.x += positionDiff.x * camera_sensitivity * 0.001f;
+			m_Rotation.y -= positionDiff.y * camera_sensitivity * 0.001f;
 
 			constexpr float min_pitch = glm::radians(-89.9f);
 			constexpr float max_pitch = glm::radians( 89.9f);
@@ -182,29 +182,6 @@ namespace KuchCraft {
 				break;
 			}
 		}
-	}
-
-	void Player::SetRenderDistance(uint32_t distance, bool reloadWorld)
-	{
-		m_GraphicalSettings.RenderDistance = distance;
-		if (reloadWorld)
-			World::Get().ReloadChunks();
-
-		// Set far plan to camera
-		float horizontalDistane = m_GraphicalSettings.RenderDistance * (chunk_size_XZ + 1) * (float)glm::sqrt(2.0f);
-		float verticalDistance  = chunk_size_Y * 2.0f;
-
-		if (horizontalDistane > verticalDistance)
-			m_Camera.SetFarPlan(horizontalDistane);
-		else
-			m_Camera.SetFarPlan(verticalDistance);
-	}
-
-	void Player::SetKeptInMemoryChunksDistance(uint32_t distance, bool reloadWorld)
-	{
-		m_GraphicalSettings.ChunksKeptInMemoryDistance = distance;
-		if (reloadWorld)
-			World::Get().ReloadChunks();
 	}
 
 }
