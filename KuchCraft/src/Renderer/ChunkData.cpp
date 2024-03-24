@@ -12,7 +12,7 @@ namespace KuchCraft {
 	{
 		m_IndexCount.clear();
 		m_Textures.  clear();
-		m_Data      .clear();
+		m_VertexData      .clear();
 
 		m_WaterVertices.clear();
 	}
@@ -22,8 +22,8 @@ namespace KuchCraft {
 		m_DrawCalls = 1;
 		m_TextureSlotHelper = new TextureSlotHelper();
 
-		m_Data.clear();
-		m_Data.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_vertex_count);
+		m_VertexData.clear();
+		m_VertexData.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_vertex_count);
 
 		m_Textures.clear();
 		m_Textures.reserve(max_texture_slots);
@@ -41,7 +41,7 @@ namespace KuchCraft {
 		if (m_TextureSlotHelper)
 			delete m_TextureSlotHelper;
 
-		m_Data.         shrink_to_fit();
+		m_VertexData.   shrink_to_fit();
 		m_IndexCount.   shrink_to_fit();
 		m_Textures.     shrink_to_fit();
 		m_WaterVertices.shrink_to_fit();
@@ -109,7 +109,7 @@ namespace KuchCraft {
 			uint32_t index = verticesIndex * 4 + i;
 			uint32_t data  = packedData | ((index & 0x1F) << 17);
 
-			m_Data.push_back(data);
+			m_VertexData.push_back(data);
 		}
 		UpdateIndexCount();
 	}
