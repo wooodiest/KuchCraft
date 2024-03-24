@@ -12,7 +12,7 @@ namespace KuchCraft {
 	{
 		m_IndexCount.clear();
 		m_Textures.  clear();
-		m_Vertices.  clear();
+		m_Data      .clear();
 
 		m_WaterVertices.clear();
 	}
@@ -22,8 +22,8 @@ namespace KuchCraft {
 		m_DrawCalls = 1;
 		m_TextureSlotHelper = new TextureSlotHelper();
 
-		m_Vertices.clear();
-		m_Vertices.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_vertex_count);
+		m_Data.clear();
+		m_Data.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_vertex_count);
 
 		m_Textures.clear();
 		m_Textures.reserve(max_texture_slots);
@@ -41,7 +41,7 @@ namespace KuchCraft {
 		if (m_TextureSlotHelper)
 			delete m_TextureSlotHelper;
 
-		m_Vertices.     shrink_to_fit();
+		m_Data.         shrink_to_fit();
 		m_IndexCount.   shrink_to_fit();
 		m_Textures.     shrink_to_fit();
 		m_WaterVertices.shrink_to_fit();
@@ -65,7 +65,7 @@ namespace KuchCraft {
 		m_IndexCount[GetCurrentDrawCallIndex()] += quad_index_count;
 	}
 
-	void ChunkDrawList::Add(const glm::mat4& model, const Vertex vertices[quad_vertex_count], const Block& block)
+	void ChunkDrawList::Add(const glm::ivec3& position, uint32_t verticesIndex, const Block& block)
 	{
 		uint32_t texture = Renderer::GetTexture(block.blockType);
 		float    texSlot = -1.0f;
@@ -79,6 +79,7 @@ namespace KuchCraft {
 				break;
 			}
 		}
+
 		// If we haven't found the texture, check whether we have a new one or whether we have used all slots
 		if (texSlot == -1.0f)
 		{
@@ -88,14 +89,27 @@ namespace KuchCraft {
 			texSlot = (float)m_TextureSlotHelper->GetCurrentSlot();
 			AddTexture(texture);
 		}
+
 		// Create geometry
+		//        PackedData        //
+		//   5B - position.x | 0B	//
+		//   7B - position.y | 5B	//
+		//   5B - position.z | 12B  //
+		//   5B - index      | 17B  //
+		//   7B - texture    | 22B  //
+		uint32_t packedData = 0;
+		packedData |= ((position.x & 0x1F)        << 0 ) |
+				      ((position.y & 0x7F)        << 5 ) |
+				      ((position.z & 0x1F)        << 12) |
+					  (((uint32_t)texSlot & 0x7F) << 22);
+
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
-			m_Vertices.emplace_back(Vertex{
-					glm::vec3(model * glm::vec4(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z, 1.0f)),
-					glm::vec2(vertices[i].TexCoord.x, vertices[i].TexCoord.y),
-					texSlot
-				});
+			// every vertex quad has stride of 4
+			uint32_t index = verticesIndex * 4 + i;
+			uint32_t data  = packedData | ((index & 0x1F) << 17);
+
+			m_Data.push_back(data);
 		}
 		UpdateIndexCount();
 	}

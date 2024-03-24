@@ -14,6 +14,7 @@ namespace KuchCraft {
 
 		void SetMat4(const std::string& name, const glm::mat4& v);
 		void SetInt(const std::string& name, int v);
+		void SetFloat3(const std::string& name, const glm::vec3& v);
 		void SetFloat4(const std::string& name, const glm::vec4& v);
 		void SetIntArray(const std::string& name, int* values, uint32_t count);
 		void SetFloat4Array(const std::string& name, float* data , uint32_t count);

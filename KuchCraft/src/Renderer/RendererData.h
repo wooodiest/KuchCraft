@@ -198,6 +198,13 @@ namespace KuchCraft {
 	};
 
 	// Cube - quad vertices
+	constexpr uint32_t vertices_bottom_index = 0;
+	constexpr uint32_t vertices_top_index    = 1;
+	constexpr uint32_t vertices_front_index  = 2;
+	constexpr uint32_t vertices_right_index  = 3;
+	constexpr uint32_t vertices_behind_index = 4;
+	constexpr uint32_t vertices_left_index   = 5;
+
 	constexpr Vertex vertices_bottom[quad_vertex_count]
 	{
 		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.0f }, 0.0f },

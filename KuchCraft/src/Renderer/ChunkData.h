@@ -42,9 +42,9 @@ namespace KuchCraft {
 		uint32_t GetTexture(uint32_t drawCallIndex, uint32_t index) const { return m_Textures[drawCallIndex * max_texture_slots + index];           }
 		uint32_t GetCurrentDrawCallIndex()                          const { return m_DrawCalls - 1;                                                 }
 
-		TextureSlotHelper&         GetSlotHelper()  const { return *m_TextureSlotHelper; }
-		const std::vector<Vertex>& GetVertices()    const { return m_Vertices;           }
-		const void* GetVerticesPtr(uint32_t offset) const { return &m_Vertices[offset];  }
+		TextureSlotHelper&           GetSlotHelper()  const { return *m_TextureSlotHelper; }
+		const std::vector<uint32_t>& GetVertices()    const { return m_VertexData;         }
+		const void* GetVerticesPtr(uint32_t offset)   const { return &m_VertexData[offset];}
 
 		const std::vector<Vertex_P3C2>& GetWaterVertices() const { return m_WaterVertices;     }
 		const void* GetWaterVerticesPtr()                  const { return &m_WaterVertices[0]; }
@@ -53,7 +53,7 @@ namespace KuchCraft {
 		void AddTexture(uint32_t texture);
 		void UpdateIndexCount();
 
-		void Add(const glm::mat4& model, const Vertex vertices[quad_vertex_count], const Block& block);
+		void Add(const glm::ivec3& position, uint32_t verticesIndex, const Block& block);
 		void AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count]);
 
 	private:
@@ -62,7 +62,7 @@ namespace KuchCraft {
 		uint32_t m_DrawCalls = 1;
 		std::vector<uint32_t> m_IndexCount;
 		std::vector<uint32_t> m_Textures;
-		std::vector<Vertex>   m_Vertices;
+		std::vector<uint32_t> m_VertexData;
 
 		// Water
 		std::vector<Vertex_P3C2> m_WaterVertices;

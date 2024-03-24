@@ -147,6 +147,7 @@ namespace KuchCraft {
 	{
 		uint32_t vertexOffset = 0;
 		const auto& drawList = chunk->GetDrawList();
+		s_ChunkData.Shader.SetFloat3("u_ChunkPosition", chunk->GetPosition());
 
 		for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
 		{
@@ -157,7 +158,7 @@ namespace KuchCraft {
 
 				glBindVertexArray(s_ChunkData.VertexArray);
 				glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex), drawList.GetVerticesPtr(vertexOffset));
+				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(uint32_t), drawList.GetVerticesPtr(vertexOffset));
 				
 				vertexOffset += vertexCount;
 
@@ -363,14 +364,10 @@ namespace KuchCraft {
 
 		glGenBuffers(1, &s_ChunkData.VertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+		glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, sizeof(uint32_t), (void*)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(float)));
-		glEnableVertexAttribArray(2);
 
 		s_ChunkData.Shader.Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl");
 		s_ChunkData.Shader.Bind();
