@@ -6,7 +6,9 @@
 #include "Core/Input.h"
 #include "Core/Events/Event.h"
 #include "Core/Events/KeyEvent.h"
+#include "Core/Events/MouseEvent.h"
 #include "Physics/Ray.h"
+#include "World/Block.h"
 #include "Physics/PlayerPhysicsBody.h"
 
 namespace KuchCraft {
@@ -49,6 +51,11 @@ namespace KuchCraft {
 	private:
 		void Init();
 		bool OnKeyPressed(KeyPressedEvent& e);
+		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+
+		void PlaceBlock(const glm::vec3& position, const Block& block);
+		void DestroyBlock(const glm::vec3& position);
+
 		TargetedBlockInfo GetTargetBlockInfo();
 
 	private:

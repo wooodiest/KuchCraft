@@ -5,6 +5,7 @@
 
 #include "Core/Core.h"
 #include "Core/Log.h"
+#include "Core/Random.h"
 #include "Core/Utils.h"
 
 #include "Renderer/Renderer.h"
@@ -96,11 +97,6 @@ namespace KuchCraft {
 		m_Position = m_PhysicsBody.GetPosition();
 
 		m_TargetedBlock = GetTargetBlockInfo();
-		if (m_TargetedBlock.Targeted)
-		{
-			if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
-				World::Get().SetBlock(m_TargetedBlock.Position, Block(BlockType::CoalOre));
-		}
 
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
 	}
@@ -109,6 +105,7 @@ namespace KuchCraft {
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(KC_BIND_EVENT_FN(Player::OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(KC_BIND_EVENT_FN(Player::OnMouseButtonPressed));
 
 		m_Camera.OnEvent(event);
 	}
@@ -231,6 +228,54 @@ namespace KuchCraft {
 			}
 		}
 		return false;
+	}
+
+	bool Player::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		switch (e.GetMouseButton())
+		{
+			case MouseCode::ButtonLeft:
+			{
+				DestroyBlock(m_TargetedBlock.Position);
+				return false;
+			}
+			case MouseCode::ButtonRight:
+			{
+				PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_blocks))));
+				return false;
+			}
+		}
+		
+		return false;
+	}
+
+	void Player::PlaceBlock(const glm::vec3& position, const Block& block)
+	{
+		if (!m_TargetedBlock.Targeted)
+			return;
+
+		glm::vec3 newPosition = position;
+		switch (m_TargetedBlock.Plane)
+		{
+			case PlaneDirection::Left:   newPosition.x -= 1.0f; break;
+			case PlaneDirection::Right:  newPosition.x += 1.0f; break;
+			case PlaneDirection::Bottom: newPosition.y -= 1.0f; break;
+			case PlaneDirection::Top:    newPosition.y += 1.0f; break;
+			case PlaneDirection::Behind: newPosition.z -= 1.0f; break;
+			case PlaneDirection::Front:  newPosition.z += 1.0f; break;
+		}
+
+		//TODO: Check possible collisions with new position
+
+		World::Get().SetBlock(newPosition, block);
+	}
+
+	void Player::DestroyBlock(const glm::vec3& position)
+	{
+		if (!m_TargetedBlock.Targeted)
+			return;
+
+		World::Get().SetBlock(position, Block(BlockType::Air));
 	}
 
 	void Player::SetGameMode(GameMode gameMode)
