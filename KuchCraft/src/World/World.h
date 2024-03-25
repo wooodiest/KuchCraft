@@ -47,6 +47,7 @@ namespace KuchCraft {
 		Camera& GetCamera() { return m_Player.GetCamera(); }
 		bool GetQuitStatus() const { return m_QuitStatus; }
 
+		// TODO: Fix do not work properly
 		void ReloadChunks();
 
 	private:

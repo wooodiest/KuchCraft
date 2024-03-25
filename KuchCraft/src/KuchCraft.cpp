@@ -60,19 +60,7 @@ namespace KuchCraft {
 		s_Settings.RenderDistance = distance;
 
 		if (m_World)
-		{
 			m_World->ReloadChunks();
-
-			// Set far plan to camera
-			float horizontalDistane = s_Settings.RenderDistance * (chunk_size_XZ + 1) * (float)glm::sqrt(2.0f);
-			float verticalDistance  = chunk_size_Y * 2.0f;
-
-			Camera& camera = m_World->GetCamera();
-			if (horizontalDistane > verticalDistance)
-				camera.SetFarPlan(horizontalDistane);
-			else
-				camera.SetFarPlan(verticalDistance);
-		}
 	}
 
 	void KuchCraft::SetKeptInMemoryChunksDistance(uint32_t distance)
