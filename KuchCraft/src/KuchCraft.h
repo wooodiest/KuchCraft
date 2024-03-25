@@ -1,10 +1,11 @@
 #pragma once
 
 #include "World/WorldData.h"
+#include "World/World.h"
+
 #include "Renderer/RendererData.h"
 #include "Renderer/ChunkData.h"
 
-#include "World/World.h"
 #include "Core/Events/Event.h"
 
 namespace KuchCraft {

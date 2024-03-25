@@ -1,17 +1,18 @@
-#include "Renderer.h"
+#include "kcpch.h"
+#include "Renderer/Renderer.h"
 
-#include <array>
-#include <iostream>
-#include <unordered_map>
+#include "Renderer/Shader.h"
+
+#include "Core/Application.h"
+
+#include "World/World.h"
+
 #include <stb_image.h>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <glm/gtc/matrix_transform.hpp>
 
-#include "Shader.h"
-#include "Core/Application.h"
-#include "World/World.h"
-#include "Core/Log.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace KuchCraft {
 

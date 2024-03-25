@@ -1,10 +1,10 @@
-#include "Chunk.h"
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
+#include "kcpch.h"
+#include "World/Chunk.h"
 
 #include "World/World.h"
 #include "World/WorldGenerator.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace KuchCraft {
 

@@ -1,12 +1,10 @@
-#include "Shader.h"
+#include "kcpch.h"
+#include "Renderer/Shader.h"
+
+#include "Renderer/Renderer.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <fstream>
-#include <iostream>
-#include "Renderer/Renderer.h"
-
-#include "Core/Log.h"
 
 namespace KuchCraft {
 

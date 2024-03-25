@@ -1,4 +1,5 @@
-#include "Utils.h"
+#include "kcpch.h"
+#include "Core/Utils.h"
 
 namespace KuchCraft {
 

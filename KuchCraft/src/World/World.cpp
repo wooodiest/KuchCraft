@@ -1,9 +1,5 @@
-#include "World.h"
-
-#include <glm/glm.hpp>
-#include <string>
-#include <iostream>
-#include <glm/gtc/matrix_transform.hpp>
+#include "kcpch.h"
+#include "World/World.h"
 
 #include "KuchCraft.h"
 
@@ -11,10 +7,12 @@
 #include "Renderer/Renderer.h"
 
 #include "World/WorldGenerator.h"
-#include "KuchCraft.h"
 
 #include "Core/Core.h"
 #include "Core/Utils.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace KuchCraft {
 

@@ -1,4 +1,5 @@
-#include "Timer.h"
+#include "kcpch.h"
+#include "Core/Timer.h"
 
 namespace KuchCraft {
 

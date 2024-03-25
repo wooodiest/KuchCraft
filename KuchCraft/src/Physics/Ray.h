@@ -1,7 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include "AABB.h"
+
+#include <glm/glm.hpp>
 
 namespace KuchCraft
 {

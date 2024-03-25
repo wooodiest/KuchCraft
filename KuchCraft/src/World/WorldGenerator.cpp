@@ -1,7 +1,7 @@
-#include "WorldGenerator.h"
+#include "kcpch.h"
+#include "World/WorldGenerator.h"
 
 #include "Core/Random.h"
-#include <iostream>
 
 namespace KuchCraft {
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <string>
-
 #include "World/Chunk.h"
+
 #include "Core/Events/Event.h"
 #include "Core/Events/KeyEvent.h"
+
 #include "Game/Player.h"
+
+#include <glm/glm.hpp>
 
 namespace KuchCraft {
 

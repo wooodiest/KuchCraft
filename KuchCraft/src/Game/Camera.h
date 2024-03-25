@@ -1,8 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include "Core/Events/Event.h"
 #include "Core/Events/ApplicationEvent.h"
+
+#include <glm/glm.hpp>
 
 namespace KuchCraft {
 
@@ -17,7 +18,7 @@ namespace KuchCraft {
 
 		bool OnWindowResized(WindowResizeEvent& e);
 
-		void SetFarPlan(float far);
+		void SetFarPlan(float farplan);
 
 		const glm::mat4& GetProjection()             const { return m_Projection;             }
 		const glm::mat4& GetOrthoProjection()        const { return m_OrthoProjection;        }

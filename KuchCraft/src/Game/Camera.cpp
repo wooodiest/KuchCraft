@@ -1,13 +1,12 @@
-#include "Camera.h"
-
-#include <iostream>
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "kcpch.h"
+#include "Game/Camera.h"
 
 #include "Core/Input.h"
 #include "Core/Application.h"
 #include "Core/Core.h"
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace KuchCraft {
 
@@ -33,9 +32,9 @@ namespace KuchCraft {
 		dispatcher.Dispatch<WindowResizeEvent>(KC_BIND_EVENT_FN(Camera::OnWindowResized));
 	}
 
-	void Camera::SetFarPlan(float far)
+	void Camera::SetFarPlan(float farplan)
 	{
-		m_Far = far; 
+		m_Far = farplan;
 		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 		UpdateProjection(width, height);
 	}

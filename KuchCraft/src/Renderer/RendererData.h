@@ -1,10 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <map>
-#include <tuple>
-
 #include "Core/Timer.h"
 
 #include "World/Block.h"
@@ -12,13 +7,15 @@
 
 #include "Renderer/Shader.h"
 
+#include <glm/glm.hpp>
+
 namespace KuchCraft {
 
 	// Constances
 	constexpr bool opengl_logs = true;
 
 	// GPU
-	constexpr uint32_t max_texture_slots     = 32;
+	constexpr uint32_t max_texture_slots     = 32; // Max value 128
 	constexpr uint32_t default_texture_slot  = 0;
 
 	// Text rendering

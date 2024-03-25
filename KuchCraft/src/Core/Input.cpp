@@ -1,8 +1,9 @@
-#include "Input.h"
-
-#include <GLFW/glfw3.h>
+#include "kcpch.h"
+#include "Core/Input.h"
 
 #include "Core/Application.h"
+
+#include <GLFW/glfw3.h>
 
 namespace KuchCraft {
 

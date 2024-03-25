@@ -1,12 +1,10 @@
-#include "Application.h"
+#include "kcpch.h"
+#include "Core/Application.h"
 
-#include <iostream>
-
-#include "Core/Input.h"
 #include "Core/Random.h"
-#include "Renderer/Renderer.h"
-#include "Core/Log.h"
 #include "Core/Core.h"
+
+#include "Renderer/Renderer.h"
 
 namespace KuchCraft {
 
@@ -14,10 +12,8 @@ namespace KuchCraft {
 
 	Application::Application()
 	{
-		s_Instance = this;
-
 		Random::Init();
-		Log::Init();
+		s_Instance = this;
 
 		m_Window = new Window("KuchCraft", 1920, 1080, false);
 		m_Window->SetEventCallback(KC_BIND_EVENT_FN(Application::OnEvent));

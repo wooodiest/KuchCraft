@@ -25,6 +25,9 @@ project "KuchCraft"
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "kcpch.h"
+    pchsource "%{wks.location}/KuchCraft/src/kcpch.cpp"
+
     files
     {
         "%{wks.location}/KuchCraft/src/**.h",

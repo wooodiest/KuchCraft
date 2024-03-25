@@ -1,11 +1,10 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <string>
-#include <glad/glad.h>
-
 #include "Game/Camera.h"
 #include "World/Chunk.h"
+
+#include <glm/glm.hpp>
+#include <glad/glad.h>
 
 namespace KuchCraft {
 

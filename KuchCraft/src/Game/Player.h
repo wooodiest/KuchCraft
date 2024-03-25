@@ -1,15 +1,19 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include "Game/Camera.h"
+
+#include "Physics/Ray.h"
+
+#include "World/Block.h"
+
+#include "Physics/PlayerPhysicsBody.h"
+
 #include "Core/Input.h"
 #include "Core/Events/Event.h"
 #include "Core/Events/KeyEvent.h"
 #include "Core/Events/MouseEvent.h"
-#include "Physics/Ray.h"
-#include "World/Block.h"
-#include "Physics/PlayerPhysicsBody.h"
+
+#include <glm/glm.hpp>
 
 namespace KuchCraft {
 

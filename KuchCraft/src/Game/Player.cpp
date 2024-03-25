@@ -1,19 +1,19 @@
-#include "Player.h"
+#include "kcpch.h"
+#include "Game/Player.h"
 
-#include "Core/Random.h"
 #include "World/World.h"
 
+#include "Renderer/Renderer.h"
+
+#include "Core/Random.h"
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Random.h"
 #include "Core/Utils.h"
 
-#include "Renderer/Renderer.h"
-
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtx/norm.hpp>
 #include <glm/gtc/integer.hpp>
-#include <iostream>
 
 namespace KuchCraft {
 

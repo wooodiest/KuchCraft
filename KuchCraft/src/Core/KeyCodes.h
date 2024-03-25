@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 namespace KuchCraft {
 
 	typedef enum class KeyCode : uint16_t

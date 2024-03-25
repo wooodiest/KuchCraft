@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
-#include <glm/glm.hpp>
-
 #include "Renderer/RendererData.h"
+
 #include "World/Block.h"
+
+#include <glm/glm.hpp>
 
 namespace KuchCraft {
 

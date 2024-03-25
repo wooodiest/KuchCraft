@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <string>
 #include "Physics/AABB.h"
+
+#include <glm/glm.hpp>
 
 namespace KuchCraft {
 

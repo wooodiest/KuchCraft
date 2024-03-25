@@ -1,9 +1,5 @@
 #pragma once
 
-#include <functional>
-#include <string>
-#include <sstream>
-
 #include "Core/Core.h"
 
 namespace KuchCraft {

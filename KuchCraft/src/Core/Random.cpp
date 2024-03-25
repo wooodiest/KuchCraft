@@ -1,4 +1,5 @@
-#include "Random.h"
+#include "kcpch.h"
+#include "Core/Random.h"
 
 namespace KuchCraft {
 
