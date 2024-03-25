@@ -10,6 +10,8 @@
 #include "Renderer/Renderer.h"
 
 #include <glm/gtc/epsilon.hpp>
+#include <glm/gtx/norm.hpp>
+#include <glm/gtc/integer.hpp>
 #include <iostream>
 
 namespace KuchCraft {
@@ -92,6 +94,14 @@ namespace KuchCraft {
 		m_PhysicsBody.OnUpdate(dt);
 
 		m_Position = m_PhysicsBody.GetPosition();
+
+		m_TargetedBlock = GetTargetBlockInfo();
+		if (m_TargetedBlock.Targeted)
+		{
+			if (Input::IsMouseButtonPressed(MouseCode::ButtonLeft))
+				World::Get().SetBlock(m_TargetedBlock.Position, Block(BlockType::CoalOre));
+		}
+
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
 	}
 
@@ -112,13 +122,77 @@ namespace KuchCraft {
 			case KuchCraft::GameMode::Creative:  gameMode = "Creative"; break;
 			case KuchCraft::GameMode::Spectator: gameMode = "Spectator"; break;
 		}
+
 		m_DebugText =
 			  "\nPlayer:"
 			  "\n   Position: "  + VecToString(m_Position) 
 			+ "\n   Rotation: "  + VecToString(glm::vec2(glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y)))
 			+ "\n   Gamemode: "  + gameMode;
 
+		if (m_TargetedBlock.Targeted)
+		{
+			m_DebugText += "\n   Targeted block: " + World::Get().GetBlock(m_TargetedBlock.Position).GetName();
+			switch (m_TargetedBlock.Plane)
+			{
+				case PlaneDirection::Left:   m_DebugText += " - left - ";   break;
+				case PlaneDirection::Right:  m_DebugText += " - right - ";  break;
+				case PlaneDirection::Bottom: m_DebugText += " - bottom - "; break;
+				case PlaneDirection::Top:    m_DebugText += " - top - ";    break;
+				case PlaneDirection::Behind: m_DebugText += " - behind - "; break;
+				case PlaneDirection::Front:  m_DebugText += " - front - ";  break;
+			}
+			m_DebugText += VecToString(m_TargetedBlock.Position);
+		}
+		else
+			m_DebugText += "\n   Targeted block: none";
+
 		return m_DebugText;
+	}
+
+	TargetedBlockInfo Player::GetTargetBlockInfo()
+	{
+		TargetedBlockInfo outputTargetedBlockInfo;
+
+		const glm::ivec3 absolutePosition{ m_Position };
+		constexpr float range          = 3.5f;
+		constexpr int   absolute_range = 4;
+
+		float currentDistance = std::numeric_limits<float>::infinity();
+		const Ray ray = { GetEyePosition(), m_Camera.GetFront(), range };
+
+		// Find blocks near player
+		for (int x = absolutePosition.x - absolute_range; x <= absolutePosition.x + absolute_range; x++)
+		{
+			for (int y = absolutePosition.y - absolute_range; y <= absolutePosition.y + absolute_range; y++)
+			{
+				for (int z = absolutePosition.z - absolute_range; z <= absolutePosition.z + absolute_range; z++)
+				{
+					constexpr float block_size = 1.0f;
+					AABB blockAABB = { glm::vec3{ x, y, z },
+						glm::vec3{x + block_size, y + block_size, z + block_size} };
+
+					const glm::vec3& blockPosition = blockAABB.Min;
+					const Block block = World::Get().GetBlock(blockPosition);
+
+					if (!block.IsSolid())
+						continue;
+
+					auto targetedBlockInfo = ray.IsColliding(blockAABB);
+					if (targetedBlockInfo.Targeted)
+					{
+						glm::vec3 blockCenter = blockPosition + glm::vec3(block_size / 2.0f);
+						float distance = glm::length2(ray.Origin - blockCenter);
+
+						if (distance < currentDistance)
+						{
+							outputTargetedBlockInfo = targetedBlockInfo;
+							currentDistance         = distance;	
+						}
+					}
+				}
+			}
+		}
+		return outputTargetedBlockInfo;
 	}
 
 	bool Player::OnKeyPressed(KeyPressedEvent& e)

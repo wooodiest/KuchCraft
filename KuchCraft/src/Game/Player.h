@@ -6,6 +6,7 @@
 #include "Core/Input.h"
 #include "Core/Events/Event.h"
 #include "Core/Events/KeyEvent.h"
+#include "Physics/Ray.h"
 #include "Physics/PlayerPhysicsBody.h"
 
 namespace KuchCraft {
@@ -48,6 +49,7 @@ namespace KuchCraft {
 	private:
 		void Init();
 		bool OnKeyPressed(KeyPressedEvent& e);
+		TargetedBlockInfo GetTargetBlockInfo();
 
 	private:
 		glm::vec3 m_Position{ 0.0f };
@@ -57,6 +59,7 @@ namespace KuchCraft {
 		Camera			  m_Camera;
 		GameMode		  m_GameMode;
 		PlayerPhysicsBody m_PhysicsBody;
+		TargetedBlockInfo m_TargetedBlock;
 
 		std::string m_DebugText;
 

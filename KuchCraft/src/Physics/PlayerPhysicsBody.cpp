@@ -99,12 +99,11 @@ namespace KuchCraft {
 		}
 
 		if (m_Colliding)
+		{
 			PerformCollsionCheck();
-
-		m_IsOnGround = IsOnGround();
-		m_IsInWater  = IsInWater();
-
-		m_MovementVectorCpy = m_MovementVector;
+			m_IsOnGround = IsOnGround();
+			m_IsInWater  = IsInWater();
+		}
 
 		if (m_IsOnGround || m_Flying || !m_IsInWater)
 			m_MovementVector  = { 0.0f, 0.0f, 0.0f };	
@@ -196,7 +195,7 @@ namespace KuchCraft {
 		}
 	}
 
-	bool PlayerPhysicsBody::CheckForCollisions(const glm::vec3 position, glm::vec3& out_CollisionVector)
+	bool PlayerPhysicsBody::CheckForCollisions(const glm::vec3& position, glm::vec3& out_CollisionVector)
 	{
 		bool colided = false;
 		out_CollisionVector = { 0.0f, 0.0f, 0.0f };
@@ -205,15 +204,15 @@ namespace KuchCraft {
 		AABB playerAABB = m_PlayerAbsoluteAABB.MoveTo(position);
 
 		// Find blocks near player
-		for (int x = -m_CollisionCheckRadius.x; x <= m_CollisionCheckRadius.x; x++)
+		for (int x = absolutePosition.x - m_CollisionCheckRadius.x; x <= absolutePosition.x + m_CollisionCheckRadius.x; x++)
 		{
-			for (int y = -m_CollisionCheckRadius.y; y <= m_CollisionCheckRadius.y; y++)
+			for (int y = absolutePosition.y - m_CollisionCheckRadius.y; y <= absolutePosition.y + m_CollisionCheckRadius.y; y++)
 			{
-				for (int z = -m_CollisionCheckRadius.z; z <= m_CollisionCheckRadius.z; z++)
+				for (int z = absolutePosition.z - m_CollisionCheckRadius.z; z <= absolutePosition.z + m_CollisionCheckRadius.z; z++)
 				{
 					constexpr float block_size = 1.0f;
-					AABB blockAABB = { glm::vec3{ absolutePosition.x + x, absolutePosition.y + y, absolutePosition.z + z },
-						glm::vec3{ absolutePosition.x + x + block_size, absolutePosition.y + y + block_size, absolutePosition.z + z + block_size} };
+					AABB blockAABB = { glm::vec3{ x, y, z },
+						glm::vec3{ x + block_size, y + block_size, z + block_size} };
 
 					const glm::vec3& blockPosition = blockAABB.Min;
 					const Block block = World::Get().GetBlock(blockPosition);

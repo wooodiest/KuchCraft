@@ -37,7 +37,7 @@ namespace KuchCraft {
 
 	private:
 		void PerformCollsionCheck();
-		bool CheckForCollisions(const glm::vec3 position, glm::vec3& out_CollisionVector);
+		bool CheckForCollisions(const glm::vec3& position, glm::vec3& out_CollisionVector);
 		bool IsOnGround();
 		bool IsInWater();
 
@@ -51,7 +51,6 @@ namespace KuchCraft {
 
 		glm::vec3 m_Position          { 0.0f };
 		glm::vec3 m_MovementVector    { 0.0f };
-		glm::vec3 m_MovementVectorCpy { 0.0f };
 		glm::vec3 m_JumpVector        { 0.0f };
 
 		float m_HorizontalSpeed = 0.0f;
