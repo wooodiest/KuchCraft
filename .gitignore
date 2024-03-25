@@ -15,3 +15,9 @@ x64/
 **.vcxproj.user
 **.csproj
 *.log
+
+#KuchCraft files
+*.log
+KuchCraft-Profile-Runtime.json
+KuchCraft-Profile-Shutdown.json
+KuchCraft-Profile-Startup.json

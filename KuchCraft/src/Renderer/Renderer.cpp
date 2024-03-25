@@ -26,6 +26,8 @@ namespace KuchCraft {
 
 	void Renderer::Init()
 	{
+		KC_PROFILE_FUNCTION();
+
 		PrepareShaders();
 		PrepareRenderer();
 
@@ -39,6 +41,8 @@ namespace KuchCraft {
 
 	void Renderer::ShutDown()
 	{
+		KC_PROFILE_FUNCTION();
+
 		// RendererData
 		glDeleteBuffers(1, &s_RendererData.QuadIndexBuffer);
 		glDeleteBuffers(1, &s_RendererData.WorldDataUniformBuffer);
@@ -64,6 +68,8 @@ namespace KuchCraft {
 
 	void Renderer::OnUpdate(float dt)
 	{
+		KC_PROFILE_FUNCTION();
+
 		ResetStats();
 
 		Timer::OnUpdate(dt);
@@ -73,12 +79,16 @@ namespace KuchCraft {
 
 	void Renderer::BeginFrame()
 	{
+		KC_PROFILE_FUNCTION();
+
 		// Clear text buffer
 		s_TextData.Data.clear();
 	}
 
 	void Renderer::EndFrame()
 	{
+		KC_PROFILE_FUNCTION();
+
 		// Render text
 		glEnable(GL_BLEND);
 		RenderText();
@@ -87,6 +97,8 @@ namespace KuchCraft {
 
 	void Renderer::BeginWorld(const Camera& camera)
 	{
+		KC_PROFILE_FUNCTION();
+
 		// Set uniform buffer
 		UniformWorldBuffer buffer{
 			camera.GetViewProjection(),
@@ -104,6 +116,8 @@ namespace KuchCraft {
 
 	void Renderer::EndWorld()
 	{
+		KC_PROFILE_FUNCTION();
+
 		// Setup deafult frame buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
 		glDisable(GL_DEPTH_TEST);
@@ -146,6 +160,8 @@ namespace KuchCraft {
 
 	void Renderer::RenderChunk(Chunk* chunk)
 	{
+		KC_PROFILE_FUNCTION();
+
 		uint32_t vertexOffset = 0;
 		const auto& drawList = chunk->GetDrawList();
 		s_ChunkData.Shader.SetFloat3("u_ChunkPosition", chunk->GetPosition());
@@ -195,6 +211,8 @@ namespace KuchCraft {
 
 	void Renderer::RenderSkybox()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glBindVertexArray(s_SkyboxData.VertexArray);
 		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
 
@@ -229,6 +247,8 @@ namespace KuchCraft {
 
 	void Renderer::RenderWater(Chunk* chunk)
 	{
+		KC_PROFILE_FUNCTION();
+
 		const auto& drawList = chunk->GetDrawList();
 		uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
 
@@ -262,6 +282,8 @@ namespace KuchCraft {
 
 	void Renderer::PrepareShaders()
 	{
+		KC_PROFILE_FUNCTION();
+
 		s_RendererData.ShaderStrData["##world_data_uniform_buffer"] =
 			R"(layout(std140, binding = ##world_data_uniform_buffer_binding) uniform UniformWorldData
 			   {
@@ -290,6 +312,8 @@ namespace KuchCraft {
 
 	void Renderer::PrepareRenderer()
 	{
+		KC_PROFILE_FUNCTION();
+
 		// Setup
 		if (opengl_logs)
 		{
@@ -360,6 +384,8 @@ namespace KuchCraft {
 
 	void Renderer::PrepareChunkRendering()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glGenVertexArrays(1, &s_ChunkData.VertexArray);
 		glBindVertexArray(s_ChunkData.VertexArray);
 
@@ -381,6 +407,8 @@ namespace KuchCraft {
 
 	void Renderer::PrepareSkyboxRendering()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glGenVertexArrays(1, &s_SkyboxData.VertexArray);
 		glBindVertexArray(s_SkyboxData.VertexArray);
 
@@ -400,6 +428,8 @@ namespace KuchCraft {
 
 	void Renderer::PrepareWaterRendering()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glGenVertexArrays(1, &s_WaterData.VertexArray);
 		glBindVertexArray(s_WaterData.VertexArray);
 
@@ -419,6 +449,8 @@ namespace KuchCraft {
 
 	void Renderer::PrepareTextRendering()
 	{
+		KC_PROFILE_FUNCTION();
+
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft))
 		{
@@ -511,6 +543,8 @@ namespace KuchCraft {
 
 	void Renderer::InvalidateMainFrameBuffer(uint32_t width, uint32_t height)
 	{
+		KC_PROFILE_FUNCTION();
+
 		if (s_RendererData.RenderOutputFrameBuffer.RendererID)
 		{
 			glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
@@ -538,6 +572,8 @@ namespace KuchCraft {
 
 	void Renderer::RenderText()
 	{
+		KC_PROFILE_FUNCTION();
+
 		s_Stats.TextTimer.Begin();
 
 		s_TextData.Shader.Bind();
@@ -620,6 +656,8 @@ namespace KuchCraft {
 
 	void Renderer::LoadTextureAtlas()
 	{
+		KC_PROFILE_FUNCTION();
+
 		// Pair blocktype with texture
 		std::unordered_map<BlockType, std::string>  blockTexturePathsAtlas;
 		blockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
@@ -655,6 +693,8 @@ namespace KuchCraft {
 
 	uint32_t Renderer::LoadSkyboxTexture()
 	{
+		KC_PROFILE_FUNCTION();
+
 		const GLenum types[cube_face_cout] = {
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X,
 			GL_TEXTURE_CUBE_MAP_NEGATIVE_X,

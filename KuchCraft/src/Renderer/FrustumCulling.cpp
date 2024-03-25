@@ -42,6 +42,8 @@ namespace KuchCraft {
 	
 	void FrustumCulling::GetChunksToRender(std::vector<Chunk*>& out_ChunksToRender, std::vector<Chunk*>& activeChunks, const Camera& camera)
 	{
+		KC_PROFILE_FUNCTION();
+
 		glm::mat4 viewProjection = camera.GetViewProjection();
 		glm::vec4 frustumPlanes[frustum_planes_count];
 		frustumPlanes[0] = glm::row(viewProjection, 3) + glm::row(viewProjection, 0);

@@ -62,6 +62,8 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::OnUpdate(float dt)
 	{
+		KC_PROFILE_FUNCTION();
+
 		if (glm::length(m_MovementVector) > 0.0f)
 		{
 			m_MovementVector = glm::normalize(m_MovementVector);
@@ -175,6 +177,8 @@ namespace KuchCraft {
 
 	void PlayerPhysicsBody::PerformCollsionCheck()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glm::vec3 collisionVector{ 0.0f };
 
 		if (CheckForCollisions(m_Position, collisionVector))
@@ -198,6 +202,8 @@ namespace KuchCraft {
 
 	bool PlayerPhysicsBody::CheckForCollisions(const glm::vec3& position, glm::vec3& out_CollisionVector)
 	{
+		KC_PROFILE_FUNCTION();
+
 		bool colided = false;
 		out_CollisionVector = { 0.0f, 0.0f, 0.0f };
 
@@ -262,6 +268,8 @@ namespace KuchCraft {
 
 	bool PlayerPhysicsBody::IsOnGround()
 	{
+		KC_PROFILE_FUNCTION();
+
 		constexpr float down_position_diff = 0.001f;
 		const glm::vec3 downPosition = m_Position + glm::vec3(0.0f, -down_position_diff, 0.0f);
 

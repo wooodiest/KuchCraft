@@ -55,6 +55,8 @@ namespace KuchCraft {
 
 	uint32_t Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
+		KC_PROFILE_FUNCTION();
+
 		std::string vertex   = ReadFile(vertexShaderPath);
 		std::string fragment = ReadFile(fragmentShaderPath);
 		PreProcess(vertex);
@@ -112,6 +114,8 @@ namespace KuchCraft {
 
 	std::string Shader::ReadFile(const std::string& filepath)
 	{
+		KC_PROFILE_FUNCTION();
+
 		std::string result;
 		std::ifstream in(filepath, std::ios::in | std::ios::binary);
 		
@@ -142,6 +146,8 @@ namespace KuchCraft {
 
 	void Shader::PreProcess(std::string& file)
 	{
+		KC_PROFILE_FUNCTION();
+
 		auto& strMap = Renderer::GetShaderStrMap();
 		auto& varMap = Renderer::GetShaderVarMap();
 

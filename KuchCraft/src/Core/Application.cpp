@@ -12,6 +12,8 @@ namespace KuchCraft {
 
 	Application::Application()
 	{
+		KC_PROFILE_FUNCTION();
+
 		Random::Init();
 		s_Instance = this;
 
@@ -22,12 +24,16 @@ namespace KuchCraft {
 
 	Application::~Application()
 	{
+		KC_PROFILE_FUNCTION();
+
 		delete m_Game;
 		delete m_Window;
 	}
 
 	void Application::Run()
 	{
+		KC_PROFILE_FUNCTION();
+
 		while (m_Running)
 		{
 			if (!m_Minimized)
@@ -60,12 +66,16 @@ namespace KuchCraft {
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
+		KC_PROFILE_FUNCTION();
+
 		m_Running = false;
 		return true;
 	}
 
 	bool Application::OnWindowResize(WindowResizeEvent& e)
 	{
+		KC_PROFILE_FUNCTION();
+
 		if (e.GetWidth() == 0 || e.GetHeight() == 0)
 		{
 			m_Minimized = true;

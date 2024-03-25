@@ -18,6 +18,8 @@ namespace KuchCraft {
 
 	Window::Window(const std::string& title, uint32_t width, uint32_t height, bool vsync)
 	{	
+		KC_PROFILE_FUNCTION();
+
 		m_Data.Title  = title;
 		m_Data.Width  = width;
 		m_Data.Height = height;
@@ -144,12 +146,16 @@ namespace KuchCraft {
 
 	Window::~Window()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
 	void Window::OnUpdate()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glfwPollEvents();
 		glfwSwapBuffers(m_Window);
 	}

@@ -11,15 +11,19 @@ namespace KuchCraft {
 
 	ChunkDrawList::~ChunkDrawList()
 	{
+		KC_PROFILE_FUNCTION();
+
 		m_IndexCount.clear();
 		m_Textures.  clear();
-		m_VertexData      .clear();
+		m_VertexData.clear();
 
 		m_WaterVertices.clear();
 	}
 
 	void ChunkDrawList::StartRecreating()
 	{
+		KC_PROFILE_FUNCTION();
+
 		m_DrawCalls = 1;
 		m_TextureSlotHelper = new TextureSlotHelper();
 
@@ -39,6 +43,8 @@ namespace KuchCraft {
 
 	void ChunkDrawList::EndRecreating()
 	{
+		KC_PROFILE_FUNCTION();
+
 		if (m_TextureSlotHelper)
 			delete m_TextureSlotHelper;
 
