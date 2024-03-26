@@ -2,7 +2,7 @@
 
 namespace KuchCraft {
 
-	enum class BlockType
+	enum class BlockType : uint8_t
 	{
 		Air = 0, Water,
 		Bedrock, Bricks,
