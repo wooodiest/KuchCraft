@@ -2,8 +2,6 @@
 
 #include "Core/KeyCodes.h"
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	class Input

@@ -7,8 +7,6 @@
 
 #include "Renderer/Shader.h"
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	// Constances

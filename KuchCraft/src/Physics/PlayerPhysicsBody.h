@@ -2,8 +2,6 @@
 
 #include "Physics/AABB.h"
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	class PlayerPhysicsBody

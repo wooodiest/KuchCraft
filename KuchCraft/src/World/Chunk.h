@@ -1,9 +1,8 @@
 #pragma once
 
 #include "World/Block.h"
-#include "Renderer/ChunkData.h"
 
-#include <glm/glm.hpp>
+#include "Renderer/ChunkData.h"
 
 namespace KuchCraft {
 

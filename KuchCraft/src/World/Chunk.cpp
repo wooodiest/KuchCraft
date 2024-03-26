@@ -4,8 +4,6 @@
 #include "World/World.h"
 #include "World/WorldGenerator.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 namespace KuchCraft {
 
 	Chunk::Chunk(const glm::vec3& position)

@@ -1,10 +1,6 @@
 #include "kcpch.h"
 #include "Renderer/FrustumCulling.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_access.hpp>
-
 namespace KuchCraft {
 
 	constexpr uint32_t frustum_planes_count = 6;

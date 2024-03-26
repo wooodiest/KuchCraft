@@ -4,9 +4,6 @@
 #include "World/Block.h"
 #include "World/World.h"
 
-#include <glm/gtx/norm.hpp>
-#include <glm/gtc/integer.hpp>
-
 namespace KuchCraft {
 
 	constexpr float player_speed        = 5.0f;

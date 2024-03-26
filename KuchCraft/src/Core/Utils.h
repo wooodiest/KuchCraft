@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	std::string VecToString(const glm::vec2& vec);

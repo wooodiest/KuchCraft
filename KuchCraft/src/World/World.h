@@ -7,8 +7,6 @@
 
 #include "Game/Player.h"
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	struct WorldStats

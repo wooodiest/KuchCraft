@@ -11,10 +11,6 @@
 #include "Core/Random.h"
 #include "Core/Utils.h"
 
-#include <glm/gtc/epsilon.hpp>
-#include <glm/gtx/norm.hpp>
-#include <glm/gtc/integer.hpp>
-
 namespace KuchCraft {
 
 	Player::Player()

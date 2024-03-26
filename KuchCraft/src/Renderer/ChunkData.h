@@ -4,8 +4,6 @@
 
 #include "World/Block.h"
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	class TextureSlotHelper

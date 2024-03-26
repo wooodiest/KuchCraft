@@ -3,8 +3,6 @@
 #include "Core/Events/Event.h"
 #include "Core/Events/ApplicationEvent.h"
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	class Camera

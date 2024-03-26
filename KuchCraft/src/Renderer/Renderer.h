@@ -3,7 +3,6 @@
 #include "Game/Camera.h"
 #include "World/Chunk.h"
 
-#include <glm/glm.hpp>
 #include <glad/glad.h>
 
 namespace KuchCraft {

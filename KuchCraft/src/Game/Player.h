@@ -13,8 +13,6 @@
 #include "Core/Events/KeyEvent.h"
 #include "Core/Events/MouseEvent.h"
 
-#include <glm/glm.hpp>
-
 namespace KuchCraft {
 
 	constexpr float player_height          = 1.8f;

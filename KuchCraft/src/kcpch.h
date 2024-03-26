@@ -24,6 +24,22 @@
 #define NOMINMAX
 #include <Windows.h>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/trigonometric.hpp>
+#include <glm/gtc/constants.hpp>
+#include <glm/gtc/bitfield.hpp>
+#include <glm/gtc/round.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/vector_angle.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/epsilon.hpp>
+#include <glm/gtx/norm.hpp>
+#include <glm/gtc/integer.hpp>
+
 #include "Core/Log.h"
 #include "Core/Instrumentator.h"
 
