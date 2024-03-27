@@ -97,7 +97,10 @@ namespace KuchCraft {
 		m_Position = m_PhysicsBody.GetPosition();
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
 
-		m_TargetedBlock = GetTargetBlockInfo();
+		if (m_GameMode != GameMode::Spectator)
+			m_TargetedBlock = GetTargetBlockInfo();
+		else
+			m_TargetedBlock.Targeted = false;
 	}
 
 	void Player::OnEvent(Event& event)
@@ -237,12 +240,14 @@ namespace KuchCraft {
 		{
 			case MouseCode::ButtonLeft:
 			{
-				DestroyBlock(m_TargetedBlock.Position);
+				if (m_GameMode != GameMode::Spectator)
+					DestroyBlock(m_TargetedBlock.Position);
 				return false;
 			}
 			case MouseCode::ButtonRight:
 			{
-				PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_blocks))));
+				if (m_GameMode != GameMode::Spectator)
+					PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_blocks))));
 				return false;
 			}
 		}
@@ -268,9 +273,15 @@ namespace KuchCraft {
 			case PlaneDirection::Front:  newPosition.z += 1.0f; break;
 		}
 
-		//TODO: Check possible collisions with new position
+		const glm::ivec3 blockAbsolutePosition{ newPosition };
+		constexpr uint32_t block_size = 1;
+		const AABB blockAABB  = { blockAbsolutePosition, blockAbsolutePosition + glm::ivec3(block_size)};
+		const AABB playerAABB = m_PhysicsBody.GetPlayerAbsoluteAABB().MoveTo(m_Position);
 
-		World::Get().SetBlock(newPosition, block);
+		if (playerAABB.IsColliding(blockAABB))
+			return;
+		else
+			World::Get().SetBlock(newPosition, block);
 	}
 
 	void Player::DestroyBlock(const glm::vec3& position)

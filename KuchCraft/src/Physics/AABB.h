@@ -13,7 +13,7 @@ namespace KuchCraft {
 
 		bool IsColliding(const AABB& other) const;
 
-		AABB MoveTo(const glm::vec3& position);
+		AABB MoveTo(const glm::vec3& position) const;
 
 		glm::vec3 GetOverlaping(const AABB& other) const;
 

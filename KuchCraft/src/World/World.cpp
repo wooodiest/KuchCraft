@@ -201,7 +201,7 @@ namespace KuchCraft {
 					m_WorldStats.TotalRecreatedChunks++;
 				}
 			}
-			if (x == chunk_size_XZ - 1)
+			else if (x == chunk_size_XZ - 1)
 			{
 				auto c = GetChunk({ position.x + chunk_size_XZ, position.y, position.z });
 				if (c)
@@ -219,7 +219,7 @@ namespace KuchCraft {
 					m_WorldStats.TotalRecreatedChunks++;
 				}
 			}
-			if (z == chunk_size_XZ - 1)
+			else if (z == chunk_size_XZ - 1)
 			{
 				auto c = GetChunk({ position.x, position.y, position.z + chunk_size_XZ });
 				if (c)

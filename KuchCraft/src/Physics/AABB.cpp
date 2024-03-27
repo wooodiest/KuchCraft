@@ -10,7 +10,7 @@ namespace KuchCraft {
 				 Min.z < other.Max.z && Max.z > other.Min.z    );
 	}
 
-	AABB AABB::MoveTo(const glm::vec3& position)
+	AABB AABB::MoveTo(const glm::vec3& position) const
 	{
 		return AABB {
 			Min + position,

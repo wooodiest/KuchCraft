@@ -18,6 +18,7 @@ namespace KuchCraft {
 
 		bool GetFlyingStatus()         const { return m_Flying;   }
 		const glm::vec3& GetPosition() const { return m_Position; }
+		const AABB& GetPlayerAbsoluteAABB() const { return m_PlayerAbsoluteAABB; }
 
 		void OnUpdate(float dt);
 
