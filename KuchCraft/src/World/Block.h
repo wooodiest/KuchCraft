@@ -17,8 +17,9 @@ namespace KuchCraft {
 
 		None // No element and/or last element
 	};
-	constexpr int total_number_of_blocks    = (int)BlockType::None - 1;
-	constexpr int absolute_number_of_blocks = (int)BlockType::None;
+	constexpr uint32_t first_index_of_block_types     = (uint32_t)BlockType::Water;
+	constexpr uint32_t total_number_of_block_types    = (uint32_t)BlockType::None - 1;
+	constexpr uint32_t absolute_number_of_block_types = (uint32_t)BlockType::None;
 
 	struct Block
 	{
@@ -35,12 +36,13 @@ namespace KuchCraft {
 		bool operator !=(const BlockType& other) const { return !(*this == other);             }
 
 		bool IsTransparent() const { return IsTransparent(blockType); }
-		bool IsSolid()       const { return IsSolid(blockType);      }
+		bool IsSolid()       const { return IsSolid(blockType);       }
 
-		const std::string& GetName() const { return s_BlockNames[blockType]; };
+		const std::string& GetName() const { return GetName(*this); };
 
 		static bool IsTransparent(const Block& block);
 		static bool IsSolid(const Block& block);
+		static const std::string& GetName(const Block& block);
 
 	private:
 		static std::unordered_map<BlockType, std::string> s_BlockNames;

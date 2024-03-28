@@ -25,6 +25,11 @@ namespace KuchCraft {
 		return true;
 	}
 
+	const std::string& Block::GetName(const Block& block)
+	{
+		return s_BlockNames[block];
+	}
+
 	std::unordered_map<BlockType, std::string> Block::s_BlockNames = {
 		{ BlockType::Air,           "air"            },
 		{ BlockType::Water,         "water"          },

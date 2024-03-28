@@ -107,6 +107,9 @@ namespace KuchCraft {
 
 		if (m_IsOnGround || m_Flying || !m_IsInWater)
 			m_MovementVector  = { 0.0f, 0.0f, 0.0f };	
+
+		if (m_Flying)
+			m_JumpVector = { 0.0f, 0.0f, 0.0f };
 	}
 
 	void PlayerPhysicsBody::MoveForward()

@@ -70,8 +70,8 @@ namespace KuchCraft {
 		static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 		// Loading textures
-		static void     LoadTextureAtlas();
-		static uint32_t LoadTextureToAtals(const std::string& path);
+		static void     LoadTextures();
+		static uint32_t LoadTexture(const std::string& path);
 		static uint32_t LoadSkyboxTexture();
 
 		// Prepare renderer for...

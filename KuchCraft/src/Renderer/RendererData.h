@@ -103,7 +103,7 @@ namespace KuchCraft {
 
 	struct RendererData
 	{
-		uint32_t Textures[absolute_number_of_blocks];
+		uint32_t Textures[absolute_number_of_block_types];
 		uint32_t QuadIndexBuffer = 0;
 		
 		bool TintStatus = false;

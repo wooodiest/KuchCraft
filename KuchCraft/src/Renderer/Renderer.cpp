@@ -38,7 +38,7 @@ namespace KuchCraft {
 		PrepareWaterRendering();
 		PrepareTextRendering();
 		
-		LoadTextureAtlas();
+		LoadTextures();
 	}
 
 	void Renderer::ShutDown()
@@ -705,40 +705,20 @@ namespace KuchCraft {
 		s_Stats.Quads += cube_face_cout;
 	}
 
-	void Renderer::LoadTextureAtlas()
+	void Renderer::LoadTextures()
 	{
 		KC_PROFILE_FUNCTION();
 
-		// Pair blocktype with texture
-		std::unordered_map<BlockType, std::string>  blockTexturePathsAtlas;
-		blockTexturePathsAtlas[BlockType::Bedrock]       = "bedrock";
-		blockTexturePathsAtlas[BlockType::Bricks]        = "bricks";
-		blockTexturePathsAtlas[BlockType::CoalOre]       = "coal_ore";
-		blockTexturePathsAtlas[BlockType::Cobblestone]   = "cobblestone";
-		blockTexturePathsAtlas[BlockType::CraftingTable] = "crafting_table";
-		blockTexturePathsAtlas[BlockType::DiamondOre]    = "diamond_ore";
-		blockTexturePathsAtlas[BlockType::Dioryte]       = "dioryte";
-		blockTexturePathsAtlas[BlockType::Dirt]          = "dirt";
-		blockTexturePathsAtlas[BlockType::Furnace]       = "furnace";
-		blockTexturePathsAtlas[BlockType::Granite]       = "granite";
-		blockTexturePathsAtlas[BlockType::Grass]         = "grass";
-		blockTexturePathsAtlas[BlockType::Gravel]        = "gravel";
-		blockTexturePathsAtlas[BlockType::IronOre]       = "iron_ore";
-		blockTexturePathsAtlas[BlockType::OakLog]        = "oak_log";
-		blockTexturePathsAtlas[BlockType::OakPlanks]     = "oak_planks";
-		blockTexturePathsAtlas[BlockType::Sand]          = "sand";
-		blockTexturePathsAtlas[BlockType::Stone]         = "stone";
-		blockTexturePathsAtlas[BlockType::StoneBrick]    = "stone_brick";
-		blockTexturePathsAtlas[BlockType::Water]         = "water";
-		blockTexturePathsAtlas[BlockType::Leaves]        = "leaves";
-
-		// Load all textures to gpu
-		const std::string mainPath  = "assets/textures/";
+		const std::string path  = "assets/textures/";
 		const std::string extension = ".png";
-		for (auto& [type, name] : blockTexturePathsAtlas)
+
+		for (uint32_t i = first_index_of_block_types; i < absolute_number_of_block_types; i++)
 		{
-			std::string path = mainPath + name + extension;
-			s_RendererData.Textures[(int)type] = LoadTextureToAtals(path);
+			std::string blockName = Block::GetName((BlockType)i);
+			std::replace(blockName.begin(), blockName.end(), ' ', '_');
+
+			const std::string texturePath = path + blockName + extension;
+			s_RendererData.Textures[i] = LoadTexture(texturePath);
 		}
 	}
 
@@ -786,7 +766,7 @@ namespace KuchCraft {
 		return texture;
 	}
 
-	uint32_t Renderer::LoadTextureToAtals(const std::string& path)
+	uint32_t Renderer::LoadTexture(const std::string& path)
 	{
 		uint32_t texture = 0;
 		glGenTextures(1, &texture);
@@ -798,6 +778,11 @@ namespace KuchCraft {
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 		unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+		if (!data)
+		{
+			KC_ERROR("Failed to load texture: {0}", path.c_str());
+		}
+
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 		stbi_image_free(data);
@@ -807,7 +792,7 @@ namespace KuchCraft {
 
 	uint32_t Renderer::GetTexture(BlockType type)
 	{
-		return s_RendererData.Textures[(int)type];
+		return s_RendererData.Textures[(uint32_t)type];
 	}
 
 
