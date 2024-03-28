@@ -42,6 +42,9 @@ namespace KuchCraft {
 
 		std::string& GetDebugText();
 
+		bool GetTargetedBlockStatus()               const { return m_TargetedBlock.Targeted; }
+		const TargetedBlockInfo& GetTargetedBlock() const { return m_TargetedBlock;          }
+
 		void SetPosition(const glm::vec3& position) { m_Position = position; }
 		void SetRotation(const glm::vec2& rotation) { m_Rotation = rotation; }
 

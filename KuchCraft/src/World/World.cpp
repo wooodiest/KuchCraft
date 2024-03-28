@@ -166,6 +166,9 @@ namespace KuchCraft {
 		Renderer::RenderSkybox();
 		Renderer::EndSkybox();
 
+		if (m_Player.GetTargetedBlockStatus())
+			Renderer::RenderOutlinedBlock(m_Player.GetTargetedBlock().Position);
+		
 		Renderer::BeginWater();
 		for (const auto& c : m_ChunksToRender)
 			Renderer::RenderWater(c);

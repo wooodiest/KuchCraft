@@ -4,6 +4,7 @@
 #include "Renderer/Shader.h"
 
 #include "Core/Application.h"
+#include "Core/Utils.h"
 
 #include "World/World.h"
 
@@ -14,9 +15,11 @@
 
 namespace KuchCraft {
 
-	RendererData        Renderer::s_RendererData;
 	RendererStatistics  Renderer::s_Stats;
 	RendererChunkData   Renderer::s_ChunkData;
+	RendererUtilsData   Renderer::s_UtilsData;
+
+	RendererData        Renderer::s_RendererData;
 	RendererSkyboxData  Renderer::s_SkyboxData;
 	RendererWaterData   Renderer::s_WaterData;
 	RendererTextData    Renderer::s_TextData;
@@ -28,12 +31,13 @@ namespace KuchCraft {
 
 		PrepareShaders();
 		PrepareRenderer();
+		PrepereUtils();
 
 		PrepareChunkRendering();
 		PrepareSkyboxRendering();
 		PrepareWaterRendering();
 		PrepareTextRendering();
-
+		
 		LoadTextureAtlas();
 	}
 
@@ -47,6 +51,10 @@ namespace KuchCraft {
 		glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
+
+		// Utils data
+		glDeleteBuffers(1, &s_UtilsData.OutlinedBlockVertexBuffer);
+		glDeleteVertexArrays(1, &s_UtilsData.OutlinedBlockVertexArray);
 
 		// RendererChunkData
 		glDeleteBuffers(1, &s_ChunkData.VertexBuffer);
@@ -306,6 +314,8 @@ namespace KuchCraft {
 		s_RendererData.ShaderVarData["##world_data_uniform_buffer_binding"] = std::to_string(s_RendererData.WorldDataUniformBufferBinding);
 		s_RendererData.ShaderVarData["##text_data_uniform_buffer_binding"]  = std::to_string(s_TextData.TextDataUniformBufferBinding);
 		s_RendererData.ShaderVarData["##max_text_uniform_array_limit"]      = std::to_string(max_text_uniform_array_limit);
+		s_RendererData.ShaderVarData["##outlined_block_border_radius"]      = std::to_string(outlined_block_border_radius);
+		s_RendererData.ShaderVarData["##outlined_block_border_color"]       = VecToString(outlined_block_border_color);
 	}
 
 	void Renderer::PrepareRenderer()
@@ -528,6 +538,26 @@ namespace KuchCraft {
 		FT_Done_FreeType(ft);
 	}
 
+	void Renderer::PrepereUtils()
+	{
+		KC_PROFILE_FUNCTION();
+		
+		glGenVertexArrays(1, &s_UtilsData.OutlinedBlockVertexArray);
+		glBindVertexArray(s_UtilsData.OutlinedBlockVertexArray);
+
+		glGenBuffers(1, &s_UtilsData.OutlinedBlockVertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, s_UtilsData.OutlinedBlockVertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(block_vertices), block_vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		s_UtilsData.OutlinedBlockShader.Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
+		s_UtilsData.OutlinedBlockShader.Bind();
+	}
+
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		InvalidateMainFrameBuffer(width, height);
@@ -650,6 +680,29 @@ namespace KuchCraft {
 		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 		glm::vec2 position{  width * positionNormalized.x, height * positionNormalized.y};
 		RenderText(text, position, color, fontSize, spacing);
+	}
+
+	void Renderer::RenderOutlinedBlock(const glm::vec3& position)
+	{
+		glDisable(GL_CULL_FACE);
+		glDepthFunc(GL_LEQUAL);
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
+
+		s_UtilsData.OutlinedBlockShader.Bind();
+		s_UtilsData.OutlinedBlockShader.SetMat4("u_Transform", transform);
+
+		glBindVertexArray(s_UtilsData.OutlinedBlockVertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_UtilsData.OutlinedBlockVertexBuffer);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+		glDrawElements(GL_TRIANGLES, cube_index_count, GL_UNSIGNED_INT, nullptr);
+
+		glEnable(GL_CULL_FACE);
+		glDepthFunc(GL_LESS);
+
+		s_Stats.DrawCalls++;
+		s_Stats.Quads += cube_face_cout;
 	}
 
 	void Renderer::LoadTextureAtlas()

@@ -35,6 +35,9 @@ namespace KuchCraft {
 	constexpr uint32_t cube_face_cout       = 6;
 
 	// Utils
+	constexpr float     outlined_block_border_radius = 0.005f;
+	constexpr glm::vec4 outlined_block_border_color{ 1.0f, 1.0f, 1.0f, 1.0f };
+
 	constexpr glm::vec4 white_color     { 1.0f, 1.0f, 1.0f, 1.0f };
 	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 0.7f, 1.0f };
 	constexpr glm::vec4 clear_color     { 0.8f, 0.8f, 1.0f, 1.0f };
@@ -126,6 +129,13 @@ namespace KuchCraft {
 
 	}; 
 
+	struct RendererUtilsData
+	{
+		Shader   OutlinedBlockShader;
+		uint32_t OutlinedBlockVertexBuffer = 0;
+		uint32_t OutlinedBlockVertexArray  = 0;
+	};
+
 	struct RendererChunkData
 	{
 		uint32_t VertexArray  = 0;
@@ -200,51 +210,44 @@ namespace KuchCraft {
 	constexpr uint32_t vertices_behind_index = 4;
 	constexpr uint32_t vertices_left_index   = 5;
 
-	constexpr Vertex vertices_bottom[quad_vertex_count]
-	{
+	constexpr Vertex vertices_bottom[quad_vertex_count] {
 		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.0f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 1.0f }, { 0.0f,  0.0f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.0f,  0.5f }, 0.0f },
 		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.25f, 0.5f }, 0.0f }
 	};
-	constexpr Vertex vertices_top[quad_vertex_count]
-	{
+	constexpr Vertex vertices_top[quad_vertex_count] {
 		Vertex{{ 0.0f, 1.0f, 1.0f }, { 0.25f, 0.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.5f,  0.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.25f, 0.5f }, 0.0f }
 	};
-	constexpr Vertex vertices_front[quad_vertex_count]
-	{
+	constexpr Vertex vertices_front[quad_vertex_count] {
 		Vertex{{ 0.0f, 0.0f, 1.0f }, { 0.0f,  0.5f }, 0.0f },
 		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.5f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.25f, 1.0f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 1.0f }, { 0.0f,  1.0f }, 0.0f }
 	};
-	constexpr Vertex vertices_right[quad_vertex_count]
-	{
+	constexpr Vertex vertices_right[quad_vertex_count] {
 		Vertex{{ 1.0f, 0.0f, 1.0f }, { 0.25f, 0.5f }, 0.0f },
 		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  1.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 1.0f }, { 0.25f, 1.0f }, 0.0f }
 	};
-	constexpr Vertex vertices_behind[quad_vertex_count]
-	{
+	constexpr Vertex vertices_behind[quad_vertex_count] {
 		Vertex{{ 1.0f, 0.0f, 0.0f }, { 0.5f,  0.5f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.75f, 0.5f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f },
 		Vertex{{ 1.0f, 1.0f, 0.0f }, { 0.5f,  1.0f }, 0.0f }
 	};
-	constexpr Vertex vertices_left[quad_vertex_count]
-	{
+	constexpr Vertex vertices_left[quad_vertex_count] {
 		Vertex{{ 0.0f, 0.0f, 0.0f }, { 0.75f, 0.5f }, 0.0f },
 		Vertex{{ 0.0f, 0.0f, 1.0f }, { 1.0f,  0.5f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 1.0f }, { 1.0f,  1.0f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f }
 	};
 
-	constexpr float skybox_vertices[] =
-	{
+	constexpr float skybox_vertices[] = {
 		 1.0f, -1.0f,  1.0f,
 		 1.0f, -1.0f, -1.0f,
 		 1.0f,  1.0f, -1.0f,
@@ -274,6 +277,33 @@ namespace KuchCraft {
 		-1.0f, -1.0f, -1.0f,
 		-1.0f,  1.0f, -1.0f,
 		 1.0f,  1.0f, -1.0f,
+	};
+
+	constexpr float block_vertices[] = {
+		1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 0.0f, 1.0f, 1.0f
 	};
 
 }

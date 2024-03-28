@@ -45,6 +45,8 @@ namespace KuchCraft {
 		static void RenderTextNorm(const std::string& text, const glm::vec2& positionNormalized, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
 
 		// Utils
+		static void RenderOutlinedBlock(const glm::vec3& position);
+
 		static void SetWaterTintStatus(bool status);
 		static void ShowTriangles(bool status);
 		static uint32_t GetTexture(BlockType type);
@@ -75,6 +77,8 @@ namespace KuchCraft {
 		// Prepare renderer for...
 		static void PrepareShaders();
 		static void PrepareRenderer();
+		static void PrepereUtils();
+
 		static void PrepareChunkRendering();
 		static void PrepareSkyboxRendering();
 		static void PrepareWaterRendering();
@@ -83,6 +87,8 @@ namespace KuchCraft {
 		// Renderer data
 		static RendererData       s_RendererData;
 		static RendererStatistics s_Stats;
+		static RendererUtilsData  s_UtilsData;
+
 		static RendererChunkData  s_ChunkData;
 		static RendererSkyboxData s_SkyboxData;
 		static RendererWaterData  s_WaterData;
@@ -91,6 +97,7 @@ namespace KuchCraft {
 		 
 	private:
 		Renderer() = default;
+
 	};
 
 }
