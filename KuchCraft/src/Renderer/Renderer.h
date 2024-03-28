@@ -25,19 +25,9 @@ namespace KuchCraft {
 		static void EndWorld();
 
 		// Rendering chunks
-		static void BeginChunk();
-		static void RenderChunk(Chunk* chunk);
-		static void EndChunk();
-		
-		// Rendering skybox
-		static void BeginSkybox();
+		static void RenderChunks(const std::vector<Chunk*>& chunks);
+		static void RenderChunksWater(const std::vector<Chunk*>& chunks);
 		static void RenderSkybox();
-		static void EndSkybox();
-
-		// Rendering water
-		static void BeginWater();
-		static void RenderWater(Chunk* chunk);
-		static void EndWater();
 
 		// Text
 		static void RenderTextTopLeft(const std::string& text, const glm::vec2& margin, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);

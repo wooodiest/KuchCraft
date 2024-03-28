@@ -158,37 +158,104 @@ namespace KuchCraft {
 		s_Stats.Quads     = 0;
 	}
 
-	void Renderer::BeginChunk()
-	{
-		s_Stats.ChunkTimer.Begin();
-		s_ChunkData.Shader.Bind();
-	}
-
-	void Renderer::RenderChunk(Chunk* chunk)
+	void Renderer::RenderChunks(const std::vector<Chunk*>& chunks)
 	{
 		KC_PROFILE_FUNCTION();
 
-		uint32_t vertexOffset = 0;
-		const auto& drawList = chunk->GetDrawList();
-		s_ChunkData.Shader.SetFloat3("u_ChunkPosition", chunk->GetPosition());
+		s_Stats.ChunkTimer.Begin();
+		s_ChunkData.Shader.Bind();
 
-		for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
+		for (const auto& chunk : chunks)
 		{
-			uint32_t indexCount = drawList.GetIndexCount(i);
+			uint32_t vertexOffset = 0;
+			const auto& drawList  = chunk->GetDrawList();
+			s_ChunkData.Shader.SetFloat3("u_ChunkPosition", chunk->GetPosition());
+
+			for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
+			{
+				uint32_t indexCount = drawList.GetIndexCount(i);
+				if (indexCount != 0)
+				{
+					uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
+
+					glBindVertexArray(s_ChunkData.VertexArray);
+					glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
+					glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(uint32_t), drawList.GetVerticesPtr(vertexOffset));
+
+					vertexOffset += vertexCount;
+
+					// Bind textures
+					uint32_t textures = drawList.GetTextureCount(i);
+					for (uint32_t j = 0; j < textures; j++)
+						glBindTextureUnit(j, drawList.GetTexture(i, j));
+
+					// Draw elements		
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+					glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+
+					// Update stats
+					s_Stats.DrawCalls++;
+					s_Stats.Quads += vertexCount / quad_vertex_count;
+				}
+			}
+		}
+
+		s_Stats.ChunkTimer.End();
+	}
+
+	void Renderer::RenderSkybox()
+	{
+		KC_PROFILE_FUNCTION();
+
+		s_Stats.SkyboxTimer.Begin();
+		s_SkyboxData.Shader.Bind();
+
+		glCullFace(GL_FRONT);
+		glDepthFunc(GL_LEQUAL);
+
+		glBindVertexArray(s_SkyboxData.VertexArray);
+		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count, GL_UNSIGNED_INT, nullptr);
+
+		// Update stats
+		s_Stats.DrawCalls++;
+		s_Stats.Quads += cube_face_cout;
+
+		glCullFace(GL_BACK);
+		glDepthFunc(GL_LESS);
+
+		s_Stats.SkyboxTimer.End();
+	}
+
+	void Renderer::RenderChunksWater(const std::vector<Chunk*>& chunks)
+	{
+		KC_PROFILE_FUNCTION();
+
+		s_Stats.WaterTimer.Begin();
+		s_WaterData.Shader.Bind();
+
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+
+		for (const auto& chunk : chunks)
+		{
+			const auto& drawList = chunk->GetDrawList();
+			uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
+
 			if (indexCount != 0)
 			{
 				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
 
-				glBindVertexArray(s_ChunkData.VertexArray);
-				glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(uint32_t), drawList.GetVerticesPtr(vertexOffset));
-				
-				vertexOffset += vertexCount;
+				glBindVertexArray(s_WaterData.VertexArray);
+				glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
+				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex_P3C2), drawList.GetWaterVerticesPtr());
 
-				// Bind textures
-				uint32_t textures = drawList.GetTextureCount(i);
-				for (uint32_t j = 0; j < textures; j++)
-					glBindTextureUnit(j, drawList.GetTexture(i, j));
+				glBindTextureUnit(default_texture_slot, GetTexture(BlockType::Water));
 
 				// Draw elements		
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
@@ -199,87 +266,7 @@ namespace KuchCraft {
 				s_Stats.Quads += vertexCount / quad_vertex_count;
 			}
 		}
-	}
 
-	void Renderer::EndChunk()
-	{
-		s_Stats.ChunkTimer.End();
-	}
-
-	void Renderer::BeginSkybox()
-	{
-		s_Stats.SkyboxTimer.Begin();
-		s_SkyboxData.Shader.Bind();
-
-		glCullFace(GL_FRONT);
-		glDepthFunc(GL_LEQUAL);
-	}
-
-	void Renderer::RenderSkybox()
-	{
-		KC_PROFILE_FUNCTION();
-
-		glBindVertexArray(s_SkyboxData.VertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
-		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count , GL_UNSIGNED_INT, nullptr);
-
-		// Update stats
-		s_Stats.DrawCalls++;
-		s_Stats.Quads += cube_face_cout;
-	}
-
-	void Renderer::EndSkybox()
-	{
-		glCullFace(GL_BACK);
-		glDepthFunc(GL_LESS);
-
-		s_Stats.SkyboxTimer.End();
-	}
-
-	void Renderer::BeginWater()
-	{
-		s_Stats.WaterTimer.Begin();
-
-		glDisable(GL_CULL_FACE);
-		glEnable(GL_BLEND);
-
-		s_WaterData.Shader.Bind();
-	}
-
-	void Renderer::RenderWater(Chunk* chunk)
-	{
-		KC_PROFILE_FUNCTION();
-
-		const auto& drawList = chunk->GetDrawList();
-		uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
-
-		if (indexCount != 0)
-		{
-			uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-
-			glBindVertexArray(s_WaterData.VertexArray);
-			glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex_P3C2), drawList.GetWaterVerticesPtr());
-
-			glBindTextureUnit(default_texture_slot, GetTexture(BlockType::Water));
-
-			// Draw elements		
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
-			glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
-
-			// Update stats
-			s_Stats.DrawCalls++;
-			s_Stats.Quads += vertexCount / quad_vertex_count;
-		}
-	}
-
-	void Renderer::EndWater()
-	{
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
 

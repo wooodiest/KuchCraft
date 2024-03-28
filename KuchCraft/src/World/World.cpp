@@ -157,22 +157,13 @@ namespace KuchCraft {
 		Renderer::BeginWorld(m_Player.GetCamera());
 		Renderer::SetWaterTintStatus(GetBlock(m_Player.GetEyePosition()) == BlockType::Water);
 
-		Renderer::BeginChunk();
-		for (const auto& c : m_ChunksToRender)
-			Renderer::RenderChunk(c);
-		Renderer::EndChunk();
-
-		Renderer::BeginSkybox();
+		Renderer::RenderChunks(m_ChunksToRender);
 		Renderer::RenderSkybox();
-		Renderer::EndSkybox();
 
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer::RenderOutlinedBlock(m_Player.GetTargetedBlock().Position);
 		
-		Renderer::BeginWater();
-		for (const auto& c : m_ChunksToRender)
-			Renderer::RenderWater(c);
-		Renderer::EndWater();
+		Renderer::RenderChunksWater(m_ChunksToRender);
 
 		// Text to render
 		if (Renderer::GetShowStatsStatus())
