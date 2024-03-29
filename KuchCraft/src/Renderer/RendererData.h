@@ -21,15 +21,6 @@ namespace KuchCraft {
 	constexpr uint32_t max_texture_slots     = 32; // Max value 128
 	constexpr uint32_t default_texture_slot  = 0;
 
-	// Text rendering
-	constexpr float default_font_size      = 24.0f;
-	constexpr float default_font_spacing   = 1.3f;
-	constexpr glm::vec4 default_font_color = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	constexpr uint32_t max_text_uniform_array_limit = 400;
-	constexpr uint32_t font_characters_count        = 128;
-	constexpr uint32_t font_texture_size            = 256;
-
 	// Vertex data
 	constexpr uint32_t triangle_index_count = 6;
 	constexpr uint32_t quad_index_count     = 6;
@@ -95,17 +86,6 @@ namespace KuchCraft {
 		glm::vec4 TintColor;
 	};
 
-	struct UniformTextBuffer
-	{
-		struct Text
-		{
-			glm::mat4 Transform;
-			glm::vec4 Letter{ 0.0f }; // weird alignment
-		} Text[max_text_uniform_array_limit];
-
-		glm::vec4 Color{ default_font_color };
-	};
-
 	struct RendererData
 	{
 		uint32_t Textures[absolute_number_of_block_types];
@@ -162,30 +142,6 @@ namespace KuchCraft {
 		Ref<Shader>       Shader;
 		Ref<VertexArray>  VertexArray;
 		Ref<VertexBuffer> VertexBuffer;
-	};
-
-	struct RendererTextCharacter
-	{
-		uint32_t   ID;
-		uint32_t   Advance;
-		glm::ivec2 Size;
-		glm::ivec2 Bearing;
-	};
-
-	struct RendererTextData
-	{
-		const char* FontPath  = "assets/fonts/Roboto-Regular.ttf";
-		std::vector<std::tuple<std::string, glm::vec2, glm::vec4, float, float>> Data;
-
-		uint32_t TextDataUniformBuffer        = 0;
-		uint32_t TextDataUniformBufferBinding = 1;
-
-		uint32_t VertexArray     = 0;
-		uint32_t VertexBuffer    = 0;
-		uint32_t Texture         = 0;
-		Shader   Shader;
-	
-		std::map<char, RendererTextCharacter> Characters;
 	};
 
 	struct GraphicalInfo

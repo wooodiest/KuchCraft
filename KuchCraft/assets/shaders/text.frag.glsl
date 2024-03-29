@@ -3,6 +3,7 @@
 layout (location = 0) out vec4 color;
 
 uniform sampler2DArray u_Texture;
+uniform vec4 u_Color;
 
 ##text_data_uniform_buffer
 

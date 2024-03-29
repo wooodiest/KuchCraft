@@ -1,6 +1,8 @@
 #include "kcpch.h"
 #include "Renderer/Renderer.h"
 
+#include "Renderer/Text/TextRenderer.h"
+
 #include "Renderer/Shader.h"
 
 #include "Core/Application.h"
@@ -22,7 +24,6 @@ namespace KuchCraft {
 	RendererData        Renderer::s_RendererData;
 	RendererSkyboxData  Renderer::s_SkyboxData;
 	RendererWaterData   Renderer::s_WaterData;
-	RendererTextData    Renderer::s_TextData;
 	GraphicalInfo       Renderer::s_GraphicalInfo;
 
 	void Renderer::Init()
@@ -36,9 +37,10 @@ namespace KuchCraft {
 		PrepareChunkRendering();
 		PrepareSkyboxRendering();
 		PrepareWaterRendering();
-		PrepareTextRendering();
 		
 		LoadTextures();
+
+		TextRenderer::Init();
 	}
 
 	void Renderer::ShutDown()
@@ -50,10 +52,6 @@ namespace KuchCraft {
 		glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
-
-		// Text data
-		glDeleteBuffers(1, &s_TextData.VertexBuffer);
-		glDeleteVertexArrays(1, &s_TextData.VertexArray);
 
 		// RendererStatistics
 		ResetStats();
@@ -75,17 +73,13 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		// Clear text buffer
-		s_TextData.Data.clear();
+		TextRenderer::Clear();
 	}
 
 	void Renderer::EndFrame()
 	{
 		KC_PROFILE_FUNCTION();
-
-		// Render text
-		glEnable(GL_BLEND);
-		RenderText();
-		glDisable(GL_BLEND);
+		TextRenderer::Render();
 	}
 
 	void Renderer::BeginWorld(const Camera& camera)
@@ -277,13 +271,12 @@ namespace KuchCraft {
 			   layout(std140, binding = ##text_data_uniform_buffer_binding) uniform UniformTextData
 			   {
 					TextData u_Text[##max_text_uniform_array_limit];
-					vec4 u_Color;
 			   };)";
 
 		s_RendererData.ShaderVarData["##max_texture_slots"]                 = std::to_string(max_texture_slots);
 		s_RendererData.ShaderVarData["##world_data_uniform_buffer_binding"] = std::to_string(s_RendererData.WorldDataUniformBufferBinding);
-		s_RendererData.ShaderVarData["##text_data_uniform_buffer_binding"]  = std::to_string(s_TextData.TextDataUniformBufferBinding);
-		s_RendererData.ShaderVarData["##max_text_uniform_array_limit"]      = std::to_string(max_text_uniform_array_limit);
+		s_RendererData.ShaderVarData["##text_data_uniform_buffer_binding"]  = std::to_string(1); // TODO
+		s_RendererData.ShaderVarData["##max_text_uniform_array_limit"]      = std::to_string(400); //TODO
 		s_RendererData.ShaderVarData["##outlined_block_border_radius"]      = std::to_string(outlined_block_border_radius);
 		s_RendererData.ShaderVarData["##outlined_block_border_color"]       = VecToString(outlined_block_border_color);
 	}
@@ -470,89 +463,6 @@ namespace KuchCraft {
 		s_WaterData.Shader      ->Unbind();
 	}
 
-	void Renderer::PrepareTextRendering()
-	{
-		KC_PROFILE_FUNCTION();
-
-		FT_Library ft;
-		if (FT_Init_FreeType(&ft))
-		{
-			KC_ERROR("Failed to init freetype");
-		}
-
-		FT_Face face;
-		if (FT_New_Face(ft, s_TextData.FontPath, 0, &face))
-		{
-			KC_ERROR("Failed to load font: {0}", s_TextData.FontPath);
-		}
-
-		FT_Set_Pixel_Sizes(face, font_texture_size, font_texture_size);
-
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glGenTextures(1, &s_TextData.Texture);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, s_TextData.Texture);
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, font_texture_size, font_texture_size, font_characters_count, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-
-		for (unsigned char c = 0; c < font_characters_count; c++)
-		{
-			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-			{
-				KC_ERROR("Failed to load glyph: {0}", (uint32_t)c);
-			}
-
-			glTexSubImage3D(
-				GL_TEXTURE_2D_ARRAY,
-				0, 0, 0, int(c),
-				face->glyph->bitmap.width,
-				face->glyph->bitmap.rows,
-				1,
-				GL_RED,
-				GL_UNSIGNED_BYTE,
-				face->glyph->bitmap.buffer
-			);
-
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			s_TextData.Characters.emplace(c, RendererTextCharacter{
-				(uint32_t)c,
-				(uint32_t)face->glyph->advance.x,
-				{face->glyph->bitmap.width, face->glyph->bitmap.rows},
-				{face->glyph->bitmap_left, face->glyph->bitmap_top}
-			});
-		}
-
-		float vertices[] = {
-			0.0f, 1.0f,
-			0.0f, 0.0f,
-			1.0f, 1.0f,
-			1.0f, 0.0f,
-		};
-
-		glGenVertexArrays(1, &s_TextData.VertexArray);
-		glBindVertexArray(s_TextData.VertexArray);
-
-		glGenBuffers(1, &s_TextData.VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_TextData.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		s_TextData.Shader.Compile("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
-		s_TextData.Shader.Bind();
-
-		// Uniform buffer
-		glCreateBuffers(1, &s_TextData.TextDataUniformBuffer);
-		glNamedBufferData(s_TextData.TextDataUniformBuffer, sizeof(UniformTextBuffer), nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, s_TextData.TextDataUniformBufferBinding, s_TextData.TextDataUniformBuffer);
-
-		FT_Done_Face(face);
-		FT_Done_FreeType(ft);
-	}
-
 	void Renderer::PrepereUtils()
 	{
 		KC_PROFILE_FUNCTION();
@@ -648,90 +558,6 @@ namespace KuchCraft {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.DepthAttachment, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-	void Renderer::RenderText()
-	{
-		KC_PROFILE_FUNCTION();
-
-		s_Stats.TextTimer.Begin();
-
-		s_TextData.Shader.Bind();
-		glBindTextureUnit(default_texture_slot, s_TextData.Texture);
-		glBindVertexArray(s_TextData.VertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_TextData.VertexBuffer);
-
-		// Set uniform buffer
-		UniformTextBuffer buffer;
-		
-		for (const auto& [text, position, color, fontSize, spacing] : s_TextData.Data)
-		{
-			buffer.Color = color;
-			glm::vec2 currentPosition{ position };
-			float scale = fontSize / font_texture_size;
-
-			uint32_t currentArrayIndex = 0;
-			for (auto c = text.begin(); c != text.end(); c++)
-			{
-				RendererTextCharacter ch = s_TextData.Characters[*c];
-				if (*c == '\n')
-				{
-					currentPosition.y -= (ch.Size.y) * spacing * scale;
-					currentPosition.x  = position.x;
-				}
-				else if (*c == ' ')
-				{
-					currentPosition.x += (ch.Advance >> 6) * scale;
-				}
-				else
-				{
-					float xpos = currentPosition.x + ch.Bearing.x * scale;
-					float ypos = currentPosition.y - (font_texture_size - ch.Bearing.y) * scale;
-
-					buffer.Text[currentArrayIndex].Transform = glm::translate(glm::mat4(1.0f), { xpos, ypos, 0 }) *
-						glm::scale(glm::mat4(1.0f), { font_texture_size * scale, font_texture_size * scale, 0 });
-					buffer.Text[currentArrayIndex].Letter.x = (float)ch.ID;
-
-					currentPosition.x += (ch.Advance >> 6) * scale;
-					currentArrayIndex++;
-					if (currentArrayIndex == max_text_uniform_array_limit)
-					{
-						RenderText(currentArrayIndex, &buffer);
-						currentArrayIndex = 0;
-					}
-				}
-			}
-			RenderText(currentArrayIndex, &buffer);
-		}
-
-		s_Stats.TextTimer.End();
-	}
-
-	void Renderer::RenderText(uint32_t length, UniformTextBuffer* buffer)
-	{
-		if (length != 0) 
-		{
-			glNamedBufferSubData(s_TextData.TextDataUniformBuffer, 0, sizeof(UniformTextBuffer), buffer);
-			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, length);
-		}
-	}
-
-	void Renderer::RenderTextTopLeft(const std::string& text, const glm::vec2& margin, const glm::vec4& color, float fontSize, float spacing)
-	{
-		glm::vec2 position{ margin.x, Application::Get().GetWindow().GetHeight() - margin.y };
-		RenderText(text, position, color, fontSize, spacing);
-	}
-
-	void Renderer::RenderText(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize, float spacing)
-	{
-		s_TextData.Data.emplace_back(text, position, color, fontSize, spacing);
-	}
-
-	void Renderer::RenderTextNorm(const std::string& text, const glm::vec2& positionNormalized, const glm::vec4& color, float fontSize, float spacing)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		glm::vec2 position{  width * positionNormalized.x, height * positionNormalized.y};
-		RenderText(text, position, color, fontSize, spacing);
 	}
 
 	void Renderer::RenderOutlinedBlock(const glm::vec3& position)

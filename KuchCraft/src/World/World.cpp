@@ -5,6 +5,7 @@
 
 #include "Renderer/FrustumCulling.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Text/TextRenderer.h"
 
 #include "World/WorldGenerator.h"
 
@@ -165,9 +166,8 @@ namespace KuchCraft {
 		
 		Renderer::RenderChunksWater(m_ChunksToRender);
 
-		// Text to render
 		if (Renderer::GetShowStatsStatus())
-			Renderer::RenderTextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDebugText(), { 6.0f, 25.0f });
+			TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDebugText(), { 6.0f, 25.0f });
 		
 		Renderer::EndWorld();
 	}

@@ -29,11 +29,6 @@ namespace KuchCraft {
 		static void RenderChunksWater(const std::vector<Chunk*>& chunks);
 		static void RenderSkybox();
 
-		// Text
-		static void RenderTextTopLeft(const std::string& text, const glm::vec2& margin, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
-		static void RenderText(const std::string& text, const glm::vec2& position, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
-		static void RenderTextNorm(const std::string& text, const glm::vec2& positionNormalized, const glm::vec4& color = default_font_color, float fontSize = default_font_size, float spacing = default_font_spacing);
-
 		// Utils
 		static void RenderOutlinedBlock(const glm::vec3& position);
 
@@ -55,8 +50,6 @@ namespace KuchCraft {
 	private:
 		// Utils
 		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
-		static void RenderText();
-		static void RenderText(uint32_t length, UniformTextBuffer* buffer);
 		static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 		// Loading textures
@@ -72,7 +65,6 @@ namespace KuchCraft {
 		static void PrepareChunkRendering();
 		static void PrepareSkyboxRendering();
 		static void PrepareWaterRendering();
-		static void PrepareTextRendering();
 
 		// Renderer data
 		static RendererData       s_RendererData;
@@ -82,7 +74,6 @@ namespace KuchCraft {
 		static RendererChunkData  s_ChunkData;
 		static RendererSkyboxData s_SkyboxData;
 		static RendererWaterData  s_WaterData;
-		static RendererTextData   s_TextData;
 		static GraphicalInfo      s_GraphicalInfo;
 		 
 	private:
