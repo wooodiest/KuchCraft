@@ -100,11 +100,13 @@ namespace KuchCraft {
 
 	void TextRenderer::ShutDown()
 	{
-
+		KC_PROFILE_FUNCTION();
 	}
 
 	void TextRenderer::Render()
 	{
+		KC_PROFILE_FUNCTION();
+
 		glEnable(GL_BLEND);
 
 		s_Data.Shader->Bind();
@@ -171,6 +173,8 @@ namespace KuchCraft {
 
 	void TextRenderer::Clear()
 	{
+		KC_PROFILE_FUNCTION();
+
 		s_Data.TextData.clear();
 	}
 

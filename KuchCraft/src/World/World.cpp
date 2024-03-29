@@ -6,6 +6,7 @@
 #include "Renderer/FrustumCulling.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Text/TextRenderer.h"
+#include "Renderer/Renderer3D/Renderer3D.h"
 
 #include "World/WorldGenerator.h"
 
@@ -158,8 +159,7 @@ namespace KuchCraft {
 		Renderer::BeginWorld(m_Player.GetCamera());
 		Renderer::SetWaterTintStatus(GetBlock(m_Player.GetEyePosition()) == BlockType::Water);
 
-		Renderer::RenderChunks(m_ChunksToRender);
-		Renderer::RenderSkybox();
+		Renderer3D::DrawChunks(m_ChunksToRender);
 
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer::RenderOutlinedBlock(m_Player.GetTargetedBlock().Position);

@@ -64,13 +64,6 @@ namespace KuchCraft {
 				case ShaderDataType::Float3:
 				case ShaderDataType::Float4:
 				{
-					uint32_t c = element.GetCount();
-					uint32_t si = element.GetSize();
-					uint32_t st = bufferLayout.GetStride();
-					uint32_t o = element.Offset;
-
-					KC_ERROR("{0} {1} {2} {3} {4}", index, c, si, st, o);
-
 					glVertexAttribPointer(
 						index, 
 						element.GetCount(),

@@ -2,6 +2,7 @@
 #include "Renderer/Renderer.h"
 
 #include "Renderer/Text/TextRenderer.h"
+#include "Renderer/Renderer3D/Renderer3D.h"
 
 #include "Renderer/Data/Shader.h"
 
@@ -18,11 +19,9 @@
 namespace KuchCraft {
 
 	RendererStatistics  Renderer::s_Stats;
-	RendererChunkData   Renderer::s_ChunkData;
 	RendererUtilsData   Renderer::s_UtilsData;
 
 	RendererData        Renderer::s_RendererData;
-	RendererSkyboxData  Renderer::s_SkyboxData;
 	RendererWaterData   Renderer::s_WaterData;
 	GraphicalInfo       Renderer::s_GraphicalInfo;
 
@@ -34,13 +33,12 @@ namespace KuchCraft {
 		PrepareRenderer();
 		PrepereUtils();
 
-		PrepareChunkRendering();
-		PrepareSkyboxRendering();
 		PrepareWaterRendering();
 		
 		LoadTextures();
 
 		TextRenderer::Init();
+		Renderer3D  ::Init();
 	}
 
 	void Renderer::ShutDown()
@@ -53,6 +51,8 @@ namespace KuchCraft {
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
 
+		TextRenderer::ShutDown();
+		Renderer3D  ::ShutDown();
 		// RendererStatistics
 		ResetStats();
 	}
@@ -74,6 +74,7 @@ namespace KuchCraft {
 
 		// Clear text buffer
 		TextRenderer::Clear();
+		Renderer3D  ::Clear();
 	}
 
 	void Renderer::EndFrame()
@@ -139,81 +140,13 @@ namespace KuchCraft {
 		s_Stats.Quads     = 0;
 	}
 
-	void Renderer::RenderChunks(const std::vector<Chunk*>& chunks)
-	{
-		KC_PROFILE_FUNCTION();
-
-		s_Stats.ChunkTimer.Begin();
-		s_ChunkData.Shader->Bind();
-		s_ChunkData.VertexArray->Bind();
-
-		for (const auto& chunk : chunks)
-		{
-			uint32_t vertexOffset = 0;
-			const auto& drawList  = chunk->GetDrawList();
-			s_ChunkData.Shader->SetFloat3("u_ChunkPosition", chunk->GetPosition());
-
-			for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
-			{
-				uint32_t indexCount = drawList.GetIndexCount(i);
-				if (indexCount != 0)
-				{
-					uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-					s_ChunkData.VertexBuffer->SetData(drawList.GetVerticesPtr(vertexOffset), vertexCount * sizeof(uint32_t));
-
-					vertexOffset += vertexCount;
-
-					// Bind textures
-					uint32_t textures = drawList.GetTextureCount(i);
-					for (uint32_t j = 0; j < textures; j++)
-						glBindTextureUnit(j, drawList.GetTexture(i, j));
-
-					// Draw elements		
-					s_RendererData.QuadIndexBuffer->Bind();
-					glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
-
-					// Update stats
-					s_Stats.DrawCalls++;
-					s_Stats.Quads += vertexCount / quad_vertex_count;
-				}
-			}
-		}
-
-		s_Stats.ChunkTimer.End();
-	}
-
-	void Renderer::RenderSkybox()
-	{
-		KC_PROFILE_FUNCTION();
-
-		s_Stats.SkyboxTimer.Begin();
-		s_SkyboxData.Shader->Bind();
-
-		glCullFace(GL_FRONT);
-		glDepthFunc(GL_LEQUAL);
-
-		s_SkyboxData.VertexArray->Bind();
-		s_SkyboxData.VertexBuffer->Bind();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
-
-		s_RendererData.QuadIndexBuffer->Bind();
-		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count, GL_UNSIGNED_INT, nullptr);
-
-		// Update stats
-		s_Stats.DrawCalls++;
-		s_Stats.Quads += cube_face_cout;
-
-		glCullFace(GL_BACK);
-		glDepthFunc(GL_LESS);
-
-		s_Stats.SkyboxTimer.End();
-	}
-
 	void Renderer::RenderChunksWater(const std::vector<Chunk*>& chunks)
 	{
 		KC_PROFILE_FUNCTION();
+
+		//tmp
+		Renderer3D::RenderChunks();
+		Renderer3D::RenderSkybox();
 
 		s_Stats.WaterTimer.Begin();
 		s_WaterData.Shader->Bind();
@@ -353,90 +286,6 @@ namespace KuchCraft {
 		s_RendererData.VertexBuffer   ->Unbind();
 		s_RendererData.QuadIndexBuffer->Unbind();
 		s_RendererData.Shader         ->Unbind();
-	}
-
-	void Renderer::PrepareChunkRendering()
-	{
-		KC_PROFILE_FUNCTION();
-
-		s_ChunkData.VertexArray = VertexArray::Create();
-		s_ChunkData.VertexArray->Bind();
-
-		s_ChunkData.VertexBuffer = VertexBuffer::Create(max_vertices_in_chunk * sizeof(uint32_t));
-		s_ChunkData.VertexBuffer->SetBufferLayout({
-			{ ShaderDataType::Uint, "a_PackedData" }
-		});
-
-		s_ChunkData.VertexArray->SetVertexBuffer(s_ChunkData.VertexBuffer);
-
-		s_ChunkData.Shader = Shader::Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl");
-		s_ChunkData.Shader->Bind();
-
-		int samplers[max_texture_slots];
-		for (int i = 0; i < max_texture_slots; i++)
-			samplers[i] = i;
-		s_ChunkData.Shader->SetIntArray("u_Textures", samplers, max_texture_slots);
-
-		s_ChunkData.VertexArray ->Unbind();
-		s_ChunkData.VertexBuffer->Unbind();
-		s_ChunkData.Shader      ->Unbind();
-	} 
-
-	void Renderer::PrepareSkyboxRendering()
-	{
-		KC_PROFILE_FUNCTION();
-
-		s_SkyboxData.VertexArray = VertexArray::Create();
-		s_SkyboxData.VertexArray->Bind();
-
-		constexpr float vertices[] = {
-			 1.0f, -1.0f,  1.0f,
-			 1.0f, -1.0f, -1.0f,
-			 1.0f,  1.0f, -1.0f,
-			 1.0f,  1.0f,  1.0f,
-
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			-1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			 1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-
-			-1.0f, -1.0f,  1.0f,
-			 1.0f, -1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-
-			 1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-			 1.0f,  1.0f, -1.0f,
-		};
-
-		s_SkyboxData.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
-		s_SkyboxData.VertexBuffer->SetBufferLayout({
-			{ ShaderDataType::Float3, "a_Position"}
-		});
-
-		s_SkyboxData.VertexArray->SetVertexBuffer(s_SkyboxData.VertexBuffer);
-
-		s_SkyboxData.Shader = Shader::Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
-		s_SkyboxData.Shader->Bind();
-		s_SkyboxData.Shader->SetInt("u_CubemapTexture", 0);
-
-		s_SkyboxData.Texture = LoadSkyboxTexture();
-
-		s_SkyboxData.VertexArray ->Unbind();
-		s_SkyboxData.VertexBuffer->Unbind();
-		s_SkyboxData.Shader      ->Unbind();
 	}
 
 	void Renderer::PrepareWaterRendering()
@@ -598,50 +447,6 @@ namespace KuchCraft {
 			const std::string texturePath = path + blockName + extension;
 			s_RendererData.Textures[i] = LoadTexture(texturePath);
 		}
-	}
-
-	uint32_t Renderer::LoadSkyboxTexture()
-	{
-		KC_PROFILE_FUNCTION();
-
-		const GLenum types[cube_face_cout] = {
-			GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-			GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-			GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-			GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-			GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-			GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-		};
-		const std::string paths[cube_face_cout] =
-		{
-			"assets/skybox/xpos.png",
-			"assets/skybox/xneg.png",
-			"assets/skybox/ypos.png",
-			"assets/skybox/yneg.png",
-			"assets/skybox/zpos.png",
-			"assets/skybox/zneg.png"
-		}; 
-		uint32_t texture;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-
-		for (uint32_t i = 0; i < cube_face_cout; i++)
-		{
-			int width, height, channels;
-			stbi_set_flip_vertically_on_load(0);
-			unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 4);
-
-			glTexImage2D(types[i], 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-			stbi_image_free(data);
-		}
-
-		return texture;
 	}
 
 	uint32_t Renderer::LoadTexture(const std::string& path)

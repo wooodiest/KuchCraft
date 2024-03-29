@@ -120,22 +120,6 @@ namespace KuchCraft {
 		Ref<VertexBuffer> OutlinedBlockVertexBuffer;
 	};
 
-	struct RendererChunkData
-	{
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
-	};
-
-	struct RendererSkyboxData
-	{
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
-
-		uint32_t Texture      = 0;
-	};
-
 	struct RendererWaterData
 	{
 		Ref<Shader>       Shader;

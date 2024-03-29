@@ -25,9 +25,7 @@ namespace KuchCraft {
 		static void EndWorld();
 
 		// Rendering chunks
-		static void RenderChunks(const std::vector<Chunk*>& chunks);
 		static void RenderChunksWater(const std::vector<Chunk*>& chunks);
-		static void RenderSkybox();
 
 		// Utils
 		static void RenderOutlinedBlock(const glm::vec3& position);
@@ -55,15 +53,12 @@ namespace KuchCraft {
 		// Loading textures
 		static void     LoadTextures();
 		static uint32_t LoadTexture(const std::string& path);
-		static uint32_t LoadSkyboxTexture();
 
 		// Prepare renderer for...
 		static void PrepareShaders();
 		static void PrepareRenderer();
 		static void PrepereUtils();
 
-		static void PrepareChunkRendering();
-		static void PrepareSkyboxRendering();
 		static void PrepareWaterRendering();
 
 		// Renderer data
@@ -71,8 +66,6 @@ namespace KuchCraft {
 		static RendererStatistics s_Stats;
 		static RendererUtilsData  s_UtilsData;
 
-		static RendererChunkData  s_ChunkData;
-		static RendererSkyboxData s_SkyboxData;
 		static RendererWaterData  s_WaterData;
 		static GraphicalInfo      s_GraphicalInfo;
 		 
