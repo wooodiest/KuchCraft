@@ -39,11 +39,10 @@ namespace KuchCraft {
 		Bind();
 		vertexBuffer->Bind();
 
+		uint32_t index = 0;
 		const auto& bufferLayout = vertexBuffer->GetBufferLayout();
 		for (const auto& element : bufferLayout)
 		{
-			uint32_t index = 0;
-
 			switch (element.Type)
 			{
 				case ShaderDataType::Uint:
@@ -60,11 +59,18 @@ namespace KuchCraft {
 					index++;
 					break;
 				}
-				case ShaderDataType::Float :
+				case ShaderDataType::Float:
 				case ShaderDataType::Float2:
 				case ShaderDataType::Float3:
 				case ShaderDataType::Float4:
 				{
+					uint32_t c = element.GetCount();
+					uint32_t si = element.GetSize();
+					uint32_t st = bufferLayout.GetStride();
+					uint32_t o = element.Offset;
+
+					KC_ERROR("{0} {1} {2} {3} {4}", index, c, si, st, o);
+
 					glVertexAttribPointer(
 						index, 
 						element.GetCount(),
@@ -87,7 +93,7 @@ namespace KuchCraft {
 		glBindVertexArray(m_RendererID);
 	}
 
-	void VertexArray::UnBind() const
+	void VertexArray::Unbind() const
 	{
 		glBindVertexArray(0);
 	}

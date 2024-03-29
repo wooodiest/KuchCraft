@@ -15,7 +15,7 @@ namespace KuchCraft {
 		void SetVertexBuffer(const Ref<VertexBuffer>& vertexBuffer);
 
 		void Bind()   const;
-		void UnBind() const;
+		void Unbind() const;
 
 	private:
 		uint32_t m_RendererID = 0;

@@ -52,10 +52,6 @@ namespace KuchCraft {
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
 
-		// Utils data
-		glDeleteBuffers(1, &s_UtilsData.OutlinedBlockVertexBuffer);
-		glDeleteVertexArrays(1, &s_UtilsData.OutlinedBlockVertexArray);
-
 		// WaterData
 		glDeleteBuffers(1, &s_WaterData.VertexBuffer);
 		glDeleteVertexArrays(1, &s_WaterData.VertexArray);
@@ -203,13 +199,13 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		s_Stats.SkyboxTimer.Begin();
-		s_SkyboxData.Shader.Bind();
+		s_SkyboxData.Shader->Bind();
 
 		glCullFace(GL_FRONT);
 		glDepthFunc(GL_LEQUAL);
 
-		glBindVertexArray(s_SkyboxData.VertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
+		s_SkyboxData.VertexArray->Bind();
+		s_SkyboxData.VertexBuffer->Bind();
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
@@ -393,27 +389,67 @@ namespace KuchCraft {
 		for (int i = 0; i < max_texture_slots; i++)
 			samplers[i] = i;
 		s_ChunkData.Shader->SetIntArray("u_Textures", samplers, max_texture_slots);
-	}
+
+		s_ChunkData.VertexArray ->Unbind();
+		s_ChunkData.VertexBuffer->Unbind();
+		s_ChunkData.Shader      ->Unbind();
+	} 
 
 	void Renderer::PrepareSkyboxRendering()
 	{
 		KC_PROFILE_FUNCTION();
 
-		glGenVertexArrays(1, &s_SkyboxData.VertexArray);
-		glBindVertexArray(s_SkyboxData.VertexArray);
+		s_SkyboxData.VertexArray = VertexArray::Create();
+		s_SkyboxData.VertexArray->Bind();
 
-		glGenBuffers(1, &s_SkyboxData.VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_SkyboxData.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(skybox_vertices), skybox_vertices, GL_STATIC_DRAW);
+		constexpr float vertices[] = {
+			 1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f,  1.0f,
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f,
 
-		s_SkyboxData.Shader.Compile("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
-		s_SkyboxData.Shader.Bind();
-		s_SkyboxData.Shader.SetInt("u_CubemapTexture", 0);
+			-1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			 1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+
+			 1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+		};
+
+		s_SkyboxData.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
+		s_SkyboxData.VertexBuffer->SetBufferLayout({
+			{ ShaderDataType::Float3, "a_Position"}
+		});
+
+		s_SkyboxData.VertexArray->SetVertexBuffer(s_SkyboxData.VertexBuffer);
+
+		s_SkyboxData.Shader = Shader::Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
+		s_SkyboxData.Shader->Bind();
+		s_SkyboxData.Shader->SetInt("u_CubemapTexture", 0);
 
 		s_SkyboxData.Texture = LoadSkyboxTexture();
+
+		s_SkyboxData.VertexArray ->Unbind();
+		s_SkyboxData.VertexBuffer->Unbind();
+		s_SkyboxData.Shader      ->Unbind();
 	}
 
 	void Renderer::PrepareWaterRendering()
@@ -524,20 +560,58 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 		
-		glGenVertexArrays(1, &s_UtilsData.OutlinedBlockVertexArray);
-		glBindVertexArray(s_UtilsData.OutlinedBlockVertexArray);
+		s_UtilsData.OutlinedBlockVertexArray = VertexArray::Create();
+		s_UtilsData.OutlinedBlockVertexArray->Bind();
 
-		glGenBuffers(1, &s_UtilsData.OutlinedBlockVertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_UtilsData.OutlinedBlockVertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(block_vertices), block_vertices, GL_STATIC_DRAW);
+		// Float3::pos, Float2::texCoord
+		constexpr float vertices[] = 
+		{
+			// bottom
+			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+			// top
+			0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			// front
+			0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			// right
+			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			// behind
+			1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			// left
+			0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+		};
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+		s_UtilsData.OutlinedBlockVertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
+		s_UtilsData.OutlinedBlockVertexBuffer->SetBufferLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		});
 
-		s_UtilsData.OutlinedBlockShader.Compile("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
-		s_UtilsData.OutlinedBlockShader.Bind();
+		s_UtilsData.OutlinedBlockVertexArray->SetVertexBuffer(s_UtilsData.OutlinedBlockVertexBuffer);
+
+		s_UtilsData.OutlinedBlockShader = Shader::Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
+		s_UtilsData.OutlinedBlockShader->Bind();
+
+		s_UtilsData.OutlinedBlockVertexArray ->Unbind();
+		s_UtilsData.OutlinedBlockVertexBuffer->Unbind();
+		s_UtilsData.OutlinedBlockShader      ->Unbind();
 	}
 
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
@@ -671,11 +745,11 @@ namespace KuchCraft {
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 
-		s_UtilsData.OutlinedBlockShader.Bind();
-		s_UtilsData.OutlinedBlockShader.SetMat4("u_Transform", transform);
+		s_UtilsData.OutlinedBlockShader->Bind();
+		s_UtilsData.OutlinedBlockShader->SetMat4("u_Transform", transform);
 
-		glBindVertexArray(s_UtilsData.OutlinedBlockVertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_UtilsData.OutlinedBlockVertexBuffer);
+		s_UtilsData.OutlinedBlockVertexArray->Bind();
+		s_UtilsData.OutlinedBlockVertexBuffer->Bind();
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
 		glDrawElements(GL_TRIANGLES, cube_index_count, GL_UNSIGNED_INT, nullptr);

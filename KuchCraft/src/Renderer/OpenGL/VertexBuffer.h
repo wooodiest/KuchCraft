@@ -18,7 +18,7 @@ namespace KuchCraft {
 		const BufferLayout& GetBufferLayout()            const { return m_BufferLayout;         }
 
 		void Bind()   const;
-		void UnBind() const;
+		void Unbind() const;
 
 	private:
 		uint32_t     m_RendererID = 0;

@@ -136,9 +136,9 @@ namespace KuchCraft {
 
 	struct RendererUtilsData
 	{
-		Shader   OutlinedBlockShader;
-		uint32_t OutlinedBlockVertexBuffer = 0;
-		uint32_t OutlinedBlockVertexArray  = 0;
+		Ref<Shader>       OutlinedBlockShader;
+		Ref<VertexArray>  OutlinedBlockVertexArray;
+		Ref<VertexBuffer> OutlinedBlockVertexBuffer;
 	};
 
 	struct RendererChunkData
@@ -150,10 +150,11 @@ namespace KuchCraft {
 
 	struct RendererSkyboxData
 	{
-		uint32_t VertexArray  = 0;
-		uint32_t VertexBuffer = 0;
+		Ref<Shader>       Shader;
+		Ref<VertexArray>  VertexArray;
+		Ref<VertexBuffer> VertexBuffer;
+
 		uint32_t Texture      = 0;
-		Shader   Shader;
 	};
 
 	struct RendererWaterData
@@ -252,63 +253,8 @@ namespace KuchCraft {
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f }
 	};
 
-	constexpr float skybox_vertices[] = {
-		 1.0f, -1.0f,  1.0f,
-		 1.0f, -1.0f, -1.0f,
-		 1.0f,  1.0f, -1.0f,
-		 1.0f,  1.0f,  1.0f,
 
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f, -1.0f,
 
-		-1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		 1.0f,  1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
 
-		 1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f,  1.0f,
-		-1.0f, -1.0f, -1.0f,
-		 1.0f, -1.0f, -1.0f,
-
-		-1.0f, -1.0f,  1.0f,
-		 1.0f, -1.0f,  1.0f,
-		 1.0f,  1.0f,  1.0f,
-		-1.0f,  1.0f,  1.0f,
-
-		 1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f,  1.0f, -1.0f,
-		 1.0f,  1.0f, -1.0f,
-	};
-
-	constexpr float block_vertices[] = {
-		1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-		1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f, 1.0f, 1.0f
-	};
 
 }
