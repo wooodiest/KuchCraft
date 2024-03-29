@@ -6,9 +6,17 @@
 #include <glad/glad.h>
 
 namespace KuchCraft {
-
+	Ref<Shader> Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	{
+		return CreateRef<Shader>(vertexShaderPath, fragmentShaderPath);
+	}
 	Shader::Shader()
 	{
+	}
+
+	Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	{
+		Compile(vertexShaderPath, fragmentShaderPath);
 	}
 
 	Shader::~Shader()
@@ -52,7 +60,7 @@ namespace KuchCraft {
 		glUniformMatrix4fv(location, count, GL_FALSE, data);
 	}
 
-	uint32_t Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	uint32_t Shader::Compile(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
 	{
 		KC_PROFILE_FUNCTION();
 

@@ -56,10 +56,6 @@ namespace KuchCraft {
 		glDeleteBuffers(1, &s_UtilsData.OutlinedBlockVertexBuffer);
 		glDeleteVertexArrays(1, &s_UtilsData.OutlinedBlockVertexArray);
 
-		// RendererChunkData
-		glDeleteBuffers(1, &s_ChunkData.VertexBuffer);
-		glDeleteVertexArrays(1, &s_ChunkData.VertexArray);
-
 		// WaterData
 		glDeleteBuffers(1, &s_WaterData.VertexBuffer);
 		glDeleteVertexArrays(1, &s_WaterData.VertexArray);
@@ -163,13 +159,13 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		s_Stats.ChunkTimer.Begin();
-		s_ChunkData.Shader.Bind();
+		s_ChunkData.Shader->Bind();
 
 		for (const auto& chunk : chunks)
 		{
 			uint32_t vertexOffset = 0;
 			const auto& drawList  = chunk->GetDrawList();
-			s_ChunkData.Shader.SetFloat3("u_ChunkPosition", chunk->GetPosition());
+			s_ChunkData.Shader->SetFloat3("u_ChunkPosition", chunk->GetPosition());
 
 			for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
 			{
@@ -178,9 +174,8 @@ namespace KuchCraft {
 				{
 					uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
 
-					glBindVertexArray(s_ChunkData.VertexArray);
-					glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
-					glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(uint32_t), drawList.GetVerticesPtr(vertexOffset));
+					s_ChunkData.VertexArray->Bind();
+					s_ChunkData.VertexBuffer->SetData(drawList.GetVerticesPtr(vertexOffset), vertexCount * sizeof(uint32_t));
 
 					vertexOffset += vertexCount;
 
@@ -372,7 +367,7 @@ namespace KuchCraft {
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P2C2), (void*)(2 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-		s_RendererData.Shader.Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
+		s_RendererData.Shader.Compile("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
 		s_RendererData.Shader.Bind();
 		s_RendererData.Shader.SetInt("u_Texture", default_texture_slot);
 	}
@@ -381,23 +376,23 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		glGenVertexArrays(1, &s_ChunkData.VertexArray);
-		glBindVertexArray(s_ChunkData.VertexArray);
+		s_ChunkData.VertexArray = VertexArray::Create();
+		s_ChunkData.VertexArray->Bind();
 
-		glGenBuffers(1, &s_ChunkData.VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_ChunkData.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(uint32_t), nullptr, GL_DYNAMIC_DRAW);
+		s_ChunkData.VertexBuffer = VertexBuffer::Create(max_vertices_in_chunk * sizeof(uint32_t));
+		s_ChunkData.VertexBuffer->SetBufferLayout({
+			{ ShaderDataType::Uint, "a_PackedData" }
+		});
 
-		glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, sizeof(uint32_t), (void*)0);
-		glEnableVertexAttribArray(0);
+		s_ChunkData.VertexArray->SetVertexBuffer(s_ChunkData.VertexBuffer);
 
-		s_ChunkData.Shader.Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl");
-		s_ChunkData.Shader.Bind();
+		s_ChunkData.Shader = Shader::Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl");
+		s_ChunkData.Shader->Bind();
 
 		int samplers[max_texture_slots];
 		for (int i = 0; i < max_texture_slots; i++)
 			samplers[i] = i;
-		s_ChunkData.Shader.SetIntArray("u_Textures", samplers, max_texture_slots);
+		s_ChunkData.Shader->SetIntArray("u_Textures", samplers, max_texture_slots);
 	}
 
 	void Renderer::PrepareSkyboxRendering()
@@ -414,7 +409,7 @@ namespace KuchCraft {
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		s_SkyboxData.Shader.Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
+		s_SkyboxData.Shader.Compile("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
 		s_SkyboxData.Shader.Bind();
 		s_SkyboxData.Shader.SetInt("u_CubemapTexture", 0);
 
@@ -437,9 +432,9 @@ namespace KuchCraft {
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P3C2), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-		s_WaterData.Shader.Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
+		s_WaterData.Shader.Compile("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
 		s_WaterData.Shader.Bind();
-		s_ChunkData.Shader.SetInt("u_Texture", default_texture_slot);
+		s_WaterData.Shader.SetInt("u_Texture", default_texture_slot);
 	}
 
 	void Renderer::PrepareTextRendering()
@@ -513,7 +508,7 @@ namespace KuchCraft {
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
-		s_TextData.Shader.Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
+		s_TextData.Shader.Compile("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
 		s_TextData.Shader.Bind();
 
 		// Uniform buffer
@@ -541,7 +536,7 @@ namespace KuchCraft {
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 
-		s_UtilsData.OutlinedBlockShader.Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
+		s_UtilsData.OutlinedBlockShader.Compile("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
 		s_UtilsData.OutlinedBlockShader.Bind();
 	}
 

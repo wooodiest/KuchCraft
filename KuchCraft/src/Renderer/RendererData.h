@@ -7,6 +7,11 @@
 
 #include "Renderer/Shader.h"
 
+#include "Renderer/OpenGL/IndexBuffer.h"
+#include "Renderer/OpenGL/VertexBuffer.h"
+#include "Renderer/OpenGL/VertexArray.h"
+#include "Renderer/OpenGL/BufferLayout.h"
+
 namespace KuchCraft {
 
 	// Constances
@@ -138,9 +143,9 @@ namespace KuchCraft {
 
 	struct RendererChunkData
 	{
-		uint32_t VertexArray  = 0;
-		uint32_t VertexBuffer = 0;
-		Shader   Shader;
+		Ref<Shader>       Shader;
+		Ref<VertexArray>  VertexArray;
+		Ref<VertexBuffer> VertexBuffer;
 	};
 
 	struct RendererSkyboxData
