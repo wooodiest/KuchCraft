@@ -3,7 +3,7 @@
 
 #include "Renderer/Text/TextRenderer.h"
 
-#include "Renderer/Shader.h"
+#include "Renderer/Data/Shader.h"
 
 #include "Core/Application.h"
 #include "Core/Utils.h"

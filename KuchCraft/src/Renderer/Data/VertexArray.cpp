@@ -1,5 +1,5 @@
 #include "kcpch.h"
-#include "Renderer/OpenGL/VertexArray.h"
+#include "Renderer/Data/VertexArray.h"
 
 #include <glad/glad.h>
 

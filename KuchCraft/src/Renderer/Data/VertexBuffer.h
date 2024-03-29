@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/OpenGL/BufferLayout.h"
+#include "Renderer/Data/BufferLayout.h"
 
 namespace KuchCraft {
 

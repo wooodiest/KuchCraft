@@ -1,5 +1,5 @@
 #include "kcpch.h"
-#include "Renderer/OpenGL/IndexBuffer.h"
+#include "Renderer/Data/IndexBuffer.h"
 
 #include <glad/glad.h>
 

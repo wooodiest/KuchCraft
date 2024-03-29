@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Renderer/Shader.h"
-#include "Renderer/OpenGL/IndexBuffer.h"
-#include "Renderer/OpenGL/VertexBuffer.h"
-#include "Renderer/OpenGL/VertexArray.h"
+#include "Renderer/Data/Shader.h"
+#include "Renderer/Data/IndexBuffer.h"
+#include "Renderer/Data/VertexBuffer.h"
+#include "Renderer/Data/VertexArray.h"
 
 namespace KuchCraft {
 

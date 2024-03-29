@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TextRendererData.h"
+#include "Renderer/Text/TextRendererData.h"
 
 namespace KuchCraft {
 

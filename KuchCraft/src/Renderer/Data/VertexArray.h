@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/OpenGL/VertexBuffer.h"
+#include "Renderer/Data/VertexBuffer.h"
 
 namespace KuchCraft {
 
