@@ -46,15 +46,10 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		// RendererData
-		glDeleteBuffers(1, &s_RendererData.QuadIndexBuffer);
 		glDeleteBuffers(1, &s_RendererData.WorldDataUniformBuffer);
 		glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
-
-		// WaterData
-		glDeleteBuffers(1, &s_WaterData.VertexBuffer);
-		glDeleteVertexArrays(1, &s_WaterData.VertexArray);
 
 		// Text data
 		glDeleteBuffers(1, &s_TextData.VertexBuffer);
@@ -122,9 +117,9 @@ namespace KuchCraft {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Render main frame buffer data to default frame buffer 
-		s_RendererData.Shader.Bind();
-		glBindVertexArray(s_RendererData.VertexArray);
-		glBindBuffer(GL_ARRAY_BUFFER, s_RendererData.VertexBuffer);
+		s_RendererData.Shader      ->Bind();
+		s_RendererData.VertexArray ->Bind();
+		s_RendererData.VertexBuffer->Bind();
 		glBindTextureUnit(default_texture_slot, s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 	}
@@ -156,6 +151,7 @@ namespace KuchCraft {
 
 		s_Stats.ChunkTimer.Begin();
 		s_ChunkData.Shader->Bind();
+		s_ChunkData.VertexArray->Bind();
 
 		for (const auto& chunk : chunks)
 		{
@@ -169,8 +165,6 @@ namespace KuchCraft {
 				if (indexCount != 0)
 				{
 					uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-
-					s_ChunkData.VertexArray->Bind();
 					s_ChunkData.VertexBuffer->SetData(drawList.GetVerticesPtr(vertexOffset), vertexCount * sizeof(uint32_t));
 
 					vertexOffset += vertexCount;
@@ -181,7 +175,7 @@ namespace KuchCraft {
 						glBindTextureUnit(j, drawList.GetTexture(i, j));
 
 					// Draw elements		
-					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+					s_RendererData.QuadIndexBuffer->Bind();
 					glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 
 					// Update stats
@@ -210,7 +204,7 @@ namespace KuchCraft {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+		s_RendererData.QuadIndexBuffer->Bind();
 		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count, GL_UNSIGNED_INT, nullptr);
 
 		// Update stats
@@ -228,7 +222,8 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		s_Stats.WaterTimer.Begin();
-		s_WaterData.Shader.Bind();
+		s_WaterData.Shader->Bind();
+		s_WaterData.VertexArray->Bind();
 
 		glDisable(GL_CULL_FACE);
 		glEnable(GL_BLEND);
@@ -241,15 +236,12 @@ namespace KuchCraft {
 			if (indexCount != 0)
 			{
 				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-
-				glBindVertexArray(s_WaterData.VertexArray);
-				glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * sizeof(Vertex_P3C2), drawList.GetWaterVerticesPtr());
+				s_WaterData.VertexBuffer->SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
 
 				glBindTextureUnit(default_texture_slot, GetTexture(BlockType::Water));
 
 				// Draw elements		
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+				s_RendererData.QuadIndexBuffer->Bind();
 				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 
 				// Update stats
@@ -340,9 +332,7 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		glGenBuffers(1, &s_RendererData.QuadIndexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, max_indices_in_chunk * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		s_RendererData.QuadIndexBuffer = IndexBuffer::Create(indices, max_indices_in_chunk);
 		delete[] indices;
 
 		// Uniform buffer
@@ -351,21 +341,25 @@ namespace KuchCraft {
 		glBindBufferBase(GL_UNIFORM_BUFFER, s_RendererData.WorldDataUniformBufferBinding, s_RendererData.WorldDataUniformBuffer);
 
 		// Prepare for rendering to screen
-		glGenVertexArrays(1, &s_RendererData.VertexArray);
-		glBindVertexArray(s_RendererData.VertexArray);
+		s_RendererData.VertexArray = VertexArray::Create();
+		s_RendererData.VertexArray->Bind();
 
-		glGenBuffers(1, &s_RendererData.VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_RendererData.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(Vertex_P2C2), screen_vertices, GL_STATIC_DRAW);
+		s_RendererData.VertexBuffer = VertexBuffer::Create(6 * sizeof(Vertex_P2C2), screen_vertices, true);
+		s_RendererData.VertexBuffer->SetBufferLayout({
+			{ ShaderDataType::Float2, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		});
 
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P2C2), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P2C2), (void*)(2 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+		s_RendererData.VertexArray->SetVertexBuffer(s_RendererData.VertexBuffer);
 
-		s_RendererData.Shader.Compile("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
-		s_RendererData.Shader.Bind();
-		s_RendererData.Shader.SetInt("u_Texture", default_texture_slot);
+		s_RendererData.Shader = Shader::Create("assets/shaders/default.vert.glsl", "assets/shaders/default.frag.glsl");
+		s_RendererData.Shader->Bind();
+		s_RendererData.Shader->SetInt("u_Texture", default_texture_slot);
+
+		s_RendererData.VertexArray    ->Unbind();
+		s_RendererData.VertexBuffer   ->Unbind();
+		s_RendererData.QuadIndexBuffer->Unbind();
+		s_RendererData.Shader         ->Unbind();
 	}
 
 	void Renderer::PrepareChunkRendering()
@@ -456,21 +450,24 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		glGenVertexArrays(1, &s_WaterData.VertexArray);
-		glBindVertexArray(s_WaterData.VertexArray);
+		s_WaterData.VertexArray = VertexArray::Create();
+		s_WaterData.VertexArray->Bind();
 
-		glGenBuffers(1, &s_WaterData.VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, s_WaterData.VertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, max_vertices_in_chunk * sizeof(Vertex_P3C2), nullptr, GL_DYNAMIC_DRAW);
+		s_WaterData.VertexBuffer = VertexBuffer::Create(max_vertices_in_chunk * sizeof(Vertex_P3C2));
+		s_WaterData.VertexBuffer->SetBufferLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		});
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex_P3C2), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex_P3C2), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+		s_WaterData.VertexArray->SetVertexBuffer(s_WaterData.VertexBuffer);
 
-		s_WaterData.Shader.Compile("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
-		s_WaterData.Shader.Bind();
-		s_WaterData.Shader.SetInt("u_Texture", default_texture_slot);
+		s_WaterData.Shader = Shader::Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
+		s_WaterData.Shader->Bind();
+		s_WaterData.Shader->SetInt("u_Texture", default_texture_slot);
+
+		s_WaterData.VertexArray ->Unbind();
+		s_WaterData.VertexBuffer->Unbind();
+		s_WaterData.Shader      ->Unbind();
 	}
 
 	void Renderer::PrepareTextRendering()
@@ -564,8 +561,7 @@ namespace KuchCraft {
 		s_UtilsData.OutlinedBlockVertexArray->Bind();
 
 		// Float3::pos, Float2::texCoord
-		constexpr float vertices[] = 
-		{
+		constexpr float vertices[] = {
 			// bottom
 			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -751,7 +747,7 @@ namespace KuchCraft {
 		s_UtilsData.OutlinedBlockVertexArray->Bind();
 		s_UtilsData.OutlinedBlockVertexBuffer->Bind();
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s_RendererData.QuadIndexBuffer);
+		s_RendererData.QuadIndexBuffer->Bind();
 		glDrawElements(GL_TRIANGLES, cube_index_count, GL_UNSIGNED_INT, nullptr);
 
 		glEnable(GL_CULL_FACE);
