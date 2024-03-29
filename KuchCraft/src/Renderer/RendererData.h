@@ -10,6 +10,7 @@
 #include "Renderer/Data/VertexBuffer.h"
 #include "Renderer/Data/VertexArray.h"
 #include "Renderer/Data/BufferLayout.h"
+#include "Renderer/Data/Texture2D.h"
 
 namespace KuchCraft {
 
@@ -62,21 +63,6 @@ namespace KuchCraft {
 		glm::vec2 TexCoord;
 	};
 
-	// Renderer data
-	struct RendererStatistics
-	{
-		uint32_t DrawCalls = 0;
-		uint32_t Quads     = 0;
-
-		Timer RenderTimer;
-		Timer ChunkTimer;
-		Timer SkyboxTimer;
-		Timer WaterTimer;
-		Timer TextTimer;
-
-		std::string DebugText;
-	};
-
 	struct UniformWorldBuffer
 	{
 		glm::mat4 ViewProjection;
@@ -87,7 +73,7 @@ namespace KuchCraft {
 
 	struct RendererData
 	{
-		uint32_t Textures[absolute_number_of_block_types];
+		std::map<BlockType, Ref<Texture2D>> Textures;
 		Ref<IndexBuffer> QuadIndexBuffer = 0;
 		
 		bool TintStatus = false;
@@ -125,14 +111,6 @@ namespace KuchCraft {
 		Ref<Shader>       Shader;
 		Ref<VertexArray>  VertexArray;
 		Ref<VertexBuffer> VertexBuffer;
-	};
-
-	struct GraphicalInfo
-	{
-		std::string Vendor;
-		std::string Renderer;
-		std::string Version;
-		std::string ShadingLanguageVersion;
 	};
 
 	// Renderer data utils

@@ -167,7 +167,7 @@ namespace KuchCraft {
 		Renderer::RenderChunksWater(m_ChunksToRender);
 
 		if (Renderer::GetShowStatsStatus())
-			TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDebugText(), { 6.0f, 25.0f });
+			TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText(), { 6.0f, 25.0f });
 		
 		Renderer::EndWorld();
 	}

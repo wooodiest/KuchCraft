@@ -18,12 +18,9 @@
 
 namespace KuchCraft {
 
-	RendererStatistics  Renderer::s_Stats;
 	RendererUtilsData   Renderer::s_UtilsData;
-
 	RendererData        Renderer::s_RendererData;
 	RendererWaterData   Renderer::s_WaterData;
-	GraphicalInfo       Renderer::s_GraphicalInfo;
 
 	void Renderer::Init()
 	{
@@ -53,19 +50,11 @@ namespace KuchCraft {
 
 		TextRenderer::ShutDown();
 		Renderer3D  ::ShutDown();
-		// RendererStatistics
-		ResetStats();
 	}
 
 	void Renderer::OnUpdate(float dt)
 	{
 		KC_PROFILE_FUNCTION();
-
-		ResetStats();
-
-		Timer::OnUpdate(dt);
-		s_Stats.RenderTimer.End();
-		s_Stats.RenderTimer.Begin();
 	}
 
 	void Renderer::BeginFrame()
@@ -119,27 +108,6 @@ namespace KuchCraft {
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 	}
 
-	std::string& Renderer::GetDebugText()
-	{
-		s_Stats.DebugText = 				
-			"\nRenderer:"
-			"\n    Draw cals: " + std::to_string(s_Stats.DrawCalls) +
-			"\n    Quads: " + std::to_string(s_Stats.Quads) +
-			"\n    Render time: " + std::to_string(s_Stats.RenderTimer.ElapsedMillis()) + "ms" +
-			"\n      - chunks:      " + std::to_string(s_Stats.ChunkTimer.ElapsedMillis()) + "ms" +
-			"\n      - skybox:      " + std::to_string(s_Stats.SkyboxTimer.ElapsedMillis()) + "ms" +
-			"\n      - water:         " + std::to_string(s_Stats.WaterTimer.ElapsedMillis()) + "ms" +
-			"\n      - text:            " + std::to_string(s_Stats.TextTimer.ElapsedMillis()) + "ms";
-
-		return s_Stats.DebugText;
-	}
-
-	void Renderer::ResetStats()
-	{
-		s_Stats.DrawCalls = 0;
-		s_Stats.Quads     = 0;
-	}
-
 	void Renderer::RenderChunksWater(const std::vector<Chunk*>& chunks)
 	{
 		KC_PROFILE_FUNCTION();
@@ -148,7 +116,6 @@ namespace KuchCraft {
 		Renderer3D::RenderChunks();
 		Renderer3D::RenderSkybox();
 
-		s_Stats.WaterTimer.Begin();
 		s_WaterData.Shader->Bind();
 		s_WaterData.VertexArray->Bind();
 
@@ -171,16 +138,10 @@ namespace KuchCraft {
 				s_RendererData.QuadIndexBuffer->Bind();
 				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 
-				// Update stats
-				s_Stats.DrawCalls++;
-				s_Stats.Quads += vertexCount / quad_vertex_count;
 			}
 		}
-
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
-
-		s_Stats.WaterTimer.End();
 	}
 
 	void Renderer::PrepareShaders()
@@ -225,11 +186,6 @@ namespace KuchCraft {
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		}
-
-		s_GraphicalInfo.Vendor = (char*)glGetString(GL_VENDOR);
-		s_GraphicalInfo.Renderer = (char*)glGetString(GL_RENDERER);
-		s_GraphicalInfo.Version = (char*)glGetString(GL_VERSION);
-		s_GraphicalInfo.ShadingLanguageVersion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		OnViewportSizeChanged(width, height);
@@ -427,9 +383,6 @@ namespace KuchCraft {
 
 		glEnable(GL_CULL_FACE);
 		glDepthFunc(GL_LESS);
-
-		s_Stats.DrawCalls++;
-		s_Stats.Quads += cube_face_cout;
 	}
 
 	void Renderer::LoadTextures()
@@ -445,37 +398,13 @@ namespace KuchCraft {
 			std::replace(blockName.begin(), blockName.end(), ' ', '_');
 
 			const std::string texturePath = path + blockName + extension;
-			s_RendererData.Textures[i] = LoadTexture(texturePath);
+			s_RendererData.Textures[(BlockType)i] = Texture2D::Create(texturePath, TextureSpecification{0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
 		}
-	}
-
-	uint32_t Renderer::LoadTexture(const std::string& path)
-	{
-		uint32_t texture = 0;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		int width, height, channels;
-		stbi_set_flip_vertically_on_load(1);
-		unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
-		if (!data)
-		{
-			KC_ERROR("Failed to load texture: {0}", path.c_str());
-		}
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		stbi_image_free(data);
-
-		return texture;
 	}
 
 	uint32_t Renderer::GetTexture(BlockType type)
 	{
-		return s_RendererData.Textures[(uint32_t)type];
+		return s_RendererData.Textures[type]->GetRendererID();
 	}
 
 

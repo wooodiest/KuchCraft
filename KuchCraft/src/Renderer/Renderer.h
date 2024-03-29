@@ -38,11 +38,7 @@ namespace KuchCraft {
 		static std::unordered_map<std::string, std::string>& GetShaderVarMap() { return s_RendererData.ShaderVarData; }
 
 		// Stats
-		static std::string& GetDebugText();
-		static void ResetStats();
-		static RendererStatistics& GetStats()    { return s_Stats;                  }
-		static GraphicalInfo& GetGraphicalInfo() { return s_GraphicalInfo;          }
-		static bool GetShowStatsStatus()		 { return s_RendererData.ShowStats; }
+		static bool GetShowStatsStatus()  { return s_RendererData.ShowStats;                      }
 		static void FlipShowStatsStatus() { s_RendererData.ShowStats = !s_RendererData.ShowStats; }
 
 	private:
@@ -52,7 +48,6 @@ namespace KuchCraft {
 
 		// Loading textures
 		static void     LoadTextures();
-		static uint32_t LoadTexture(const std::string& path);
 
 		// Prepare renderer for...
 		static void PrepareShaders();
@@ -63,11 +58,9 @@ namespace KuchCraft {
 
 		// Renderer data
 		static RendererData       s_RendererData;
-		static RendererStatistics s_Stats;
 		static RendererUtilsData  s_UtilsData;
 
 		static RendererWaterData  s_WaterData;
-		static GraphicalInfo      s_GraphicalInfo;
 		 
 	private:
 		Renderer() = default;
