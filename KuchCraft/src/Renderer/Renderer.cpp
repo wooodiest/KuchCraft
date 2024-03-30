@@ -3,6 +3,7 @@
 
 #include "Renderer/Text/TextRenderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
+#include "Renderer/AssetManager.h"
 
 #include "Renderer/Data/Shader.h"
 
@@ -27,8 +28,7 @@ namespace KuchCraft {
 		PrepareShaders();
 		PrepareRenderer();
 		
-		LoadTextures();
-
+		AssetManager::Init();
 		TextRenderer::Init();
 		Renderer3D  ::Init();
 	}
@@ -244,29 +244,6 @@ namespace KuchCraft {
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-
-	void Renderer::LoadTextures()
-	{
-		KC_PROFILE_FUNCTION();
-
-		const std::string path  = "assets/textures/";
-		const std::string extension = ".png";
-
-		for (uint32_t i = first_index_of_block_types; i < absolute_number_of_block_types; i++)
-		{
-			std::string blockName = Block::GetName((BlockType)i);
-			std::replace(blockName.begin(), blockName.end(), ' ', '_');
-
-			const std::string texturePath = path + blockName + extension;
-			s_RendererData.Textures[(BlockType)i] = Texture2D::Create(texturePath, TextureSpecification{0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
-	}
-
-	uint32_t Renderer::GetTexture(BlockType type)
-	{
-		return s_RendererData.Textures[type]->GetRendererID();
-	}
-
 
 	void Renderer::ShowTriangles(bool status)
 	{

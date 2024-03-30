@@ -2,6 +2,7 @@
 #include "Renderer/ChunkData.h"
 
 #include "Renderer/Renderer.h"
+#include "Renderer/AssetManager.h"
 
 namespace KuchCraft {
 
@@ -74,7 +75,7 @@ namespace KuchCraft {
 
 	void ChunkDrawList::Add(const glm::ivec3& position, uint32_t verticesIndex, const Block& block)
 	{
-		uint32_t texture = Renderer::GetTexture(block.blockType);
+		uint32_t texture = AssetManager::GetBlockTexture(block)->GetRendererID();
 		float    texSlot = -1.0f;
 
 		// Check if the texture already has assigned slot

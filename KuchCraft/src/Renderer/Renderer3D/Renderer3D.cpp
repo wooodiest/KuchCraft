@@ -2,6 +2,7 @@
 #include "Renderer/Renderer3D/Renderer3D.h"
 
 #include "Renderer/Renderer.h"
+#include "Renderer/AssetManager.h"
 
 #include <glad/glad.h>
 #include <stb_image.h> // tmp
@@ -339,7 +340,7 @@ namespace KuchCraft {
 				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
 				s_WaterData.VertexBuffer->SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
 
-				Renderer::s_RendererData.Textures[BlockType::Water]->Bind(default_texture_slot);
+				AssetManager::GetBlockTexture(BlockType::Water)->Bind(default_texture_slot);
 				// Draw elements		
 				s_Data.QuadIndexBuffer->Bind();
 				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);

@@ -73,7 +73,6 @@ namespace KuchCraft {
 
 	struct RendererData
 	{
-		std::map<BlockType, Ref<Texture2D>> Textures;
 		Ref<IndexBuffer> QuadIndexBuffer = 0;
 		
 		bool TintStatus = false;

@@ -27,7 +27,6 @@ namespace KuchCraft {
 		// Utils
 		static void SetWaterTintStatus(bool status);
 		static void ShowTriangles(bool status);
-		static uint32_t GetTexture(BlockType type);
 
 		static std::unordered_map<std::string, std::string>& GetShaderStrMap() { return s_RendererData.ShaderStrData; }
 		static std::unordered_map<std::string, std::string>& GetShaderVarMap() { return s_RendererData.ShaderVarData; }
@@ -41,9 +40,6 @@ namespace KuchCraft {
 		// Utils
 		static void InvalidateMainFrameBuffer(uint32_t width, uint32_t height);
 		static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
-
-		// Loading textures
-		static void LoadTextures();
 
 		// Prepare renderer for...
 		static void PrepareShaders();
