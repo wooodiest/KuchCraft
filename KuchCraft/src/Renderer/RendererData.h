@@ -64,7 +64,7 @@ namespace KuchCraft {
 		glm::vec2 TexCoord;
 	};
 
-	struct UniformWorldBuffer
+	struct UniformBufferCameraData
 	{
 		glm::mat4 ViewProjection;
 		glm::mat4 AbsoluteViewProjection;
@@ -73,19 +73,11 @@ namespace KuchCraft {
 
 	struct RendererData
 	{
-		Ref<IndexBuffer> QuadIndexBuffer = 0;
-		
-		bool TintStatus = false;
-		bool ShowStats  = true;
-
+		Ref<IndexBuffer>   QuadIndexBuffer;
 		Ref<UniformBuffer> WorldDataUniformBuffer;
-
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
-
-		std::unordered_map<std::string, std::string> ShaderStrData;
-		std::unordered_map<std::string, std::string> ShaderVarData;
+		Ref<Shader>		   Shader;
+		Ref<VertexArray>   VertexArray;
+		Ref<VertexBuffer>  VertexBuffer;
 	}; 
 
 	// Renderer data utils

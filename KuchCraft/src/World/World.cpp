@@ -59,7 +59,7 @@ namespace KuchCraft {
 
 		switch (e.GetKeyCode())
 		{
-			case Key::F3: Renderer::FlipShowStatsStatus(); return false;
+			
 		}
 
 		return false;
@@ -142,32 +142,23 @@ namespace KuchCraft {
 
 		}
 
+		// Delete from memory chunks that are too far away
+		DeleteUnusedChunks(playerPosition);
+
 		// Find chunks to render
 		m_ChunksToRender.clear();
 		m_ChunksToRender.reserve(surroundingChunksCount / 2); // It is very likely that we will not render all the chunks around the player
 		FrustumCulling::GetChunksToRender(m_ChunksToRender, m_ChunksToUpdate, m_Player.GetCamera());
 		m_WorldStats.ChunksToRender = static_cast<uint32_t>(m_ChunksToRender.size());
 
-		// Delete from memory chunks that are too far away
-		DeleteUnusedChunks(playerPosition);
-	}
-
-	void World::Render()
-	{
-		KC_PROFILE_FUNCTION();
-
-		Renderer::BeginWorld(m_Player.GetCamera());
 		//Renderer::SetWaterTintStatus(GetBlock(m_Player.GetEyePosition()) == BlockType::Water);
 
 		Renderer3D::DrawChunks(m_ChunksToRender);
 
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);
-	
-		if (Renderer::GetShowStatsStatus())
-			TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText(), { 6.0f, 25.0f });
-		
-		Renderer::EndWorld();
+
+		TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText(), { 6.0f, 25.0f });
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)

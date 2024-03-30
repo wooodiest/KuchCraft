@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/Camera.h"
+#include "Renderer/Camera.h"
 
 #include "Physics/Ray.h"
 

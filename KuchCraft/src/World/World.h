@@ -33,7 +33,6 @@ namespace KuchCraft {
 		bool OnKeyPressed(KeyPressedEvent& e);
 
 		void OnUpdate(float dt);
-		void Render();
 
 		// Utils
 		void  SetBlock(const glm::vec3& position, const Block& block);

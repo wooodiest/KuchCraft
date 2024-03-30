@@ -30,20 +30,20 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		Renderer::BeginFrame();
-		Renderer::OnUpdate(dt);
+
 		if (m_World)
 		{
 			m_World->OnUpdate(dt);
-			m_World->Render();
 
 			// Check to safety exit from world
-			if (m_World->GetQuitStatus())
+			if (m_World->GetQuitStatus()) // TODO: Move this outside end frame so it can render last frame befor quiting
 			{
 				delete m_World;
 				m_World = nullptr;
 			}
 		}
-		Renderer::EndFrame();
+
+		Renderer::EndFrame(m_World ? &m_World->GetCamera() : nullptr);
 	}
 
 	void KuchCraft::OnEvent(Event& event)

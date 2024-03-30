@@ -39,59 +39,51 @@ namespace KuchCraft {
 
 		TextRenderer::ShutDown();
 		Renderer3D  ::ShutDown();
-	}
-
-	void Renderer::OnUpdate(float dt)
-	{
-		KC_PROFILE_FUNCTION();
+		AssetManager::ShutDown();
 	}
 
 	void Renderer::BeginFrame()
 	{
 		KC_PROFILE_FUNCTION();
 
-		// Clear text buffer
 		TextRenderer::Clear();
 		Renderer3D  ::Clear();
 	}
 
-	void Renderer::EndFrame()
-	{
-		KC_PROFILE_FUNCTION();
-		TextRenderer::Render();
-	}
-
-	void Renderer::BeginWorld(const Camera& camera)
+	void Renderer::EndFrame(Camera* camera)
 	{
 		KC_PROFILE_FUNCTION();
 
-		// Set uniform buffer
-		UniformWorldBuffer buffer{
-			camera.GetViewProjection(),
-			camera.GetAbsoluteViewProjection(),
-			camera.GetOrthoProjection()
-		};
-		s_RendererData.WorldDataUniformBuffer->SetData(&buffer, sizeof(buffer));
+		// Set camera uniform buffer
+		{
+			glm::mat4 viewProjection         = camera ? camera->GetViewProjection()         : glm::mat4(1.0f);
+			glm::mat4 absoluteViewProjection = camera ? camera->GetAbsoluteViewProjection() : glm::mat4(1.0f);
+			glm::mat4 orthoProjection        = camera ? camera->GetOrthoProjection()        : glm::ortho(0.0f, (float)Application::Get().GetWindow().GetWidth(), 0.0f, (float)Application::Get().GetWindow().GetHeight());
 
-	}
-
-	void Renderer::EndWorld()
-	{
-		KC_PROFILE_FUNCTION();
+			UniformBufferCameraData buffer{
+				viewProjection,
+				absoluteViewProjection,
+				orthoProjection
+			};
+			s_RendererData.WorldDataUniformBuffer->SetData(&buffer, sizeof(buffer));
+		}
 
 		Renderer3D::Render();
 
+		// Render main frame buffer data to default frame buffer 
 		DefaultFrameBuffer::Bind();
 		DefaultFrameBuffer::Clear();
-
-		// Render main frame buffer data to default frame buffer 
+		RendererCommand::DisableBlending();
+		RendererCommand::DisableFaceCulling();
 		RendererCommand::DisableDepthTesting();
 
-		s_RendererData.Shader      ->Bind();
-		s_RendererData.VertexArray ->Bind();
+		s_RendererData.Shader->Bind();
+		s_RendererData.VertexArray->Bind();
 		s_RendererData.VertexBuffer->Bind();
 		Texture2D::Bind(Renderer3D::GetFrameBuffer()->GetColorAttachmentRendererID(), default_texture_slot);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
+
+		TextRenderer::Render();
 	}
 
 	void Renderer::PrepareRenderer()
@@ -101,7 +93,6 @@ namespace KuchCraft {
 		if (opengl_logs)
 			RendererCommand::EnableLogMessages();
 		
-
 		// QuadIndexBuffer
 		uint32_t* indices = new uint32_t[max_indices_in_chunk];
 		uint32_t  offset = 0;
@@ -120,7 +111,7 @@ namespace KuchCraft {
 		delete[] indices;
 
 		// Uniform buffer
-		s_RendererData.WorldDataUniformBuffer = UniformBuffer::Create(sizeof(UniformWorldBuffer), 0);
+		s_RendererData.WorldDataUniformBuffer = UniformBuffer::Create(sizeof(UniformBufferCameraData), 0);
 
 		// Prepare for rendering to screen
 		s_RendererData.VertexArray = VertexArray::Create();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Game/Camera.h"
+#include "Renderer/Camera.h"
 #include "World/Chunk.h"
 
 #include <glad/glad.h>
@@ -14,19 +14,10 @@ namespace KuchCraft {
 		static void ShutDown();
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
-		static void OnUpdate(float dt);
 
 		// Renderer
 		static void BeginFrame();
-		static void EndFrame();
-
-		// Scene
-		static void BeginWorld(const Camera& camera);
-		static void EndWorld();
-
-		// Stats
-		static bool GetShowStatsStatus()  { return s_RendererData.ShowStats;                      }
-		static void FlipShowStatsStatus() { s_RendererData.ShowStats = !s_RendererData.ShowStats; }
+		static void EndFrame(Camera* camera);
 
 	private:
 		static RendererData s_RendererData;

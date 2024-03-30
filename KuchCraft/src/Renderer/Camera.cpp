@@ -1,5 +1,5 @@
 #include "kcpch.h"
-#include "Game/Camera.h"
+#include "Renderer/Camera.h"
 
 #include "Core/Input.h"
 #include "Core/Application.h"
