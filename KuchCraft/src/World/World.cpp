@@ -162,10 +162,8 @@ namespace KuchCraft {
 		Renderer3D::DrawChunks(m_ChunksToRender);
 
 		if (m_Player.GetTargetedBlockStatus())
-			Renderer::RenderOutlinedBlock(m_Player.GetTargetedBlock().Position);
-		
-		Renderer::RenderChunksWater(m_ChunksToRender);
-
+			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);
+	
 		if (Renderer::GetShowStatsStatus())
 			TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText(), { 6.0f, 25.0f });
 		

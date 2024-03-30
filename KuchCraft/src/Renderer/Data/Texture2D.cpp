@@ -112,4 +112,9 @@ namespace KuchCraft {
 		glBindTextureUnit(slot, m_RendererID);
 	}
 
+	void Texture2D::Bind(uint32_t rendererID, uint32_t slot)
+	{
+		glBindTextureUnit(slot, rendererID);
+	}
+
 }

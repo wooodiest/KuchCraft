@@ -99,20 +99,6 @@ namespace KuchCraft {
 
 	}; 
 
-	struct RendererUtilsData
-	{
-		Ref<Shader>       OutlinedBlockShader;
-		Ref<VertexArray>  OutlinedBlockVertexArray;
-		Ref<VertexBuffer> OutlinedBlockVertexBuffer;
-	};
-
-	struct RendererWaterData
-	{
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
-	};
-
 	// Renderer data utils
 	constexpr Vertex_P2C2 screen_vertices[quad_vertex_count_a]
 	{

@@ -18,9 +18,7 @@
 
 namespace KuchCraft {
 
-	RendererUtilsData   Renderer::s_UtilsData;
-	RendererData        Renderer::s_RendererData;
-	RendererWaterData   Renderer::s_WaterData;
+	RendererData Renderer::s_RendererData;
 
 	void Renderer::Init()
 	{
@@ -28,9 +26,6 @@ namespace KuchCraft {
 
 		PrepareShaders();
 		PrepareRenderer();
-		PrepereUtils();
-
-		PrepareWaterRendering();
 		
 		LoadTextures();
 
@@ -95,6 +90,8 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
+		Renderer3D::Render();
+
 		// Setup deafult frame buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
 		glDisable(GL_DEPTH_TEST);
@@ -106,42 +103,6 @@ namespace KuchCraft {
 		s_RendererData.VertexBuffer->Bind();
 		glBindTextureUnit(default_texture_slot, s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
-	}
-
-	void Renderer::RenderChunksWater(const std::vector<Chunk*>& chunks)
-	{
-		KC_PROFILE_FUNCTION();
-
-		//tmp
-		Renderer3D::RenderChunks();
-		Renderer3D::RenderSkybox();
-
-		s_WaterData.Shader->Bind();
-		s_WaterData.VertexArray->Bind();
-
-		glDisable(GL_CULL_FACE);
-		glEnable(GL_BLEND);
-
-		for (const auto& chunk : chunks)
-		{
-			const auto& drawList = chunk->GetDrawList();
-			uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
-
-			if (indexCount != 0)
-			{
-				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-				s_WaterData.VertexBuffer->SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
-
-				glBindTextureUnit(default_texture_slot, GetTexture(BlockType::Water));
-
-				// Draw elements		
-				s_RendererData.QuadIndexBuffer->Bind();
-				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
-
-			}
-		}
-		glEnable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
 	}
 
 	void Renderer::PrepareShaders()
@@ -244,87 +205,6 @@ namespace KuchCraft {
 		s_RendererData.Shader         ->Unbind();
 	}
 
-	void Renderer::PrepareWaterRendering()
-	{
-		KC_PROFILE_FUNCTION();
-
-		s_WaterData.VertexArray = VertexArray::Create();
-		s_WaterData.VertexArray->Bind();
-
-		s_WaterData.VertexBuffer = VertexBuffer::Create(max_vertices_in_chunk * sizeof(Vertex_P3C2));
-		s_WaterData.VertexBuffer->SetBufferLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float2, "a_TexCoord" }
-		});
-
-		s_WaterData.VertexArray->SetVertexBuffer(s_WaterData.VertexBuffer);
-
-		s_WaterData.Shader = Shader::Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
-		s_WaterData.Shader->Bind();
-		s_WaterData.Shader->SetInt("u_Texture", default_texture_slot);
-
-		s_WaterData.VertexArray ->Unbind();
-		s_WaterData.VertexBuffer->Unbind();
-		s_WaterData.Shader      ->Unbind();
-	}
-
-	void Renderer::PrepereUtils()
-	{
-		KC_PROFILE_FUNCTION();
-		
-		s_UtilsData.OutlinedBlockVertexArray = VertexArray::Create();
-		s_UtilsData.OutlinedBlockVertexArray->Bind();
-
-		// Float3::pos, Float2::texCoord
-		constexpr float vertices[] = {
-			// bottom
-			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-			// top
-			0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-			1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			// front
-			0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-			1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-			// right
-			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-			1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-			// behind
-			1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			// left
-			0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f, 1.0f
-		};
-
-		s_UtilsData.OutlinedBlockVertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
-		s_UtilsData.OutlinedBlockVertexBuffer->SetBufferLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float2, "a_TexCoord" }
-		});
-
-		s_UtilsData.OutlinedBlockVertexArray->SetVertexBuffer(s_UtilsData.OutlinedBlockVertexBuffer);
-
-		s_UtilsData.OutlinedBlockShader = Shader::Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
-		s_UtilsData.OutlinedBlockShader->Bind();
-
-		s_UtilsData.OutlinedBlockVertexArray ->Unbind();
-		s_UtilsData.OutlinedBlockVertexBuffer->Unbind();
-		s_UtilsData.OutlinedBlockShader      ->Unbind();
-	}
-
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		InvalidateMainFrameBuffer(width, height);
@@ -363,26 +243,6 @@ namespace KuchCraft {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.DepthAttachment, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-	void Renderer::RenderOutlinedBlock(const glm::vec3& position)
-	{
-		glDisable(GL_CULL_FACE);
-		glDepthFunc(GL_LEQUAL);
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
-
-		s_UtilsData.OutlinedBlockShader->Bind();
-		s_UtilsData.OutlinedBlockShader->SetMat4("u_Transform", transform);
-
-		s_UtilsData.OutlinedBlockVertexArray->Bind();
-		s_UtilsData.OutlinedBlockVertexBuffer->Bind();
-
-		s_RendererData.QuadIndexBuffer->Bind();
-		glDrawElements(GL_TRIANGLES, cube_index_count, GL_UNSIGNED_INT, nullptr);
-
-		glEnable(GL_CULL_FACE);
-		glDepthFunc(GL_LESS);
 	}
 
 	void Renderer::LoadTextures()

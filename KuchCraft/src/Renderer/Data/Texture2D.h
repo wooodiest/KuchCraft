@@ -36,6 +36,8 @@ namespace KuchCraft
 		uint32_t GetRendererID() const { return m_RendererID; }
 		void Bind(uint32_t slot) const;
 
+		static void Bind(uint32_t rendererID, uint32_t slot);
+
 	private:
 		uint32_t m_RendererID = 0;
 		TextureSpecification m_TextureSpecification;

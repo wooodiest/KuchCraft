@@ -32,4 +32,21 @@ namespace KuchCraft {
 		uint32_t Texture = 0;
 	};
 
+	struct Renderer3DWaterData
+	{
+		Ref<Shader>       Shader;
+		Ref<VertexArray>  VertexArray;
+		Ref<VertexBuffer> VertexBuffer;
+	};
+
+	struct RendererOutlinedBlockData
+	{
+		bool Status = false;
+		glm::vec3 Position{ 0.0f };
+
+		Ref<Shader>       Shader;
+		Ref<VertexArray>  VertexArray;
+		Ref<VertexBuffer> VertexBuffer;
+	};
+
 }

@@ -1,14 +1,18 @@
 #include "kcpch.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
 
+#include "Renderer/Renderer.h"
+
 #include <glad/glad.h>
 #include <stb_image.h> // tmp
 
 namespace KuchCraft {
 
-	Renderer3DData       Renderer3D::s_Data;
-	Renderer3DChunkData  Renderer3D::s_ChunkData;
-	Renderer3DSkyboxData Renderer3D::s_SkyboxData;
+	Renderer3DData            Renderer3D::s_Data;
+	Renderer3DChunkData       Renderer3D::s_ChunkData;
+	Renderer3DSkyboxData      Renderer3D::s_SkyboxData;
+	Renderer3DWaterData       Renderer3D::s_WaterData;
+	RendererOutlinedBlockData Renderer3D::s_OutlinedBlockData;
 
 	void Renderer3D::Init()
 	{
@@ -16,6 +20,8 @@ namespace KuchCraft {
 
 		PrepareChunks();
 		PrepareSkybox();
+		PrepareWater();
+		PrepareOutlinedBlock();
 
 		// QuadIndexBuffer
 		uint32_t* indices = new uint32_t[max_indices_in_chunk];
@@ -43,6 +49,14 @@ namespace KuchCraft {
 	void Renderer3D::Render()
 	{
 		KC_PROFILE_FUNCTION();
+
+		RenderChunks();
+		RenderSkybox();
+
+		if (s_OutlinedBlockData.Status)
+			RenderOutlinedBlock();
+
+		RenderWater();
 	}
 
 	void Renderer3D::Clear()
@@ -50,6 +64,7 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		s_ChunkData.Chunks.clear();
+		s_OutlinedBlockData.Status = false;
 	}
 
 	void Renderer3D::PrepareChunks()
@@ -121,7 +136,7 @@ namespace KuchCraft {
 		s_SkyboxData.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
 		s_SkyboxData.VertexBuffer->SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position"}
-			});
+		});
 
 		s_SkyboxData.VertexArray->SetVertexBuffer(s_SkyboxData.VertexBuffer);
 
@@ -174,6 +189,87 @@ namespace KuchCraft {
 		s_SkyboxData.Shader      ->Unbind();
 	}
 
+	void Renderer3D::PrepareWater()
+	{
+		KC_PROFILE_FUNCTION();
+
+		s_WaterData.VertexArray = VertexArray::Create();
+		s_WaterData.VertexArray->Bind();
+
+		s_WaterData.VertexBuffer = VertexBuffer::Create(max_vertices_in_chunk * sizeof(Vertex_P3C2));
+		s_WaterData.VertexBuffer->SetBufferLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		});
+
+		s_WaterData.VertexArray->SetVertexBuffer(s_WaterData.VertexBuffer);
+
+		s_WaterData.Shader = Shader::Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
+		s_WaterData.Shader->Bind();
+		s_WaterData.Shader->SetInt("u_Texture", default_texture_slot);
+
+		s_WaterData.VertexArray ->Unbind();
+		s_WaterData.VertexBuffer->Unbind();
+		s_WaterData.Shader      ->Unbind();
+	}
+
+	void Renderer3D::PrepareOutlinedBlock()
+	{
+		KC_PROFILE_FUNCTION();
+		
+		s_OutlinedBlockData.VertexArray = VertexArray::Create();
+		s_OutlinedBlockData.VertexArray->Bind();
+
+		// Float3::pos, Float2::texCoord
+		constexpr float vertices[] = {
+			// bottom
+			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+			// top
+			0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			// front
+			0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			// right
+			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+			// behind
+			1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			// left
+			0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 1.0f, 1.0f
+		};
+
+		s_OutlinedBlockData.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
+		s_OutlinedBlockData.VertexBuffer->SetBufferLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		});
+
+		s_OutlinedBlockData.VertexArray->SetVertexBuffer(s_OutlinedBlockData.VertexBuffer);
+
+		s_OutlinedBlockData.Shader = Shader::Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
+		s_OutlinedBlockData.Shader->Bind();
+
+		s_OutlinedBlockData.VertexArray ->Unbind();
+		s_OutlinedBlockData.VertexBuffer->Unbind();
+		s_OutlinedBlockData.Shader      ->Unbind();
+	}
+
 	void Renderer3D::RenderChunks()
 	{
 		KC_PROFILE_FUNCTION();
@@ -197,10 +293,9 @@ namespace KuchCraft {
 
 					vertexOffset += vertexCount;
 
-					uint32_t textures = drawList.GetTextureCount(i);
-					for (uint32_t j = 0; j < textures; j++)
-						glBindTextureUnit(j, drawList.GetTexture(i, j));
-	
+					for (uint32_t j = 0; j < drawList.GetTextureCount(i); j++)
+						Texture2D::Bind(drawList.GetTexture(i, j), j);
+
 					s_Data.QuadIndexBuffer->Bind();
 					glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 				}
@@ -226,6 +321,54 @@ namespace KuchCraft {
 		glDepthFunc(GL_LESS);
 	}
 
+	void Renderer3D::RenderWater()
+	{
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+
+		s_WaterData.Shader->Bind();
+		s_WaterData.VertexArray->Bind();
+
+		for (const auto& chunk : s_ChunkData.Chunks)
+		{
+			const auto& drawList = chunk->GetDrawList();
+			uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
+
+			if (indexCount != 0)
+			{
+				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
+				s_WaterData.VertexBuffer->SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
+
+				Renderer::s_RendererData.Textures[BlockType::Water]->Bind(default_texture_slot);
+				// Draw elements		
+				s_Data.QuadIndexBuffer->Bind();
+				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+			}
+		}
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+	}
+
+	void Renderer3D::RenderOutlinedBlock()
+	{
+		glDisable(GL_CULL_FACE);
+		glDepthFunc(GL_LEQUAL);
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_OutlinedBlockData.Position);
+
+		s_OutlinedBlockData.Shader->Bind();
+		s_OutlinedBlockData.Shader->SetMat4("u_Transform", transform);
+
+		s_OutlinedBlockData.VertexArray->Bind();
+		s_OutlinedBlockData.VertexBuffer->Bind();
+
+		s_Data.QuadIndexBuffer->Bind();
+		glDrawElements(GL_TRIANGLES, cube_index_count, GL_UNSIGNED_INT, nullptr);
+
+		glEnable(GL_CULL_FACE);
+		glDepthFunc(GL_LESS);
+	}
+
 	void Renderer3D::DrawChunk(Chunk* chunk)
 	{
 		s_ChunkData.Chunks.push_back(chunk);
@@ -234,6 +377,12 @@ namespace KuchCraft {
 	void Renderer3D::DrawChunks(const std::vector<Chunk*>& chunks)
 	{
 		s_ChunkData.Chunks.insert(s_ChunkData.Chunks.end(), chunks.begin(), chunks.end());
+	}
+
+	void Renderer3D::DrawOutlinedBlock(const glm::vec3& position)
+	{
+		s_OutlinedBlockData.Status   = true;
+		s_OutlinedBlockData.Position = position;
 	}
 
 }
