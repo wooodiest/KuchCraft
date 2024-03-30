@@ -24,22 +24,13 @@ namespace KuchCraft {
 		static void BeginWorld(const Camera& camera);
 		static void EndWorld();
 
-		// Utils
-		static void SetWaterTintStatus(bool status);
-		static void ShowTriangles(bool status);
-
-		static std::unordered_map<std::string, std::string>& GetShaderStrMap() { return s_RendererData.ShaderStrData; }
-		static std::unordered_map<std::string, std::string>& GetShaderVarMap() { return s_RendererData.ShaderVarData; }
-
 		// Stats
 		static bool GetShowStatsStatus()  { return s_RendererData.ShowStats;                      }
 		static void FlipShowStatsStatus() { s_RendererData.ShowStats = !s_RendererData.ShowStats; }
 
-		static RendererData s_RendererData;
 	private:
+		static RendererData s_RendererData;
 
-		// Prepare renderer for...
-		static void PrepareShaders();
 		static void PrepareRenderer();
 		 
 	private:

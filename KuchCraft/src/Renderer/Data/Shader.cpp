@@ -6,15 +6,14 @@
 #include <glad/glad.h>
 
 namespace KuchCraft {
-	Ref<Shader> Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+
+	Ref<Shader> Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
 	{
-		return CreateRef<Shader>(vertexShaderPath, fragmentShaderPath);
-	}
-	Shader::Shader()
-	{
+		return CreateRef<Shader>(vertexShaderPath, fragmentShaderPath, additionalPreProcessValues);
 	}
 
-	Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
+		: m_AdditionalPreProcessValues(additionalPreProcessValues)
 	{
 		Compile(vertexShaderPath, fragmentShaderPath);
 	}
@@ -155,9 +154,6 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		auto& strMap = Renderer::GetShaderStrMap();
-		auto& varMap = Renderer::GetShaderVarMap();
-
 		auto replace = [&](const std::string& from, const std::string& to) {
 			size_t pos = 0;
 			while ((pos = file.find(from, pos)) != std::string::npos)
@@ -167,8 +163,7 @@ namespace KuchCraft {
 			}
 		};
 
-		std::for_each(strMap.begin(), strMap.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
-		std::for_each(varMap.begin(), varMap.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
+		std::for_each(m_AdditionalPreProcessValues.begin(), m_AdditionalPreProcessValues.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
 	}
 
 	void Shader::Bind() const

@@ -2,8 +2,23 @@
 
 layout (location = 0) in vec2 a_Position;
 
-##world_data_uniform_buffer
-##text_data_uniform_buffer
+layout(std140, binding = 0) uniform UniformCameraData
+{
+	mat4 u_ViewProjection;
+	mat4 u_AbsoluteViewProjection;
+	mat4 u_OrthoProjection;
+};
+
+struct TextData
+{
+	mat4 Transform;
+	vec4 Letter;
+};
+
+layout(std140, binding = 1) uniform UniformTextData
+{
+	TextData u_Text[##max_text_uniform_array_limit];
+};
 
 out vec2 v_TexCoord;
 out flat int v_Index;

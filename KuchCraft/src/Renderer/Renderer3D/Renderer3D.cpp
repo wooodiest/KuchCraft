@@ -2,6 +2,7 @@
 #include "Renderer/Renderer3D/Renderer3D.h"
 
 #include "Core/Application.h"
+#include "Core/Utils.h"
 
 #include "Renderer/Renderer.h"
 #include "Renderer/AssetManager.h"
@@ -101,7 +102,10 @@ namespace KuchCraft {
 
 		s_ChunkData.VertexArray->SetVertexBuffer(s_ChunkData.VertexBuffer);
 
-		s_ChunkData.Shader = Shader::Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl");
+		std::unordered_map<std::string, std::string> chunkShaderData;
+		chunkShaderData["##max_texture_slots"] = std::to_string(max_texture_slots);
+
+		s_ChunkData.Shader = Shader::Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl", chunkShaderData);
 		s_ChunkData.Shader->Bind();
 
 		int samplers[max_texture_slots];
@@ -282,7 +286,11 @@ namespace KuchCraft {
 
 		s_OutlinedBlockData.VertexArray->SetVertexBuffer(s_OutlinedBlockData.VertexBuffer);
 
-		s_OutlinedBlockData.Shader = Shader::Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl");
+		std::unordered_map<std::string, std::string> outlinedBlockShaderData;
+		outlinedBlockShaderData["##outlined_block_border_radius"] = std::to_string(outlined_block_border_radius);
+		outlinedBlockShaderData["##outlined_block_border_color"]  = VecToString(outlined_block_border_color);
+
+		s_OutlinedBlockData.Shader = Shader::Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl", outlinedBlockShaderData);
 		s_OutlinedBlockData.Shader->Bind();
 
 		s_OutlinedBlockData.VertexArray ->Unbind();

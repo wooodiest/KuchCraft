@@ -157,7 +157,7 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		Renderer::BeginWorld(m_Player.GetCamera());
-		Renderer::SetWaterTintStatus(GetBlock(m_Player.GetEyePosition()) == BlockType::Water);
+		//Renderer::SetWaterTintStatus(GetBlock(m_Player.GetEyePosition()) == BlockType::Water);
 
 		Renderer3D::DrawChunks(m_ChunksToRender);
 

@@ -69,7 +69,6 @@ namespace KuchCraft {
 		glm::mat4 ViewProjection;
 		glm::mat4 AbsoluteViewProjection;
 		glm::mat4 OrthoProjection;
-		glm::vec4 TintColor;
 	};
 
 	struct RendererData

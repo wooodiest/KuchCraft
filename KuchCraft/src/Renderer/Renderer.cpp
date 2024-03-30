@@ -26,7 +26,6 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		PrepareShaders();
 		PrepareRenderer();
 		
 		AssetManager::Init();
@@ -70,8 +69,7 @@ namespace KuchCraft {
 		UniformWorldBuffer buffer{
 			camera.GetViewProjection(),
 			camera.GetAbsoluteViewProjection(),
-			camera.GetOrthoProjection(),
-			s_RendererData.TintStatus ? water_tint_color : white_color
+			camera.GetOrthoProjection()
 		};
 		s_RendererData.WorldDataUniformBuffer->SetData(&buffer, sizeof(buffer));
 
@@ -94,37 +92,6 @@ namespace KuchCraft {
 		s_RendererData.VertexBuffer->Bind();
 		Texture2D::Bind(Renderer3D::GetFrameBuffer()->GetColorAttachmentRendererID(), default_texture_slot);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
-	}
-
-	void Renderer::PrepareShaders()
-	{
-		KC_PROFILE_FUNCTION();
-
-		s_RendererData.ShaderStrData["##world_data_uniform_buffer"] =
-			R"(layout(std140, binding = ##world_data_uniform_buffer_binding) uniform UniformWorldData
-			   {
-			   	   mat4 u_ViewProjection;
-			   	   mat4 u_AbsoluteViewProjection;
-			   	   mat4 u_OrthoProjection;
-			   	   vec4 u_TintColor;
-			   };)";
-		s_RendererData.ShaderStrData["##text_data_uniform_buffer"] =
-			R"(struct TextData
-			   {
-					mat4 Transform;
-					vec4 Letter;
-			   };
-			   layout(std140, binding = ##text_data_uniform_buffer_binding) uniform UniformTextData
-			   {
-					TextData u_Text[##max_text_uniform_array_limit];
-			   };)";
-
-		s_RendererData.ShaderVarData["##max_texture_slots"]                 = std::to_string(max_texture_slots);
-		s_RendererData.ShaderVarData["##world_data_uniform_buffer_binding"] = std::to_string(0);
-		s_RendererData.ShaderVarData["##text_data_uniform_buffer_binding"]  = std::to_string(1); // TODO
-		s_RendererData.ShaderVarData["##max_text_uniform_array_limit"]      = std::to_string(400); //TODO
-		s_RendererData.ShaderVarData["##outlined_block_border_radius"]      = std::to_string(outlined_block_border_radius);
-		s_RendererData.ShaderVarData["##outlined_block_border_color"]       = VecToString(outlined_block_border_color);
 	}
 
 	void Renderer::PrepareRenderer()
@@ -180,11 +147,6 @@ namespace KuchCraft {
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		Renderer3D::OnViewportSizeChanged(width, height);
-	}
-
-	void Renderer::SetWaterTintStatus(bool status)
-	{
-		s_RendererData.TintStatus = status;
 	}
 
 }

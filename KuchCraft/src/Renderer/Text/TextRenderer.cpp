@@ -87,7 +87,10 @@ namespace KuchCraft {
 
 		s_Data.VertexArray->SetVertexBuffer(s_Data.VertexBuffer);
 
-		s_Data.Shader = Shader::Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
+		std::unordered_map<std::string, std::string> textShaderData;
+		textShaderData["##max_text_uniform_array_limit"] = std::to_string(s_Info.MaxCharacterUniformArrayLimit);
+
+		s_Data.Shader = Shader::Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl", textShaderData);
 		s_Data.Shader->Bind();
 
 		s_Data.UniformBuffer = UniformBuffer::Create(s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText), 1);

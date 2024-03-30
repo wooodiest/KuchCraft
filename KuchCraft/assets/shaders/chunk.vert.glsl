@@ -2,7 +2,12 @@
 
 layout (location = 0) in uint a_PackedData;
 
-##world_data_uniform_buffer
+layout(std140, binding = 0) uniform UniformCameraData
+{
+	mat4 u_ViewProjection;
+	mat4 u_AbsoluteViewProjection;
+	mat4 u_OrthoProjection;
+};
 
 uniform vec3 u_ChunkPosition;
 

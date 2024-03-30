@@ -2,7 +2,12 @@
 
 layout (location = 0) in vec3 a_Position;
 
-##world_data_uniform_buffer
+layout(std140, binding = 0) uniform UniformCameraData
+{
+	mat4 u_ViewProjection;
+	mat4 u_AbsoluteViewProjection;
+	mat4 u_OrthoProjection;
+};
 
 out vec3 v_TexCoord;
 
