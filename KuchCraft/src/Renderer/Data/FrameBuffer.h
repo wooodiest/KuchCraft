@@ -74,4 +74,11 @@ namespace KuchCraft {
 		uint32_t m_DepthAttachment = 0;
 	};
 
+	class DefaultFrameBuffer
+	{
+	public:
+		static void Bind();
+		static void Clear();
+	};
+
 }

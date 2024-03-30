@@ -73,7 +73,7 @@ namespace KuchCraft {
 			camera.GetOrthoProjection(),
 			s_RendererData.TintStatus ? water_tint_color : white_color
 		};
-		s_RendererData.WorldDataUniformBufferrrrrrr->SetData(&buffer, sizeof(buffer));
+		s_RendererData.WorldDataUniformBuffer->SetData(&buffer, sizeof(buffer));
 
 	}
 
@@ -83,16 +83,16 @@ namespace KuchCraft {
 
 		Renderer3D::Render();
 
-		// Setup deafult frame buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
-		RendererCommand::DisableDepthTesting();
-		glClear(GL_COLOR_BUFFER_BIT);
+		DefaultFrameBuffer::Bind();
+		DefaultFrameBuffer::Clear();
 
 		// Render main frame buffer data to default frame buffer 
+		RendererCommand::DisableDepthTesting();
+
 		s_RendererData.Shader      ->Bind();
 		s_RendererData.VertexArray ->Bind();
 		s_RendererData.VertexBuffer->Bind();
-		glBindTextureUnit(default_texture_slot, Renderer3D::GetFrameBuffer()->GetColorAttachmentRendererID());
+		Texture2D::Bind(Renderer3D::GetFrameBuffer()->GetColorAttachmentRendererID(), default_texture_slot);
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 	}
 
@@ -131,19 +131,9 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		// Setup
 		if (opengl_logs)
-		{
-			glDebugMessageCallback(OpenGLLogMessage, nullptr);
-			glEnable(GL_DEBUG_OUTPUT);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		}
-
-		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID); // TODO
-		glViewport(0, 0, width, height);
-
-		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+			RendererCommand::EnableLogMessages();
+		
 
 		// QuadIndexBuffer
 		uint32_t* indices = new uint32_t[max_indices_in_chunk];
@@ -163,7 +153,7 @@ namespace KuchCraft {
 		delete[] indices;
 
 		// Uniform buffer
-		s_RendererData.WorldDataUniformBufferrrrrrr = UniformBuffer::Create(sizeof(UniformWorldBuffer), 0);
+		s_RendererData.WorldDataUniformBuffer = UniformBuffer::Create(sizeof(UniformWorldBuffer), 0);
 
 		// Prepare for rendering to screen
 		s_RendererData.VertexArray = VertexArray::Create();
@@ -192,36 +182,9 @@ namespace KuchCraft {
 		Renderer3D::OnViewportSizeChanged(width, height);
 	}
 
-	void Renderer::ShowTriangles(bool status)
-	{
-		if (status)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		else
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-
 	void Renderer::SetWaterTintStatus(bool status)
 	{
 		s_RendererData.TintStatus = status;
-	}
-
-	void Renderer::OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-	{
-		switch (severity)
-		{
-		case GL_DEBUG_SEVERITY_HIGH:
-			KC_ERROR("[OpenGL] : {0}", (char*)message);
-			break;
-
-		case GL_DEBUG_SEVERITY_MEDIUM:
-		case GL_DEBUG_SEVERITY_LOW:
-			KC_WARN("[OpenGL] : {0}", (char*)message);
-			break;
-
-		case GL_DEBUG_SEVERITY_NOTIFICATION:
-			KC_INFO("[OpenGL] : {0}", (char*)message);
-			break;
-		}
 	}
 
 }

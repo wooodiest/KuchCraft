@@ -4,6 +4,9 @@ namespace KuchCraft
 {
 	class RendererCommand
 	{
+	public:
+		static void ShowPolygons(bool status);
+
 	private:
 		static void EnableBlending();
 		static void DisableBlending();
@@ -15,6 +18,8 @@ namespace KuchCraft
 		static void EnableDepthTesting();
 		static void EnableLessEqualDepthTesting();
 		static void DisableDepthTesting();
+
+		static void EnableLogMessages();
 
 	public:
 		friend class Renderer;

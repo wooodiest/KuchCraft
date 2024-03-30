@@ -79,7 +79,7 @@ namespace KuchCraft {
 		bool TintStatus = false;
 		bool ShowStats  = true;
 
-		Ref<UniformBuffer> WorldDataUniformBufferrrrrrr;
+		Ref<UniformBuffer> WorldDataUniformBuffer;
 
 		Ref<Shader>       Shader;
 		Ref<VertexArray>  VertexArray;
@@ -87,8 +87,6 @@ namespace KuchCraft {
 
 		std::unordered_map<std::string, std::string> ShaderStrData;
 		std::unordered_map<std::string, std::string> ShaderVarData;
-
-		uint32_t DefaultFrameBufferRendererID = 0;
 	}; 
 
 	// Renderer data utils

@@ -5,6 +5,14 @@
 
 namespace KuchCraft {
 
+	void RendererCommand::ShowPolygons(bool status)
+	{
+		if (status)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
 	void RendererCommand::EnableBlending()
 	{
 		glEnable(GL_BLEND);
@@ -49,6 +57,33 @@ namespace KuchCraft {
 	{
 		glDisable(GL_DEPTH_TEST);
 	}
+
+	static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	{
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:
+			KC_ERROR("[OpenGL] : {0}", (char*)message);
+			break;
+
+		case GL_DEBUG_SEVERITY_MEDIUM:
+		case GL_DEBUG_SEVERITY_LOW:
+			KC_WARN("[OpenGL] : {0}", (char*)message);
+			break;
+
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
+			KC_INFO("[OpenGL] : {0}", (char*)message);
+			break;
+		}
+	}
+
+	void RendererCommand::EnableLogMessages()
+	{
+		glDebugMessageCallback(OpenGLLogMessage, nullptr);
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	}
 }
+
 
 

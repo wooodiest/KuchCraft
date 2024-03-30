@@ -1,6 +1,8 @@
 #include "kcpch.h"
 #include "Renderer/Data/FrameBuffer.h"
 
+#include "Core/Application.h"
+
 #include <glad/glad.h>
 
 namespace KuchCraft {
@@ -245,5 +247,16 @@ namespace KuchCraft {
 		ClearDepthAttachment();
 	}
 
+
+	void DefaultFrameBuffer::Bind()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
+	}
+
+	void DefaultFrameBuffer::Clear()
+	{
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 
 }
