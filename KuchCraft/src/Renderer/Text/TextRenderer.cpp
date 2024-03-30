@@ -88,10 +88,7 @@ namespace KuchCraft {
 		s_Data.Shader = Shader::Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl");
 		s_Data.Shader->Bind();
 
-		glCreateBuffers(1, &s_Data.UniformBuffer);
-		uint32_t uniformBufferSize = s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText);
-		glNamedBufferData(s_Data.UniformBuffer, uniformBufferSize, nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, text_data_uniform_buffer_binding, s_Data.UniformBuffer);
+		s_Data.UniformBuffer = UniformBuffer::Create(s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText), 1);
 
 		s_Data.VertexArray ->Unbind();
 		s_Data.VertexBuffer->Unbind();
@@ -153,15 +150,16 @@ namespace KuchCraft {
 
 					if (currentIndex == s_Info.MaxCharacterUniformArrayLimit)
 					{
-						glNamedBufferSubData(s_Data.UniformBuffer, 0, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText), textBuffer);
+						s_Data.UniformBuffer->SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
 						glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, currentIndex);
 						currentIndex = 0;
+
 					}
 				}
 			}
 			if (currentIndex)
 			{
-				glNamedBufferSubData(s_Data.UniformBuffer, 0, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText), textBuffer);
+				s_Data.UniformBuffer->SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
 				glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, currentIndex);
 			}
 

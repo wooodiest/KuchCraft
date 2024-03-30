@@ -4,6 +4,7 @@
 #include "Renderer/Data/IndexBuffer.h"
 #include "Renderer/Data/VertexBuffer.h"
 #include "Renderer/Data/VertexArray.h"
+#include "Renderer/Data/UniformBuffer.h"
 
 namespace KuchCraft {
 
@@ -42,14 +43,13 @@ namespace KuchCraft {
 		glm::vec4 Letter{ 0.0f }; // weird alignment
 	};
 
-	constexpr uint32_t text_data_uniform_buffer_binding = 1; // TO REMOVE
 	struct TextRendererData
 	{
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
-		uint32_t          Texture       = 0;
-		uint32_t          UniformBuffer = 0;
+		Ref<Shader>        Shader;
+		Ref<VertexArray>   VertexArray;
+		Ref<VertexBuffer>  VertexBuffer;
+		Ref<UniformBuffer> UniformBuffer;
+		uint32_t           Texture = 0;
 
 		std::map<char, TextCharacter> TextCharacters;
 		std::vector<std::pair<std::string, TextStyle>> TextData;

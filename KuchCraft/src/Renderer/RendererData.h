@@ -11,6 +11,7 @@
 #include "Renderer/Data/VertexArray.h"
 #include "Renderer/Data/BufferLayout.h"
 #include "Renderer/Data/Texture2D.h"
+#include "Renderer/Data/UniformBuffer.h"
 
 namespace KuchCraft {
 
@@ -78,8 +79,7 @@ namespace KuchCraft {
 		bool TintStatus = false;
 		bool ShowStats  = true;
 
-		uint32_t WorldDataUniformBuffer        = 0;
-		uint32_t WorldDataUniformBufferBinding = 0;
+		Ref<UniformBuffer> WorldDataUniformBufferrrrrrr;
 
 		Ref<Shader>       Shader;
 		Ref<VertexArray>  VertexArray;

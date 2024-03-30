@@ -38,7 +38,6 @@ namespace KuchCraft {
 		KC_PROFILE_FUNCTION();
 
 		// RendererData
-		glDeleteBuffers(1, &s_RendererData.WorldDataUniformBuffer);
 		glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
 		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
@@ -78,7 +77,7 @@ namespace KuchCraft {
 			camera.GetOrthoProjection(),
 			s_RendererData.TintStatus ? water_tint_color : white_color
 		};
-		glNamedBufferSubData(s_RendererData.WorldDataUniformBuffer, 0, sizeof(buffer), &buffer);
+		s_RendererData.WorldDataUniformBufferrrrrrr->SetData(&buffer, sizeof(buffer));
 
 		// Setup main frame buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
@@ -129,7 +128,7 @@ namespace KuchCraft {
 			   };)";
 
 		s_RendererData.ShaderVarData["##max_texture_slots"]                 = std::to_string(max_texture_slots);
-		s_RendererData.ShaderVarData["##world_data_uniform_buffer_binding"] = std::to_string(s_RendererData.WorldDataUniformBufferBinding);
+		s_RendererData.ShaderVarData["##world_data_uniform_buffer_binding"] = std::to_string(0);
 		s_RendererData.ShaderVarData["##text_data_uniform_buffer_binding"]  = std::to_string(1); // TODO
 		s_RendererData.ShaderVarData["##max_text_uniform_array_limit"]      = std::to_string(400); //TODO
 		s_RendererData.ShaderVarData["##outlined_block_border_radius"]      = std::to_string(outlined_block_border_radius);
@@ -179,9 +178,7 @@ namespace KuchCraft {
 		delete[] indices;
 
 		// Uniform buffer
-		glCreateBuffers(1, &s_RendererData.WorldDataUniformBuffer);
-		glNamedBufferData(s_RendererData.WorldDataUniformBuffer, sizeof(UniformWorldBuffer), nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, s_RendererData.WorldDataUniformBufferBinding, s_RendererData.WorldDataUniformBuffer);
+		s_RendererData.WorldDataUniformBufferrrrrrr = UniformBuffer::Create(sizeof(UniformWorldBuffer), 0);
 
 		// Prepare for rendering to screen
 		s_RendererData.VertexArray = VertexArray::Create();
