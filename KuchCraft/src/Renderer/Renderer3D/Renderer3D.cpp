@@ -5,6 +5,7 @@
 
 #include "Renderer/Renderer.h"
 #include "Renderer/AssetManager.h"
+#include "Renderer/RendererCommand.h"
 
 #include <glad/glad.h>
 #include <stb_image.h> // tmp
@@ -293,9 +294,9 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		glCullFace(GL_BACK);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
+		RendererCommand::DisableBlending();
+		RendererCommand::EnableFaceCulling();
+		RendererCommand::EnableDepthTesting();
 
 		s_ChunkData.Shader->Bind();
 		s_ChunkData.VertexArray->Bind();
@@ -328,8 +329,11 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderSkybox()
 	{
-		glCullFace(GL_FRONT);
-		glDepthFunc(GL_LEQUAL);
+		KC_PROFILE_FUNCTION();
+
+		RendererCommand::DisableBlending();
+		RendererCommand::EnableFrontFaceCulling();
+		RendererCommand::EnableLessEqualDepthTesting();
 
 		s_SkyboxData.Shader      ->Bind();
 		s_SkyboxData.VertexArray ->Bind();
@@ -339,15 +343,15 @@ namespace KuchCraft {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
 		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count, GL_UNSIGNED_INT, nullptr);
-
-		glCullFace(GL_BACK);
-		glDepthFunc(GL_LESS);
 	}
 
 	void Renderer3D::RenderWater()
 	{
-		glDisable(GL_CULL_FACE);
-		glEnable(GL_BLEND);
+		KC_PROFILE_FUNCTION();
+
+		RendererCommand::EnableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::EnableDepthTesting();
 
 		s_WaterData.Shader->Bind();
 		s_WaterData.VertexArray->Bind();
@@ -368,14 +372,13 @@ namespace KuchCraft {
 				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 			}
 		}
-		glEnable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
 	}
 
 	void Renderer3D::RenderOutlinedBlock()
 	{
-		glDisable(GL_CULL_FACE);
-		glDepthFunc(GL_LEQUAL);
+		RendererCommand::DisableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::EnableLessEqualDepthTesting();
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_OutlinedBlockData.Position);
 
@@ -387,9 +390,6 @@ namespace KuchCraft {
 
 		s_Data.QuadIndexBuffer->Bind();
 		glDrawElements(GL_TRIANGLES, cube_index_count, GL_UNSIGNED_INT, nullptr);
-
-		glEnable(GL_CULL_FACE);
-		glDepthFunc(GL_LESS);
 	}
 
 	void Renderer3D::DrawChunk(Chunk* chunk)

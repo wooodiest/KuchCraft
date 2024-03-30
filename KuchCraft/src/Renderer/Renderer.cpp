@@ -4,6 +4,7 @@
 #include "Renderer/Text/TextRenderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
 #include "Renderer/AssetManager.h"
+#include "Renderer/RendererCommand.h"
 
 #include "Renderer/Data/Shader.h"
 
@@ -84,7 +85,7 @@ namespace KuchCraft {
 
 		// Setup deafult frame buffer
 		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
-		glDisable(GL_DEPTH_TEST);
+		RendererCommand::DisableDepthTesting();
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Render main frame buffer data to default frame buffer 
@@ -139,18 +140,8 @@ namespace KuchCraft {
 		}
 
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID); // TODO
 		glViewport(0, 0, width, height);
-		// TODO: Add deafult frame buffer and call glViewporot every frame
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_BLEND);
-
-		glEnable(GL_CULL_FACE);
-		glFrontFace(GL_CCW);
-		glCullFace(GL_BACK);
 
 		glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
 

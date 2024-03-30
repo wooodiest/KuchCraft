@@ -1,6 +1,8 @@
 #include "kcpch.h"
 #include "Renderer/Text/TextRenderer.h"
 
+#include "Renderer/RendererCommand.h"
+
 #include "Core/Application.h"
 
 #include <glad/glad.h>
@@ -104,7 +106,9 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		glEnable(GL_BLEND);
+		RendererCommand::EnableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::DisableDepthTesting();
 
 		s_Data.Shader->Bind();
 		constexpr uint32_t default_texture_slott = 0;
