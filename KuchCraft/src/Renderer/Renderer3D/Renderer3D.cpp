@@ -1,6 +1,8 @@
 #include "kcpch.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
 
+#include "Core/Application.h"
+
 #include "Renderer/Renderer.h"
 #include "Renderer/AssetManager.h"
 
@@ -40,6 +42,12 @@ namespace KuchCraft {
 		}
 		s_Data.QuadIndexBuffer = IndexBuffer::Create(indices, max_indices_in_chunk);
 		delete[] indices;
+
+		FrameBufferSpecification frameBufferSpecification;
+		frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::DEPTH24STENCIL8 };
+		frameBufferSpecification.Width  = Application::Get().GetWindow().GetWidth();
+		frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
+		s_Data.MainFrameBuffer = FrameBuffer::Create(frameBufferSpecification);
 	}
 
 	void Renderer3D::ShutDown()
@@ -51,6 +59,9 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
+		s_Data.MainFrameBuffer->Bind();
+		s_Data.MainFrameBuffer->Clear();
+
 		RenderChunks();
 		RenderSkybox();
 
@@ -58,6 +69,8 @@ namespace KuchCraft {
 			RenderOutlinedBlock();
 
 		RenderWater();
+
+		s_Data.MainFrameBuffer->Unbind();
 	}
 
 	void Renderer3D::Clear()
@@ -66,6 +79,11 @@ namespace KuchCraft {
 
 		s_ChunkData.Chunks.clear();
 		s_OutlinedBlockData.Status = false;
+	}
+
+	void Renderer3D::OnViewportSizeChanged(uint32_t width, uint32_t height)
+	{
+		s_Data.MainFrameBuffer->Resize(width, height);
 	}
 
 	void Renderer3D::PrepareChunks()
@@ -274,6 +292,10 @@ namespace KuchCraft {
 	void Renderer3D::RenderChunks()
 	{
 		KC_PROFILE_FUNCTION();
+
+		glCullFace(GL_BACK);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
 
 		s_ChunkData.Shader->Bind();
 		s_ChunkData.VertexArray->Bind();

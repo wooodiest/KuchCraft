@@ -88,14 +88,7 @@ namespace KuchCraft {
 		std::unordered_map<std::string, std::string> ShaderStrData;
 		std::unordered_map<std::string, std::string> ShaderVarData;
 
-		struct FrameBuffer
-		{
-			uint32_t RendererID = 0;
-			uint32_t ColorAttachment = 0;
-			uint32_t DepthAttachment = 0;
-		} RenderOutputFrameBuffer;
 		uint32_t DefaultFrameBufferRendererID = 0;
-
 	}; 
 
 	// Renderer data utils

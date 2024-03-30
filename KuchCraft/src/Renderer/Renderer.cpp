@@ -37,11 +37,6 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		// RendererData
-		glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
-		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
-		glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
-
 		TextRenderer::ShutDown();
 		Renderer3D  ::ShutDown();
 	}
@@ -79,10 +74,6 @@ namespace KuchCraft {
 		};
 		s_RendererData.WorldDataUniformBufferrrrrrr->SetData(&buffer, sizeof(buffer));
 
-		// Setup main frame buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
-		glEnable(GL_DEPTH_TEST);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void Renderer::EndWorld()
@@ -100,7 +91,7 @@ namespace KuchCraft {
 		s_RendererData.Shader      ->Bind();
 		s_RendererData.VertexArray ->Bind();
 		s_RendererData.VertexBuffer->Bind();
-		glBindTextureUnit(default_texture_slot, s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
+		glBindTextureUnit(default_texture_slot, Renderer3D::GetFrameBuffer()->GetColorAttachmentRendererID());
 		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
 	}
 
@@ -148,7 +139,10 @@ namespace KuchCraft {
 		}
 
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-		OnViewportSizeChanged(width, height);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
+		glViewport(0, 0, width, height);
+		// TODO: Add deafult frame buffer and call glViewporot every frame
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -204,42 +198,7 @@ namespace KuchCraft {
 
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
-		InvalidateMainFrameBuffer(width, height);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
-		glViewport(0, 0, width, height);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.DefaultFrameBufferRendererID);
-		glViewport(0, 0, width, height);
-	}
-
-	void Renderer::InvalidateMainFrameBuffer(uint32_t width, uint32_t height)
-	{
-		KC_PROFILE_FUNCTION();
-
-		if (s_RendererData.RenderOutputFrameBuffer.RendererID)
-		{
-			glDeleteFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
-			glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
-			glDeleteTextures(1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
-		}
-
-		glCreateFramebuffers(1, &s_RendererData.RenderOutputFrameBuffer.RendererID);
-		glBindFramebuffer(GL_FRAMEBUFFER, s_RendererData.RenderOutputFrameBuffer.RendererID);
-
-		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
-		glBindTexture(GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.ColorAttachment);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.ColorAttachment, 0);
-
-		glCreateTextures(GL_TEXTURE_2D, 1, &s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
-		glBindTexture(GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.DepthAttachment);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, s_RendererData.RenderOutputFrameBuffer.DepthAttachment, 0);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		Renderer3D::OnViewportSizeChanged(width, height);
 	}
 
 	void Renderer::ShowTriangles(bool status)

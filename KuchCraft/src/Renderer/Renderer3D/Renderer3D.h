@@ -18,6 +18,10 @@ namespace KuchCraft {
 		static void Render();
 		static void Clear();
 
+		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
+
+		static Ref<FrameBuffer> GetFrameBuffer() { return s_Data.MainFrameBuffer; }
+
 	private:
 		static void PrepareChunks();
 		static void PrepareSkybox();

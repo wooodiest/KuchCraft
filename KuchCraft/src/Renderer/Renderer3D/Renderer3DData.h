@@ -4,7 +4,7 @@
 #include "Renderer/Data/IndexBuffer.h"
 #include "Renderer/Data/VertexBuffer.h"
 #include "Renderer/Data/VertexArray.h"
-
+#include "Renderer/Data/FrameBuffer.h"
 #include "World/Chunk.h"
 
 namespace KuchCraft {
@@ -12,6 +12,7 @@ namespace KuchCraft {
 	struct Renderer3DData
 	{
 		Ref<IndexBuffer> QuadIndexBuffer;
+		Ref<FrameBuffer> MainFrameBuffer;
 	};
 
 	struct Renderer3DChunkData
