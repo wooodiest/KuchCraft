@@ -25,6 +25,9 @@ namespace KuchCraft {
 
 		static void LoadRendererInfo();
 		 
+	public:
+		friend class Renderer3D;
+
 	private:
 		Renderer() = default;
 

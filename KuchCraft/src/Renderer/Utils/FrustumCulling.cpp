@@ -36,7 +36,7 @@ namespace KuchCraft {
 		return true;
 	}
 	
-	void FrustumCulling::GetChunksToRender(std::vector<Chunk*>& out_ChunksToRender, std::vector<Chunk*>& activeChunks, const Camera& camera)
+	void FrustumCulling::Chunks(const std::vector<Chunk*>& chunks, const Camera& camera, std::vector<Chunk*>& out_chunks)
 	{
 		KC_PROFILE_FUNCTION();
 
@@ -55,11 +55,11 @@ namespace KuchCraft {
 			frustumPlanes[i] /= length;
 		}
 
-		for (const auto& chunk : activeChunks)
+		for (const auto& chunk : chunks)
 		{
 			AABB chunkAABB{ chunk->GetPosition() };
 			if (IsAABBVisible(chunkAABB, frustumPlanes) && !chunk->NeedToRecreate())
-				out_ChunksToRender.push_back(chunk);
+				out_chunks.push_back(chunk);
 		}
 	}
 

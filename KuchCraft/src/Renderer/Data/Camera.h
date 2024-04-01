@@ -30,8 +30,9 @@ namespace KuchCraft {
 		const glm::vec3& GetAbsoluteFront() const { return m_AbsoluteFront; }
 		const glm::vec3& GetAbsoluteRight() const { return m_AbsoluteRight; }
 
-	private:
 		void UpdateProjection(uint32_t width, uint32_t height);
+
+	private:
 		void UpdateView(const glm::vec3& position);
 		void UpdateFront(const glm::vec2& rotation);
 

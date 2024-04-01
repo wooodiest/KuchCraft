@@ -3,7 +3,6 @@
 
 #include "KuchCraft.h"
 
-#include "Renderer/Utils/FrustumCulling.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Text/TextRenderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
@@ -139,21 +138,12 @@ namespace KuchCraft {
 				if (totalChunksRecreated == max_chunks_to_recreate)
 					break;
 			}
-
+			else
+				Renderer3D::DrawChunk(c);	
 		}
 
 		// Delete from memory chunks that are too far away
 		DeleteUnusedChunks(playerPosition);
-
-		// Find chunks to render
-		m_ChunksToRender.clear();
-		m_ChunksToRender.reserve(surroundingChunksCount / 2); // It is very likely that we will not render all the chunks around the player
-		FrustumCulling::GetChunksToRender(m_ChunksToRender, m_ChunksToUpdate, m_Player.GetCamera());
-		m_WorldStats.ChunksToRender = static_cast<uint32_t>(m_ChunksToRender.size());
-
-		//Renderer::SetWaterTintStatus(GetBlock(m_Player.GetEyePosition()) == BlockType::Water);
-
-		Renderer3D::DrawChunks(m_ChunksToRender);
 
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);

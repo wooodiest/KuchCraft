@@ -54,16 +54,14 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
+		s_RendererData.CurrentCamera = camera ? camera : &(*s_RendererData.SpareCamera);
+
 		// Set camera uniform buffer
 		{
-			glm::mat4 viewProjection         = camera ? camera->GetViewProjection()         : glm::mat4(1.0f);
-			glm::mat4 absoluteViewProjection = camera ? camera->GetAbsoluteViewProjection() : glm::mat4(1.0f);
-			glm::mat4 orthoProjection        = camera ? camera->GetOrthoProjection()        : glm::ortho(0.0f, (float)Application::Get().GetWindow().GetWidth(), 0.0f, (float)Application::Get().GetWindow().GetHeight());
-
 			UniformBufferCameraData buffer{
-				viewProjection,
-				absoluteViewProjection,
-				orthoProjection
+				s_RendererData.CurrentCamera->GetViewProjection(),
+				s_RendererData.CurrentCamera->GetAbsoluteViewProjection(),
+				s_RendererData.CurrentCamera->GetOrthoProjection()
 			};
 			s_RendererData.WorldDataUniformBuffer->SetData(&buffer, sizeof(buffer));
 		}
@@ -84,6 +82,8 @@ namespace KuchCraft {
 			RendererCommand::EnableLogMessages();
 		
 		s_RendererData.WorldDataUniformBuffer = UniformBuffer::Create(sizeof(UniformBufferCameraData), 0);
+
+		s_RendererData.SpareCamera = CreateRef<Camera>();
 	}
 
 	void Renderer::LoadRendererInfo()
@@ -94,6 +94,8 @@ namespace KuchCraft {
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		Renderer3D::OnViewportSizeChanged(width, height);
+
+		s_RendererData.SpareCamera->UpdateProjection(width, height);
 	}
 
 }

@@ -23,6 +23,7 @@ namespace KuchCraft {
 		Ref<VertexBuffer> VertexBuffer;
 
 		std::vector<Chunk*> Chunks;
+		std::vector<Chunk*> ChunksToRender;
 	};
 
 	struct Renderer3DSkyboxData

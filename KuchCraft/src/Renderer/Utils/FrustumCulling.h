@@ -9,7 +9,7 @@ namespace KuchCraft {
 	class FrustumCulling
 	{
 	public:
-		static void GetChunksToRender(std::vector<Chunk*>& out_ChunksToRender, std::vector<Chunk*>& activeChunks, const Camera& camera);
+		static void Chunks(const std::vector<Chunk*>& chunks, const Camera& camera, std::vector<Chunk*>& out_chunks);
 
 	};
 

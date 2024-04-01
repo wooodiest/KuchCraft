@@ -8,6 +8,8 @@
 #include "Renderer/AssetManager.h"
 #include "Renderer/RendererCommand.h"
 
+#include "Renderer/Utils/FrustumCulling.h"
+
 namespace KuchCraft {
 
 	Renderer3DData            Renderer3D::s_Data;
@@ -67,6 +69,7 @@ namespace KuchCraft {
 
 		s_Data.FrameBuffer->BindAndClear();
 
+		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_RendererData.CurrentCamera, s_ChunkData.ChunksToRender);
 		RenderChunks();
 		RenderSkybox();
 
@@ -82,7 +85,9 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_ChunkData.Chunks.clear();
+		s_ChunkData.Chunks.        clear();
+		s_ChunkData.ChunksToRender.clear();
+
 		s_OutlinedBlockData.Status = false;
 	}
 
@@ -282,15 +287,15 @@ namespace KuchCraft {
 		s_ChunkData.VertexArray->Bind();
 		s_Data.QuadIndexBuffer->Bind();
 
-		for (const auto& chunk : s_ChunkData.Chunks)
+		for (const auto& chunk : s_ChunkData.ChunksToRender)
 		{
 			uint32_t vertexOffset = 0;
 			const auto& drawList = chunk->GetDrawList();
 			s_ChunkData.Shader->SetFloat3("u_ChunkPosition", chunk->GetPosition());
 
-			for (uint32_t i = 0; i < drawList.GetDrawCallCount(); i++)
+			for (uint32_t drawCallIndex = 0; drawCallIndex < drawList.GetDrawCallCount(); drawCallIndex++)
 			{
-				uint32_t indexCount = drawList.GetIndexCount(i);
+				uint32_t indexCount = drawList.GetIndexCount(drawCallIndex);
 				if (indexCount != 0)
 				{
 					uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
@@ -298,8 +303,8 @@ namespace KuchCraft {
 
 					vertexOffset += vertexCount;
 
-					for (uint32_t j = 0; j < drawList.GetTextureCount(i); j++)
-						Texture2D::Bind(drawList.GetTexture(i, j), j);
+					for (uint32_t textureIndex = 0; textureIndex < drawList.GetTextureCount(drawCallIndex); textureIndex++)
+						Texture2D::Bind(drawList.GetTexture(drawCallIndex, textureIndex), textureIndex);
 
 					RendererCommand::DrawElements(indexCount);
 				}

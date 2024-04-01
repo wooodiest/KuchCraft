@@ -5,6 +5,8 @@
 
 #include "Renderer/Data/UniformBuffer.h"
 
+#include "Renderer/Data/Camera.h"
+
 namespace KuchCraft {
 
 	// Constances
@@ -61,6 +63,8 @@ namespace KuchCraft {
 
 	struct RendererData
 	{
+		Camera*     CurrentCamera = nullptr;
+		Ref<Camera> SpareCamera; // spare camera just in case, only care about ortho projection
 		Ref<UniformBuffer> WorldDataUniformBuffer;
 	}; 
 
