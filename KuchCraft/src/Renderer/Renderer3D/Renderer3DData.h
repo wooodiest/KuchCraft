@@ -5,6 +5,7 @@
 #include "Renderer/Data/VertexBuffer.h"
 #include "Renderer/Data/VertexArray.h"
 #include "Renderer/Data/FrameBuffer.h"
+#include "Renderer/Data/CubeMapTexture.h"
 #include "World/Chunk.h"
 
 namespace KuchCraft {
@@ -26,11 +27,10 @@ namespace KuchCraft {
 
 	struct Renderer3DSkyboxData
 	{
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
-
-		uint32_t Texture = 0;
+		Ref<Shader>         Shader;
+		Ref<VertexArray>    VertexArray;
+		Ref<VertexBuffer>   VertexBuffer;
+		Ref<CubeMapTexture> Texture;
 	};
 
 	struct Renderer3DWaterData

@@ -8,9 +8,6 @@
 #include "Renderer/AssetManager.h"
 #include "Renderer/RendererCommand.h"
 
-#include <glad/glad.h>
-#include <stb_image.h> // tmp
-
 namespace KuchCraft {
 
 	Renderer3DData            Renderer3D::s_Data;
@@ -174,45 +171,14 @@ namespace KuchCraft {
 		s_SkyboxData.Shader->Bind();
 		s_SkyboxData.Shader->SetInt("u_CubemapTexture", 0);
 
-		{ // tmp
-			const GLenum types[cube_face_cout] = {
-				GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-				GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-				GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-				GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-				GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-			};
-			const std::string paths[cube_face_cout] =
-			{
-				"assets/skybox/xpos.png",
-				"assets/skybox/xneg.png",
-				"assets/skybox/ypos.png",
-				"assets/skybox/yneg.png",
-				"assets/skybox/zpos.png",
-				"assets/skybox/zneg.png"
-			};
-			uint32_t texture;
-			glGenTextures(1, &texture);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-
-			for (uint32_t i = 0; i < cube_face_cout; i++)
-			{
-				int width, height, channels;
-				stbi_set_flip_vertically_on_load(0);
-				unsigned char* data = stbi_load(paths[i].c_str(), &width, &height, &channels, 4);
-
-				glTexImage2D(types[i], 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-				stbi_image_free(data);
-			}
-			s_SkyboxData.Texture = texture;
-		}
+		s_SkyboxData.Texture = CubeMapTexture::Create(CubeMapFacesInfo{
+			"assets/skybox/xpos.png",
+			"assets/skybox/xneg.png",
+			"assets/skybox/ypos.png",
+			"assets/skybox/yneg.png",
+			"assets/skybox/zpos.png",
+			"assets/skybox/zneg.png"
+		});
 
 		s_SkyboxData.VertexArray ->Unbind();
 		s_SkyboxData.VertexBuffer->Unbind();
@@ -354,8 +320,7 @@ namespace KuchCraft {
 		s_SkyboxData.VertexBuffer->Bind();
 		s_Data.QuadIndexBuffer   ->Bind();
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
+		s_SkyboxData.Texture->Bind();
 		RendererCommand::DrawElements(cube_face_cout * quad_index_count);
 	}
 
