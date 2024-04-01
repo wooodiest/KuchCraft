@@ -1,16 +1,8 @@
 #pragma once
 
-#include "Core/Timer.h"
-
 #include "World/Block.h"
 #include "World/WorldData.h"
 
-#include "Renderer/Data/Shader.h"
-#include "Renderer/Data/IndexBuffer.h"
-#include "Renderer/Data/VertexBuffer.h"
-#include "Renderer/Data/VertexArray.h"
-#include "Renderer/Data/BufferLayout.h"
-#include "Renderer/Data/Texture2D.h"
 #include "Renderer/Data/UniformBuffer.h"
 
 namespace KuchCraft {
@@ -30,10 +22,6 @@ namespace KuchCraft {
 	constexpr uint32_t cube_vertex_count    = 24;
 	constexpr uint32_t cube_index_count     = 36;
 	constexpr uint32_t cube_face_cout       = 6;
-
-	// Utils
-	constexpr float     outlined_block_border_radius = 0.005f;
-	constexpr glm::vec4 outlined_block_border_color{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 	constexpr glm::vec4 white_color     { 1.0f, 1.0f, 1.0f, 1.0f };
 	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 0.7f, 1.0f };
@@ -73,24 +61,8 @@ namespace KuchCraft {
 
 	struct RendererData
 	{
-		Ref<IndexBuffer>   QuadIndexBuffer;
 		Ref<UniformBuffer> WorldDataUniformBuffer;
-		Ref<Shader>		   Shader;
-		Ref<VertexArray>   VertexArray;
-		Ref<VertexBuffer>  VertexBuffer;
 	}; 
-
-	// Renderer data utils
-	constexpr Vertex_P2C2 screen_vertices[quad_vertex_count_a]
-	{
-		Vertex_P2C2{{ -1.0f, -1.0f }, { 0.0f, 0.0f }},
-		Vertex_P2C2{{  1.0f, -1.0f }, { 1.0f, 0.0f }},
-		Vertex_P2C2{{  1.0f,  1.0f }, { 1.0f, 1.0f }},
-
-		Vertex_P2C2{{ -1.0f, -1.0f }, { 0.0f, 0.0f }},
-		Vertex_P2C2{{  1.0f,  1.0f }, { 1.0f, 1.0f }},
-		Vertex_P2C2{{ -1.0f,  1.0f }, { 0.0f, 1.0f }},
-	};
 
 	// Cube - quad vertices
 	constexpr uint32_t vertices_bottom_index = 0;

@@ -23,6 +23,8 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
+		LoadRenderer3DInfo();
+
 		PrepareChunks();
 		PrepareSkybox();
 		PrepareWater();
@@ -49,10 +51,15 @@ namespace KuchCraft {
 		frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::DEPTH24STENCIL8 };
 		frameBufferSpecification.Width  = Application::Get().GetWindow().GetWidth();
 		frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
-		s_Data.MainFrameBuffer = FrameBuffer::Create(frameBufferSpecification);
+		s_Data.FrameBuffer = FrameBuffer::Create(frameBufferSpecification);
 	}
 
 	void Renderer3D::ShutDown()
+	{
+		KC_PROFILE_FUNCTION();
+	}
+
+	void Renderer3D::LoadRenderer3DInfo()
 	{
 		KC_PROFILE_FUNCTION();
 	}
@@ -61,8 +68,7 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_Data.MainFrameBuffer->Bind();
-		s_Data.MainFrameBuffer->Clear();
+		s_Data.FrameBuffer->BindAndClear();
 
 		RenderChunks();
 		RenderSkybox();
@@ -72,7 +78,7 @@ namespace KuchCraft {
 
 		RenderWater();
 
-		s_Data.MainFrameBuffer->Unbind();
+		s_Data.FrameBuffer->Unbind();
 	}
 
 	void Renderer3D::Clear()
@@ -85,7 +91,7 @@ namespace KuchCraft {
 
 	void Renderer3D::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
-		s_Data.MainFrameBuffer->Resize(width, height);
+		s_Data.FrameBuffer->Resize(width, height);
 	}
 
 	void Renderer3D::PrepareChunks()
@@ -287,8 +293,8 @@ namespace KuchCraft {
 		s_OutlinedBlockData.VertexArray->SetVertexBuffer(s_OutlinedBlockData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> outlinedBlockShaderData;
-		outlinedBlockShaderData["##outlined_block_border_radius"] = std::to_string(outlined_block_border_radius);
-		outlinedBlockShaderData["##outlined_block_border_color"]  = VecToString(outlined_block_border_color);
+		outlinedBlockShaderData["##outlined_block_border_radius"] = std::to_string(s_OutlinedBlockData.BorderRadius);
+		outlinedBlockShaderData["##outlined_block_border_color"]  = VecToString(s_OutlinedBlockData.Color);
 
 		s_OutlinedBlockData.Shader = Shader::Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl", outlinedBlockShaderData);
 		s_OutlinedBlockData.Shader->Bind();

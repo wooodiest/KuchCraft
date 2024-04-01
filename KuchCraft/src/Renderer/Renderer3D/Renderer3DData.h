@@ -12,7 +12,7 @@ namespace KuchCraft {
 	struct Renderer3DData
 	{
 		Ref<IndexBuffer> QuadIndexBuffer;
-		Ref<FrameBuffer> MainFrameBuffer;
+		Ref<FrameBuffer> FrameBuffer;
 	};
 
 	struct Renderer3DChunkData
@@ -44,6 +44,8 @@ namespace KuchCraft {
 	{
 		bool Status = false;
 		glm::vec3 Position{ 0.0f };
+		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		float BorderRadius = 0.005f;
 
 		Ref<Shader>       Shader;
 		Ref<VertexArray>  VertexArray;

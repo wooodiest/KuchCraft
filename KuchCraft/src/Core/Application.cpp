@@ -83,7 +83,7 @@ namespace KuchCraft {
 		}
 
 		m_Minimized = false;
-		Renderer::OnViewportSizeChanged(e.GetWidth(), e.GetHeight());
+		Renderer::OnViewportSizeChanged(e.GetWidth(), e.GetHeight()); // TODO dangerous renderer can be not initialized, move to game
 
 		return false;
 	}

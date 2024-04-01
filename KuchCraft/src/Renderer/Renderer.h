@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Camera.h"
+#include "Renderer/Data/Camera.h"
 #include "World/Chunk.h"
 
 #include <glad/glad.h>
@@ -15,7 +15,6 @@ namespace KuchCraft {
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
-		// Renderer
 		static void BeginFrame();
 		static void EndFrame(Camera* camera);
 
@@ -23,6 +22,8 @@ namespace KuchCraft {
 		static RendererData s_RendererData;
 
 		static void PrepareRenderer();
+
+		static void LoadRendererInfo();
 		 
 	private:
 		Renderer() = default;

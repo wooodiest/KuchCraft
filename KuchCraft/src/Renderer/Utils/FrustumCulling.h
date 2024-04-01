@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Camera.h"
+#include "Renderer/Data/Camera.h"
 
 #include "World/Chunk.h"
 

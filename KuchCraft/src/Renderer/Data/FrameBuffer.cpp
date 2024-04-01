@@ -191,6 +191,12 @@ namespace KuchCraft {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void FrameBuffer::BindAndClear() const
+	{
+		Bind();
+		Clear();
+	}
+
 	void FrameBuffer::Resize(uint32_t width, uint32_t height)
 	{
 		if (width == 0 || height == 0 || (m_Specification.Width == width && m_Specification.Height == height))
@@ -202,7 +208,7 @@ namespace KuchCraft {
 		Invalidate();
 	}
 
-	int FrameBuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
+	int FrameBuffer::ReadPixel(uint32_t attachmentIndex, int x, int y) const
 	{
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
 		int pixelData;
@@ -210,7 +216,7 @@ namespace KuchCraft {
 		return pixelData;
 	}
 
-	void FrameBuffer::ClearColorAttachment(uint32_t attachmentIndex, const glm::vec4& color)
+	void FrameBuffer::ClearColorAttachment(uint32_t attachmentIndex, const glm::vec4& color) const
 	{
 		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
 		switch (spec.TextureFormat)
@@ -228,25 +234,24 @@ namespace KuchCraft {
 		}
 	}
 
-	void FrameBuffer::ClearColorAttachments(const glm::vec4& color)
+	void FrameBuffer::ClearColorAttachments(const glm::vec4& color) const
 	{
 		for (uint32_t i = 0; i < m_ColorAttachments.size(); i++)
 			ClearColorAttachment(i, color);
 	}
 
-	void FrameBuffer::ClearDepthAttachment()
+	void FrameBuffer::ClearDepthAttachment() const
 	{
 		GLfloat depthClearValue = 1.0f;
 		GLint stencilClearValue = 0;
 		glClearTexImage(m_DepthAttachment, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, &depthClearValue);
 	}
 
-	void FrameBuffer::Clear(const glm::vec4& color)
+	void FrameBuffer::Clear(const glm::vec4& color) const
 	{
 		ClearColorAttachments(color);
 		ClearDepthAttachment();
 	}
-
 
 	void DefaultFrameBuffer::Bind()
 	{
@@ -257,6 +262,12 @@ namespace KuchCraft {
 	void DefaultFrameBuffer::Clear()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	void DefaultFrameBuffer::BindAndClear()
+	{
+		Bind();
+		Clear();
 	}
 
 }

@@ -1,5 +1,5 @@
 #include "kcpch.h"
-#include "Renderer/FrustumCulling.h"
+#include "Renderer/Utils/FrustumCulling.h"
 
 namespace KuchCraft {
 

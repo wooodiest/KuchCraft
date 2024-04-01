@@ -2,7 +2,7 @@
 
 #include "World/Block.h"
 
-#include "Renderer/ChunkData.h"
+#include "Renderer/Utils/ChunkDrawList.h"
 
 namespace KuchCraft {
 

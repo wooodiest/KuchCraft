@@ -52,13 +52,15 @@ namespace KuchCraft {
 		void Bind() const;
 		void Unbind() const;
 
-		void Resize(uint32_t width, uint32_t height);
-		int  ReadPixel(uint32_t attachmentIndex, int x, int y);
+		void BindAndClear() const;
 
-		void ClearColorAttachment(uint32_t attachmentIndex, const glm::vec4& color = { 0.0f, 0.0f, 0.0f, 1.0f });
-		void ClearColorAttachments(const glm::vec4 & color = { 0.0f, 0.0f, 0.0f, 1.0f });
-		void ClearDepthAttachment();
-		void Clear(const glm::vec4& color = { 0.0f, 0.0f, 0.0f, 1.0f });
+		void Resize(uint32_t width, uint32_t height);
+		int  ReadPixel(uint32_t attachmentIndex, int x, int y) const;
+
+		void ClearColorAttachment(uint32_t attachmentIndex, const glm::vec4& color = { 0.0f, 0.0f, 0.0f, 1.0f }) const;
+		void ClearColorAttachments(const glm::vec4 & color = { 0.0f, 0.0f, 0.0f, 1.0f }) const;
+		void ClearDepthAttachment() const;
+		void Clear(const glm::vec4& color = { 0.0f, 0.0f, 0.0f, 1.0f }) const;
 
 		uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const { return m_ColorAttachments[index]; }
 		const FrameBufferSpecification& GetSpecification()        const { return m_Specification;           }
@@ -79,6 +81,8 @@ namespace KuchCraft {
 	public:
 		static void Bind();
 		static void Clear();
+
+		static void BindAndClear();
 	};
 
 }

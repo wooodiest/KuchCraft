@@ -25,6 +25,7 @@ namespace KuchCraft
 		friend class Renderer;
 		friend class TextRenderer;
 		friend class Renderer3D;
+		friend class Renderer2D;
 
 	private:
 		RendererCommand() = default;

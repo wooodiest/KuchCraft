@@ -4,7 +4,7 @@
 #include "World/World.h"
 
 #include "Renderer/RendererData.h"
-#include "Renderer/ChunkData.h"
+#include "Renderer/Utils/ChunkDrawList.h"
 
 #include "Core/Events/Event.h"
 

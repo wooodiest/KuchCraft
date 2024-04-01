@@ -14,13 +14,14 @@ namespace KuchCraft {
 	private:
 		static void Init();
 		static void ShutDown();
+		static void LoadRenderer3DInfo();
 
 		static void Render();
 		static void Clear();
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
-		static Ref<FrameBuffer> GetFrameBuffer() { return s_Data.MainFrameBuffer; }
+		static uint32_t GetRendererdColorAttachmentRendererID() { return s_Data.FrameBuffer->GetColorAttachmentRendererID(); }
 
 	private:
 		static void PrepareChunks();

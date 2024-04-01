@@ -3,7 +3,7 @@
 
 #include "KuchCraft.h"
 
-#include "Renderer/FrustumCulling.h"
+#include "Renderer/Utils/FrustumCulling.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Text/TextRenderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
