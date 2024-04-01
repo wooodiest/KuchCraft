@@ -53,7 +53,7 @@ namespace KuchCraft {
 		s_FullScreenQuadData.VertexBuffer->Bind();
 
 		Texture2D::Bind(rendererID, default_texture_slot);
-		glDrawArrays(GL_TRIANGLES, 0, quad_vertex_count_a);
+		RendererCommand::DrawArrays(quad_vertex_count_a);
 	}
 
 	void Renderer2D::PrepareQuadRendering()

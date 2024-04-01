@@ -114,8 +114,7 @@ namespace KuchCraft {
 		RendererCommand::DisableDepthTesting();
 
 		s_Data.Shader->Bind();
-		constexpr uint32_t default_texture_slott = 0;
-		glBindTextureUnit(default_texture_slott, s_Data.Texture);
+		glBindTextureUnit(default_texture_slot, s_Data.Texture);
 
 		s_Data.VertexArray->Bind();
 		s_Data.VertexBuffer->Bind();
@@ -158,22 +157,19 @@ namespace KuchCraft {
 					if (currentIndex == s_Info.MaxCharacterUniformArrayLimit)
 					{
 						s_Data.UniformBuffer->SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
-						glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, currentIndex);
+						RendererCommand::DrawStripArraysInstanced(4, currentIndex);
 						currentIndex = 0;
-
 					}
 				}
 			}
 			if (currentIndex)
 			{
 				s_Data.UniformBuffer->SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
-				glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, currentIndex);
+				RendererCommand::DrawStripArraysInstanced(4, currentIndex);
 			}
 
 		}
 		delete[] textBuffer;
-
-		glDisable(GL_BLEND);
 	}
 
 	void TextRenderer::Clear()

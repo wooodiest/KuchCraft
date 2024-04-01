@@ -13,6 +13,21 @@ namespace KuchCraft {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
+	void RendererCommand::DrawArrays(uint32_t count, uint32_t offset)
+	{
+		glDrawArrays(GL_TRIANGLES, offset, count);
+	}
+
+	void RendererCommand::DrawElements(uint32_t count)
+	{
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void RendererCommand::DrawStripArraysInstanced(uint32_t count, uint32_t instanceCount, uint32_t offset)
+	{
+		glDrawArraysInstanced(GL_TRIANGLE_STRIP, offset, count, instanceCount);
+	}
+
 	void RendererCommand::EnableBlending()
 	{
 		glEnable(GL_BLEND);

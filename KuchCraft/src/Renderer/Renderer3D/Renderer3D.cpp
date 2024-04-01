@@ -314,6 +314,7 @@ namespace KuchCraft {
 
 		s_ChunkData.Shader->Bind();
 		s_ChunkData.VertexArray->Bind();
+		s_Data.QuadIndexBuffer->Bind();
 
 		for (const auto& chunk : s_ChunkData.Chunks)
 		{
@@ -334,8 +335,7 @@ namespace KuchCraft {
 					for (uint32_t j = 0; j < drawList.GetTextureCount(i); j++)
 						Texture2D::Bind(drawList.GetTexture(i, j), j);
 
-					s_Data.QuadIndexBuffer->Bind();
-					glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+					RendererCommand::DrawElements(indexCount);
 				}
 			}
 		}
@@ -356,7 +356,7 @@ namespace KuchCraft {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, s_SkyboxData.Texture);
-		glDrawElements(GL_TRIANGLES, cube_face_cout * quad_index_count, GL_UNSIGNED_INT, nullptr);
+		RendererCommand::DrawElements(cube_face_cout * quad_index_count);
 	}
 
 	void Renderer3D::RenderWater()
@@ -367,8 +367,11 @@ namespace KuchCraft {
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableDepthTesting();
 
-		s_WaterData.Shader->Bind();
+		s_WaterData.Shader     ->Bind();
 		s_WaterData.VertexArray->Bind();
+		s_Data.QuadIndexBuffer ->Bind();
+
+		AssetManager::GetBlockTexture(BlockType::Water)->Bind(default_texture_slot);
 
 		for (const auto& chunk : s_ChunkData.Chunks)
 		{
@@ -379,11 +382,8 @@ namespace KuchCraft {
 			{
 				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
 				s_WaterData.VertexBuffer->SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
-
-				AssetManager::GetBlockTexture(BlockType::Water)->Bind(default_texture_slot);
-				// Draw elements		
-				s_Data.QuadIndexBuffer->Bind();
-				glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+	
+				RendererCommand::DrawElements(indexCount);
 			}
 		}
 	}
@@ -399,11 +399,11 @@ namespace KuchCraft {
 		s_OutlinedBlockData.Shader->Bind();
 		s_OutlinedBlockData.Shader->SetMat4("u_Transform", transform);
 
-		s_OutlinedBlockData.VertexArray->Bind();
+		s_OutlinedBlockData.VertexArray ->Bind();
 		s_OutlinedBlockData.VertexBuffer->Bind();
+		s_Data.QuadIndexBuffer          ->Bind();
 
-		s_Data.QuadIndexBuffer->Bind();
-		glDrawElements(GL_TRIANGLES, cube_index_count, GL_UNSIGNED_INT, nullptr);
+		RendererCommand::DrawElements(cube_index_count);
 	}
 
 	void Renderer3D::DrawChunk(Chunk* chunk)

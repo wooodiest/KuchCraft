@@ -8,6 +8,10 @@ namespace KuchCraft
 		static void ShowPolygons(bool status);
 
 	private:
+		static void DrawArrays(uint32_t count, uint32_t offset = 0);
+		static void DrawElements(uint32_t count);
+		static void DrawStripArraysInstanced(uint32_t count, uint32_t instanceCount, uint32_t offset = 0);
+
 		static void EnableBlending();
 		static void DisableBlending();
 
