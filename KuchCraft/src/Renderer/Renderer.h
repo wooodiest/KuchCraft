@@ -22,7 +22,6 @@ namespace KuchCraft {
 		static RendererData s_RendererData;
 
 		static void PrepareRenderer();
-
 		static void LoadRendererInfo();
 		 
 	public:

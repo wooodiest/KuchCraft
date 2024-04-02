@@ -12,15 +12,15 @@ namespace KuchCraft {
 
 	struct Renderer3DData
 	{
-		Ref<IndexBuffer> QuadIndexBuffer;
-		Ref<FrameBuffer> FrameBuffer;
+		IndexBuffer QuadIndexBuffer;
+		FrameBuffer FrameBuffer;
 	};
 
 	struct Renderer3DChunkData
 	{
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
+		Shader       Shader;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
 
 		std::vector<Chunk*> Chunks;
 		std::vector<Chunk*> ChunksToRender;
@@ -28,17 +28,17 @@ namespace KuchCraft {
 
 	struct Renderer3DSkyboxData
 	{
-		Ref<Shader>         Shader;
-		Ref<VertexArray>    VertexArray;
-		Ref<VertexBuffer>   VertexBuffer;
-		Ref<CubeMapTexture> Texture;
+		Shader         Shader;
+		VertexArray    VertexArray;
+		VertexBuffer   VertexBuffer;
+		CubeMapTexture Texture;
 	};
 
 	struct Renderer3DWaterData
 	{
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
+		Shader       Shader;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
 	};
 
 	struct RendererOutlinedBlockData
@@ -48,9 +48,9 @@ namespace KuchCraft {
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		float BorderRadius = 0.005f;
 
-		Ref<Shader>       Shader;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
+		Shader       Shader;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
 	};
 
 }

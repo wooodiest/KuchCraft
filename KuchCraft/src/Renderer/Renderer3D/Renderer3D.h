@@ -21,7 +21,7 @@ namespace KuchCraft {
 
 		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
 
-		static uint32_t GetRendererdColorAttachmentRendererID() { return s_Data.FrameBuffer->GetColorAttachmentRendererID(); }
+		static uint32_t GetRendererdColorAttachmentRendererID() { return s_Data.FrameBuffer.GetColorAttachmentRendererID(); }
 
 	private:
 		static void PrepareChunks();

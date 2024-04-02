@@ -13,10 +13,10 @@ namespace KuchCraft {
 	class FontTexture
 	{
 	public:
-		static Ref<FontTexture> Create(const std::string& fontPath, uint32_t size, uint32_t charactersCount);
-
-		FontTexture(const std::string& fontPath, uint32_t size, uint32_t charactersCount);
+		FontTexture();
 		~FontTexture();
+
+		void Create(const std::string& fontPath, uint32_t size, uint32_t charactersCount);
 
 		const FontCharacter& GetCharacter(char c) { return m_Characters[c]; }
 

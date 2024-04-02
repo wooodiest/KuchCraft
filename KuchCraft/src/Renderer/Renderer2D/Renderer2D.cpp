@@ -48,9 +48,9 @@ namespace KuchCraft {
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::DisableDepthTesting();
 
-		s_FullScreenQuadData.Shader      ->Bind();
-		s_FullScreenQuadData.VertexArray ->Bind();
-		s_FullScreenQuadData.VertexBuffer->Bind();
+		s_FullScreenQuadData.Shader      .Bind();
+		s_FullScreenQuadData.VertexArray .Bind();
+		s_FullScreenQuadData.VertexBuffer.Bind();
 
 		Texture2D::Bind(rendererID, default_texture_slot);
 		RendererCommand::DrawArrays(quad_vertex_count_a);
@@ -73,18 +73,18 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		s_QuadData.IndexBuffer = IndexBuffer::Create(indices, s_Info.MaxIndices);
+		s_QuadData.IndexBuffer.Create(indices, s_Info.MaxIndices);
 		delete[] indices;
 
-		s_QuadData.IndexBuffer->Unbind();
+		s_QuadData.IndexBuffer.Unbind();
 	}
 
 	void Renderer2D::PrepareFullScreenQuadRendering()
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_FullScreenQuadData.VertexArray = VertexArray::Create();
-		s_FullScreenQuadData.VertexArray->Bind();
+		s_FullScreenQuadData.VertexArray.Create();
+		s_FullScreenQuadData.VertexArray.Bind();
 
 		float vertices[] = {
 			-1.0f, -1.0f, 0.0f, 0.0f,
@@ -96,21 +96,21 @@ namespace KuchCraft {
 			-1.0f,  1.0f, 0.0f, 1.0f
 		};
 
-		s_FullScreenQuadData.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
-		s_FullScreenQuadData.VertexBuffer->SetBufferLayout({
+		s_FullScreenQuadData.VertexBuffer.Create(sizeof(vertices), vertices, true);
+		s_FullScreenQuadData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float2, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 		});
 
-		s_FullScreenQuadData.VertexArray->SetVertexBuffer(s_FullScreenQuadData.VertexBuffer);
+		s_FullScreenQuadData.VertexArray.SetVertexBuffer(s_FullScreenQuadData.VertexBuffer);
 
-		s_FullScreenQuadData.Shader = Shader::Create("assets/shaders/full_screen_quad.vert.glsl", "assets/shaders/full_screen_quad.frag.glsl");
-		s_FullScreenQuadData.Shader->Bind();
-		s_FullScreenQuadData.Shader->SetInt("u_Texture", default_texture_slot);
+		s_FullScreenQuadData.Shader.Create("assets/shaders/full_screen_quad.vert.glsl", "assets/shaders/full_screen_quad.frag.glsl");
+		s_FullScreenQuadData.Shader.Bind();
+		s_FullScreenQuadData.Shader.SetInt("u_Texture", default_texture_slot);
 
-		s_FullScreenQuadData.VertexArray ->Unbind();
-		s_FullScreenQuadData.VertexBuffer->Unbind();
-		s_FullScreenQuadData.Shader      ->Unbind();
+		s_FullScreenQuadData.VertexArray .Unbind();
+		s_FullScreenQuadData.VertexBuffer.Unbind();
+		s_FullScreenQuadData.Shader      .Unbind();
 	}
 
 }

@@ -5,10 +5,10 @@ namespace KuchCraft {
 	class IndexBuffer
 	{
 	public:
-		static Ref<IndexBuffer> Create(uint32_t* data, uint32_t count);
-
-		IndexBuffer(uint32_t* data, uint32_t count);
+		IndexBuffer();
 		~IndexBuffer();
+
+		void Create(uint32_t* data, uint32_t count);
 
 		void Bind()   const;
 		void Unbind() const;

@@ -63,9 +63,9 @@ namespace KuchCraft {
 
 	struct RendererData
 	{
-		Camera*     CurrentCamera = nullptr;
-		Ref<Camera> SpareCamera; // spare camera just in case, only care about ortho projection
-		Ref<UniformBuffer> WorldDataUniformBuffer;
+		Camera* CurrentCamera = nullptr;
+		std::shared_ptr<Camera> SpareCamera; // spare camera just in case, only care about ortho projection
+		UniformBuffer WorldDataUniformBuffer;
 	}; 
 
 	// Cube - quad vertices

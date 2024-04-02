@@ -37,11 +37,11 @@ namespace KuchCraft {
 
 	struct TextRendererData
 	{
-		Ref<Shader>        Shader;
-		Ref<VertexArray>   VertexArray;
-		Ref<VertexBuffer>  VertexBuffer;
-		Ref<UniformBuffer> UniformBuffer;
-		Ref<FontTexture>   Texture;
+		Shader        Shader;
+		VertexArray   VertexArray;
+		VertexBuffer  VertexBuffer;
+		UniformBuffer UniformBuffer;
+		FontTexture   Texture;
 
 		std::vector<std::pair<std::string, TextStyle>> TextData;
 	};

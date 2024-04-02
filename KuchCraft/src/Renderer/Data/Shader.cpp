@@ -7,20 +7,19 @@
 
 namespace KuchCraft {
 
-	Ref<Shader> Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
+	Shader::Shader()
 	{
-		return CreateRef<Shader>(vertexShaderPath, fragmentShaderPath, additionalPreProcessValues);
-	}
 
-	Shader::Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
-		: m_AdditionalPreProcessValues(additionalPreProcessValues)
-	{
-		Compile(vertexShaderPath, fragmentShaderPath);
 	}
 
 	Shader::~Shader()
 	{
 		glDeleteProgram(m_RendererID);
+	}
+
+	void Shader::Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
+	{
+		Compile(vertexShaderPath, fragmentShaderPath, additionalPreProcessValues);
 	}
 
 	void Shader::SetMat4(const std::string& name, const glm::mat4& v)
@@ -59,14 +58,14 @@ namespace KuchCraft {
 		glUniformMatrix4fv(location, count, GL_FALSE, data);
 	}
 
-	uint32_t Shader::Compile(const std::string& vertexShaderPath, const std::string& fragmentShaderPath)
+	uint32_t Shader::Compile(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
 	{
 		KC_PROFILE_FUNCTION();
 
 		std::string vertex   = ReadFile(vertexShaderPath);
 		std::string fragment = ReadFile(fragmentShaderPath);
-		PreProcess(vertex);
-		PreProcess(fragment);
+		PreProcess(vertex, additionalPreProcessValues);
+		PreProcess(fragment, additionalPreProcessValues);
 		const char* vertex_cstr   = vertex.c_str();
 		const char* fragment_cstr = fragment.c_str();
 
@@ -150,7 +149,7 @@ namespace KuchCraft {
 		return result;
 	}
 
-	void Shader::PreProcess(std::string& file)
+	void Shader::PreProcess(std::string& file, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
 	{
 		KC_PROFILE_FUNCTION();
 
@@ -163,7 +162,7 @@ namespace KuchCraft {
 			}
 		};
 
-		std::for_each(m_AdditionalPreProcessValues.begin(), m_AdditionalPreProcessValues.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
+		std::for_each(additionalPreProcessValues.begin(), additionalPreProcessValues.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
 	}
 
 	void Shader::Bind() const

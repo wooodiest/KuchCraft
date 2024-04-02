@@ -7,8 +7,7 @@ namespace KuchCraft {
 	class AssetManager
 	{
 	public:
-		static Ref<Texture2D> GetBlockTexture(BlockType type);
-		static Ref<Texture2D> GetBlockTexture(const Block& block);
+		static Texture2D& GetBlockTexture(BlockType type) { return s_BlockData.Textures[type]; }
 
 	private:
 		static void Init();

@@ -42,10 +42,10 @@ namespace KuchCraft {
 	class FrameBuffer
 	{
 	public:
-		static Ref<FrameBuffer> Create(const FrameBufferSpecification& specification);
-
-		FrameBuffer(const FrameBufferSpecification& specification);
+		FrameBuffer();
 		~FrameBuffer();
+
+		void Create(const FrameBufferSpecification& specification);
 
 		void Invalidate();
 

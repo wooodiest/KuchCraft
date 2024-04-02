@@ -6,22 +6,12 @@
 
 namespace KuchCraft {
 
-	Ref<Texture2D> Texture2D::Create(const TextureSpecification& textureSpecification)
-	{
-		return CreateRef<Texture2D>(textureSpecification);
-	}
-
-	Ref<Texture2D> Texture2D::Create(const std::string& path, const TextureSpecification& textureSpecification)
-	{
-		return CreateRef<Texture2D>(path, textureSpecification);
-	}
-
 	static GLenum ImageFormatToOpenGLDataFormat(ImageFormat format)
 	{
 		switch (format)
 		{
-			case ImageFormat::RGB8:  return GL_RGB;
-			case ImageFormat::RGBA8: return GL_RGBA;
+		case ImageFormat::RGB8:  return GL_RGB;
+		case ImageFormat::RGBA8: return GL_RGBA;
 		}
 
 		return 0;
@@ -31,18 +21,29 @@ namespace KuchCraft {
 	{
 		switch (format)
 		{
-			case ImageFormat::RGB8:  return GL_RGB8;
-			case ImageFormat::RGBA8: return GL_RGBA8;
+		case ImageFormat::RGB8:  return GL_RGB8;
+		case ImageFormat::RGBA8: return GL_RGBA8;
 		}
 
 		return 0;
 	}
 
-	Texture2D::Texture2D(const TextureSpecification& textureSpecification)
-		: m_TextureSpecification(textureSpecification)
+	Texture2D::Texture2D()
 	{
+
+	}
+
+	Texture2D::~Texture2D()
+	{
+		glDeleteTextures(1, &m_RendererID);
+	}
+
+	void Texture2D::Create(const TextureSpecification& textureSpecification)
+	{
+		m_TextureSpecification = textureSpecification;
+
 		GLenum internalFormat = ImageFormatToOpenGLInternalFormat(m_TextureSpecification.Format);
-		GLenum dataFormat     = ImageFormatToOpenGLDataFormat(m_TextureSpecification.Format);
+		GLenum dataFormat = ImageFormatToOpenGLDataFormat(m_TextureSpecification.Format);
 
 		glGenTextures(1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
@@ -56,9 +57,10 @@ namespace KuchCraft {
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	Texture2D::Texture2D(const std::string& path, const TextureSpecification& textureSpecification)
-		: m_TextureSpecification(textureSpecification)
+	void Texture2D::Create(const std::string& path, const TextureSpecification& textureSpecification)
 	{
+		m_TextureSpecification = textureSpecification;
+
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
 
@@ -75,12 +77,12 @@ namespace KuchCraft {
 		if (channels == 4)
 		{
 			internalFormat = GL_RGBA8;
-			dataFormat     = GL_RGBA;
+			dataFormat = GL_RGBA;
 		}
 		else if (channels == 3)
 		{
 			internalFormat = GL_RGB8;
-			dataFormat     = GL_RGB;
+			dataFormat = GL_RGB;
 		}
 
 		glGenTextures(1, &m_RendererID);
@@ -100,12 +102,7 @@ namespace KuchCraft {
 		}
 
 		stbi_image_free(data);
-	}
-
-	Texture2D::~Texture2D()
-	{
-		glDeleteTextures(1, &m_RendererID);
-	}
+	}	
 
 	void Texture2D::Bind(uint32_t slot) const
 	{

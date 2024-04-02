@@ -30,12 +30,16 @@ namespace KuchCraft {
 		}
 	}
 
-	Ref<CubeMapTexture> CubeMapTexture::Create(const CubeMapFacesInfo& cubeMapFacesInfo)
+	CubeMapTexture::CubeMapTexture()
 	{
-		return CreateRef<CubeMapTexture>(cubeMapFacesInfo);
 	}
 
-	CubeMapTexture::CubeMapTexture(const CubeMapFacesInfo& cubeMapFacesInfo)
+	CubeMapTexture::~CubeMapTexture()
+	{
+		glDeleteTextures(1, &m_RendererID);
+	}
+
+	void CubeMapTexture::Create(const CubeMapFacesInfo& cubeMapFacesInfo)
 	{
 		constexpr GLenum types[6] = {
 			GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -64,11 +68,6 @@ namespace KuchCraft {
 
 			stbi_image_free(data);
 		}
-	}
-
-	CubeMapTexture::~CubeMapTexture()
-	{
-		glDeleteTextures(1, &m_RendererID);
 	}
 
 	void CubeMapTexture::Bind() const

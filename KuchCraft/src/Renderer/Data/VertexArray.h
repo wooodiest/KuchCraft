@@ -7,12 +7,12 @@ namespace KuchCraft {
 	class VertexArray
 	{
 	public:
-		static Ref<VertexArray> Create();
-
 		VertexArray();
 		~VertexArray();
 
-		void SetVertexBuffer(const Ref<VertexBuffer>& vertexBuffer);
+		void Create();
+
+		void SetVertexBuffer(const VertexBuffer& vertexBuffer);
 
 		void Bind()   const;
 		void Unbind() const;

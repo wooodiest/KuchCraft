@@ -7,12 +7,17 @@
 
 namespace KuchCraft {
 
-	Ref<FontTexture> FontTexture::Create(const std::string& fontPath, uint32_t size, uint32_t charactersCount)
+	FontTexture::FontTexture()
 	{
-		return CreateRef<FontTexture>(fontPath, size, charactersCount);
+		
 	}
 
-	FontTexture::FontTexture(const std::string& fontPath, uint32_t size, uint32_t charactersCount)
+	FontTexture::~FontTexture()
+	{
+		glDeleteTextures(1, &m_RendererID);
+	}
+
+	void FontTexture::Create(const std::string& fontPath, uint32_t size, uint32_t charactersCount)
 	{
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft))
@@ -63,11 +68,6 @@ namespace KuchCraft {
 				{ face->glyph->bitmap_left, face->glyph->bitmap_top   }
 			});
 		}
-	}
-
-	FontTexture::~FontTexture()
-	{
-		glDeleteTextures(1, &m_RendererID);
 	}
 
 	void FontTexture::Bind() const

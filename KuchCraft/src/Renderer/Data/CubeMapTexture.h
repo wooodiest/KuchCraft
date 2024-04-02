@@ -15,10 +15,10 @@ namespace KuchCraft {
 	class CubeMapTexture
 	{
 	public:
-		static Ref<CubeMapTexture> Create(const CubeMapFacesInfo& cubeMapFacesInfo);
-
-		CubeMapTexture(const CubeMapFacesInfo& cubeMapFacesInfo);
+		CubeMapTexture();
 		~CubeMapTexture();
+
+		void Create(const CubeMapFacesInfo& cubeMapFacesInfo);
 
 		void Bind()   const;
 		void Unbind() const;

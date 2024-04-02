@@ -5,19 +5,19 @@
 
 namespace KuchCraft {
 
-	Ref<VertexArray> VertexArray::Create()
-	{
-		return CreateRef<VertexArray>();
-	}
-
 	VertexArray::VertexArray()
 	{
-		glCreateVertexArrays(1, &m_RendererID);
+		
 	}
 
 	VertexArray::~VertexArray()
 	{
 		glDeleteVertexArrays(1, &m_RendererID);
+	}
+
+	void VertexArray::Create()
+	{
+		glCreateVertexArrays(1, &m_RendererID);
 	}
 
 	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
@@ -34,13 +34,13 @@ namespace KuchCraft {
 		return 0;
 	}
 
-	void VertexArray::SetVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
+	void VertexArray::SetVertexBuffer(const VertexBuffer& vertexBuffer)
 	{
 		Bind();
-		vertexBuffer->Bind();
+		vertexBuffer.Bind();
 
 		uint32_t index = 0;
-		const auto& bufferLayout = vertexBuffer->GetBufferLayout();
+		const auto& bufferLayout = vertexBuffer.GetBufferLayout();
 		for (const auto& element : bufferLayout)
 		{
 			switch (element.Type)

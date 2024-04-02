@@ -5,10 +5,10 @@ namespace KuchCraft {
 	class UniformBuffer
 	{
 	public:
-		static Ref<UniformBuffer> Create(uint32_t size, uint32_t binding);
-
-		UniformBuffer(uint32_t size, uint32_t binding);
+		UniformBuffer();
 		~UniformBuffer();
+
+		void Create(uint32_t size, uint32_t binding);
 
 		void SetData(const void* data, uint32_t size, uint32_t offset = 0);
 

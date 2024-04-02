@@ -5,11 +5,11 @@ namespace KuchCraft {
 	class Shader
 	{
 	public:
-		static Ref<Shader> Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath,
-			const std::unordered_map<std::string, std::string>& additionalPreProcessValues = std::unordered_map<std::string, std::string>());
-
-		Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues);
+		Shader();
 		~Shader();
+
+		void Create(const std::string& vertexShaderPath, const std::string& fragmentShaderPath,
+			const std::unordered_map<std::string, std::string>& additionalPreProcessValues = std::unordered_map<std::string, std::string>());
 
 		void SetMat4(const std::string& name, const glm::mat4& v);
 		void SetInt(const std::string& name, int v);
@@ -23,14 +23,11 @@ namespace KuchCraft {
 
 	private:
 		std::string ReadFile(const std::string& filepath);
-		void PreProcess(std::string& file);
-		uint32_t Compile(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+		void PreProcess(std::string& file, const std::unordered_map<std::string, std::string>& additionalPreProcessValues);
+		uint32_t Compile(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues);
 
 	private:
 		uint32_t m_RendererID = 0;
-
-		std::unordered_map<std::string, std::string> m_AdditionalPreProcessValues;
-
 	};
 
 }

@@ -63,7 +63,7 @@ namespace KuchCraft {
 				s_RendererData.CurrentCamera->GetAbsoluteViewProjection(),
 				s_RendererData.CurrentCamera->GetOrthoProjection()
 			};
-			s_RendererData.WorldDataUniformBuffer->SetData(&buffer, sizeof(buffer));
+			s_RendererData.WorldDataUniformBuffer.SetData(&buffer, sizeof(buffer));
 		}
 
 		Renderer3D::Render();
@@ -81,9 +81,8 @@ namespace KuchCraft {
 		if (opengl_logs)
 			RendererCommand::EnableLogMessages();
 		
-		s_RendererData.WorldDataUniformBuffer = UniformBuffer::Create(sizeof(UniformBufferCameraData), 0);
-
-		s_RendererData.SpareCamera = CreateRef<Camera>();
+		s_RendererData.WorldDataUniformBuffer.Create(sizeof(UniformBufferCameraData), 0);
+		s_RendererData.SpareCamera = std::make_shared<Camera>();
 	}
 
 	void Renderer::LoadRendererInfo()

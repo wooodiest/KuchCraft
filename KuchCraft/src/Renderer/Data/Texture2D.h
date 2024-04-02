@@ -26,12 +26,11 @@ namespace KuchCraft
 	class Texture2D
 	{
 	public:
-		static Ref<Texture2D> Create(const TextureSpecification& textureSpecification);
-		static Ref<Texture2D> Create(const std::string& path, const TextureSpecification& textureSpecification = TextureSpecification());
-
-		Texture2D(const TextureSpecification& textureSpecification);
-		Texture2D(const std::string& path, const TextureSpecification& textureSpecification);
+		Texture2D();
 		~Texture2D();
+
+		void Create(const TextureSpecification& textureSpecification);
+		void Create(const std::string& path, const TextureSpecification& textureSpecification = TextureSpecification());
 
 		uint32_t GetRendererID() const { return m_RendererID; }
 		void Bind(uint32_t slot) const;

@@ -16,8 +16,8 @@ namespace KuchCraft {
 
 		LoadTextInfo();
 
-		s_Data.VertexArray = VertexArray::Create();
-		s_Data.VertexArray->Bind();
+		s_Data.VertexArray.Create();
+		s_Data.VertexArray.Bind();
 
 		float vertices[] = {
 			0.0f, 1.0f,
@@ -26,26 +26,26 @@ namespace KuchCraft {
 			1.0f, 0.0f,
 		};
 
-		s_Data.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
-		s_Data.VertexBuffer->SetBufferLayout({
+		s_Data.VertexBuffer.Create(sizeof(vertices), vertices, true);
+		s_Data.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float2, "a_Position" }
 		});
 
-		s_Data.VertexArray->SetVertexBuffer(s_Data.VertexBuffer);
+		s_Data.VertexArray.SetVertexBuffer(s_Data.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> textShaderData;
 		textShaderData["##max_text_uniform_array_limit"] = std::to_string(s_Info.MaxCharacterUniformArrayLimit);
 
-		s_Data.Texture = FontTexture::Create(s_Info.FontPath, s_Info.FontTextureSize, s_Info.FontCharactersCount);
+		s_Data.Texture.Create(s_Info.FontPath, s_Info.FontTextureSize, s_Info.FontCharactersCount);
 
-		s_Data.Shader = Shader::Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl", textShaderData);
-		s_Data.Shader->Bind();
+		s_Data.Shader.Create("assets/shaders/text.vert.glsl", "assets/shaders/text.frag.glsl", textShaderData);
+		s_Data.Shader.Bind();
 
-		s_Data.UniformBuffer = UniformBuffer::Create(s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText), 1);
+		s_Data.UniformBuffer.Create(s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText), 1);
 
-		s_Data.VertexArray ->Unbind();
-		s_Data.VertexBuffer->Unbind();
-		s_Data.Shader      ->Unbind();
+		s_Data.VertexArray .Unbind();
+		s_Data.VertexBuffer.Unbind();
+		s_Data.Shader      .Unbind();
 	}
 
 	void TextRenderer::ShutDown()
@@ -61,17 +61,17 @@ namespace KuchCraft {
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::DisableDepthTesting();
 
-		s_Data.Shader->Bind();
-		s_Data.Texture->Bind();
+		s_Data.Shader.Bind();
+		s_Data.Texture.Bind();
 
-		s_Data.VertexArray->Bind();
-		s_Data.VertexBuffer->Bind();
+		s_Data.VertexArray.Bind();
+		s_Data.VertexBuffer.Bind();
 
 		UniformText* textBuffer = new UniformText[s_Info.MaxCharacterUniformArrayLimit];
 
 		for (const auto& [text, textStyle] : s_Data.TextData)
 		{
-			s_Data.Shader->SetFloat4("u_Color", textStyle.Color);
+			s_Data.Shader.SetFloat4("u_Color", textStyle.Color);
 
 			glm::vec2 currentPosition = textStyle.Position;
 			float scale               = textStyle.FontSize / s_Info.FontTextureSize;
@@ -79,7 +79,7 @@ namespace KuchCraft {
 			uint32_t currentIndex = 0;
 			for (auto c = text.begin(); c != text.end(); c++)
 			{
-				const FontCharacter& character = s_Data.Texture->GetCharacter(*c);
+				const FontCharacter& character = s_Data.Texture.GetCharacter(*c);
 
 				if (*c == '\n')
 				{
@@ -104,7 +104,7 @@ namespace KuchCraft {
 
 					if (currentIndex == s_Info.MaxCharacterUniformArrayLimit)
 					{
-						s_Data.UniformBuffer->SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
+						s_Data.UniformBuffer.SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
 						RendererCommand::DrawStripArraysInstanced(4, currentIndex);
 						currentIndex = 0;
 					}
@@ -112,7 +112,7 @@ namespace KuchCraft {
 			}
 			if (currentIndex)
 			{
-				s_Data.UniformBuffer->SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
+				s_Data.UniformBuffer.SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
 				RendererCommand::DrawStripArraysInstanced(4, currentIndex);
 			}
 

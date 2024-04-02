@@ -9,7 +9,7 @@ namespace KuchCraft {
 	{
 		std::string Path      = "assets/textures/";
 		std::string Extension = ".png";
-		std::map<BlockType, Ref<Texture2D>> Textures;
+		std::map<BlockType, Texture2D> Textures;
 	};
 
 }

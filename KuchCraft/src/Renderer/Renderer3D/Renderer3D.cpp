@@ -43,14 +43,14 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		s_Data.QuadIndexBuffer = IndexBuffer::Create(indices, max_indices_in_chunk);
+		s_Data.QuadIndexBuffer.Create(indices, max_indices_in_chunk);
 		delete[] indices;
 
 		FrameBufferSpecification frameBufferSpecification;
 		frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::DEPTH24STENCIL8 };
 		frameBufferSpecification.Width  = Application::Get().GetWindow().GetWidth();
 		frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
-		s_Data.FrameBuffer = FrameBuffer::Create(frameBufferSpecification);
+		s_Data.FrameBuffer.Create(frameBufferSpecification);
 	}
 
 	void Renderer3D::ShutDown()
@@ -67,7 +67,7 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_Data.FrameBuffer->BindAndClear();
+		s_Data.FrameBuffer.BindAndClear();
 
 		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_RendererData.CurrentCamera, s_ChunkData.ChunksToRender);
 		RenderChunks();
@@ -78,7 +78,7 @@ namespace KuchCraft {
 
 		RenderWater();
 
-		s_Data.FrameBuffer->Unbind();
+		s_Data.FrameBuffer.Unbind();
 	}
 
 	void Renderer3D::Clear()
@@ -93,45 +93,45 @@ namespace KuchCraft {
 
 	void Renderer3D::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
-		s_Data.FrameBuffer->Resize(width, height);
+		s_Data.FrameBuffer.Resize(width, height);
 	}
 
 	void Renderer3D::PrepareChunks()
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_ChunkData.VertexArray = VertexArray::Create();
-		s_ChunkData.VertexArray->Bind();
+		s_ChunkData.VertexArray.Create();
+		s_ChunkData.VertexArray.Bind();
 
-		s_ChunkData.VertexBuffer = VertexBuffer::Create(max_vertices_in_chunk * sizeof(uint32_t));
-		s_ChunkData.VertexBuffer->SetBufferLayout({
+		s_ChunkData.VertexBuffer.Create(max_vertices_in_chunk * sizeof(uint32_t));
+		s_ChunkData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Uint, "a_PackedData" }
 		});
 
-		s_ChunkData.VertexArray->SetVertexBuffer(s_ChunkData.VertexBuffer);
+		s_ChunkData.VertexArray.SetVertexBuffer(s_ChunkData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> chunkShaderData;
 		chunkShaderData["##max_texture_slots"] = std::to_string(max_texture_slots);
 
-		s_ChunkData.Shader = Shader::Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl", chunkShaderData);
-		s_ChunkData.Shader->Bind();
+		s_ChunkData.Shader.Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl", chunkShaderData);
+		s_ChunkData.Shader.Bind();
 
 		int samplers[max_texture_slots];
 		for (int i = 0; i < max_texture_slots; i++)
 			samplers[i] = i;
-		s_ChunkData.Shader->SetIntArray("u_Textures", samplers, max_texture_slots);
+		s_ChunkData.Shader.SetIntArray("u_Textures", samplers, max_texture_slots);
 
-		s_ChunkData.VertexArray ->Unbind();
-		s_ChunkData.VertexBuffer->Unbind();
-		s_ChunkData.Shader      ->Unbind();
+		s_ChunkData.VertexArray .Unbind();
+		s_ChunkData.VertexBuffer.Unbind();
+		s_ChunkData.Shader      .Unbind();
 	}
 
 	void Renderer3D::PrepareSkybox()
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_SkyboxData.VertexArray = VertexArray::Create();
-		s_SkyboxData.VertexArray->Bind();
+		s_SkyboxData.VertexArray.Create();
+		s_SkyboxData.VertexArray.Bind();
 
 		constexpr float vertices[] = {
 			 1.0f, -1.0f,  1.0f,
@@ -165,18 +165,18 @@ namespace KuchCraft {
 			 1.0f,  1.0f, -1.0f,
 		};
 
-		s_SkyboxData.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
-		s_SkyboxData.VertexBuffer->SetBufferLayout({
+		s_SkyboxData.VertexBuffer.Create(sizeof(vertices), vertices, true);
+		s_SkyboxData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position"}
 		});
 
-		s_SkyboxData.VertexArray->SetVertexBuffer(s_SkyboxData.VertexBuffer);
+		s_SkyboxData.VertexArray.SetVertexBuffer(s_SkyboxData.VertexBuffer);
 
-		s_SkyboxData.Shader = Shader::Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
-		s_SkyboxData.Shader->Bind();
-		s_SkyboxData.Shader->SetInt("u_CubemapTexture", 0);
+		s_SkyboxData.Shader.Create("assets/shaders/skybox.vert.glsl", "assets/shaders/skybox.frag.glsl");
+		s_SkyboxData.Shader.Bind();
+		s_SkyboxData.Shader.SetInt("u_CubemapTexture", 0);
 
-		s_SkyboxData.Texture = CubeMapTexture::Create(CubeMapFacesInfo{
+		s_SkyboxData.Texture.Create(CubeMapFacesInfo{
 			"assets/skybox/xpos.png",
 			"assets/skybox/xneg.png",
 			"assets/skybox/ypos.png",
@@ -185,41 +185,41 @@ namespace KuchCraft {
 			"assets/skybox/zneg.png"
 		});
 
-		s_SkyboxData.VertexArray ->Unbind();
-		s_SkyboxData.VertexBuffer->Unbind();
-		s_SkyboxData.Shader      ->Unbind();
+		s_SkyboxData.VertexArray .Unbind();
+		s_SkyboxData.VertexBuffer.Unbind();
+		s_SkyboxData.Shader      .Unbind();
 	}
 
 	void Renderer3D::PrepareWater()
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_WaterData.VertexArray = VertexArray::Create();
-		s_WaterData.VertexArray->Bind();
+		s_WaterData.VertexArray.Create();
+		s_WaterData.VertexArray.Bind();
 
-		s_WaterData.VertexBuffer = VertexBuffer::Create(max_vertices_in_chunk * sizeof(Vertex_P3C2));
-		s_WaterData.VertexBuffer->SetBufferLayout({
+		s_WaterData.VertexBuffer.Create(max_vertices_in_chunk * sizeof(Vertex_P3C2));
+		s_WaterData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 		});
 
-		s_WaterData.VertexArray->SetVertexBuffer(s_WaterData.VertexBuffer);
+		s_WaterData.VertexArray.SetVertexBuffer(s_WaterData.VertexBuffer);
 
-		s_WaterData.Shader = Shader::Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
-		s_WaterData.Shader->Bind();
-		s_WaterData.Shader->SetInt("u_Texture", default_texture_slot);
+		s_WaterData.Shader.Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
+		s_WaterData.Shader.Bind();
+		s_WaterData.Shader.SetInt("u_Texture", default_texture_slot);
 
-		s_WaterData.VertexArray ->Unbind();
-		s_WaterData.VertexBuffer->Unbind();
-		s_WaterData.Shader      ->Unbind();
+		s_WaterData.VertexArray .Unbind();
+		s_WaterData.VertexBuffer.Unbind();
+		s_WaterData.Shader      .Unbind();
 	}
 
 	void Renderer3D::PrepareOutlinedBlock()
 	{
 		KC_PROFILE_FUNCTION();
 		
-		s_OutlinedBlockData.VertexArray = VertexArray::Create();
-		s_OutlinedBlockData.VertexArray->Bind();
+		s_OutlinedBlockData.VertexArray.Create();
+		s_OutlinedBlockData.VertexArray.Bind();
 
 		// Float3::pos, Float2::texCoord
 		constexpr float vertices[] = {
@@ -255,24 +255,24 @@ namespace KuchCraft {
 			0.0f, 1.0f, 0.0f, 1.0f, 1.0f
 		};
 
-		s_OutlinedBlockData.VertexBuffer = VertexBuffer::Create(sizeof(vertices), vertices, true);
-		s_OutlinedBlockData.VertexBuffer->SetBufferLayout({
+		s_OutlinedBlockData.VertexBuffer.Create(sizeof(vertices), vertices, true);
+		s_OutlinedBlockData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 		});
 
-		s_OutlinedBlockData.VertexArray->SetVertexBuffer(s_OutlinedBlockData.VertexBuffer);
+		s_OutlinedBlockData.VertexArray.SetVertexBuffer(s_OutlinedBlockData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> outlinedBlockShaderData;
 		outlinedBlockShaderData["##outlined_block_border_radius"] = std::to_string(s_OutlinedBlockData.BorderRadius);
 		outlinedBlockShaderData["##outlined_block_border_color"]  = VecToString(s_OutlinedBlockData.Color);
 
-		s_OutlinedBlockData.Shader = Shader::Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl", outlinedBlockShaderData);
-		s_OutlinedBlockData.Shader->Bind();
+		s_OutlinedBlockData.Shader.Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl", outlinedBlockShaderData);
+		s_OutlinedBlockData.Shader.Bind();
 
-		s_OutlinedBlockData.VertexArray ->Unbind();
-		s_OutlinedBlockData.VertexBuffer->Unbind();
-		s_OutlinedBlockData.Shader      ->Unbind();
+		s_OutlinedBlockData.VertexArray .Unbind();
+		s_OutlinedBlockData.VertexBuffer.Unbind();
+		s_OutlinedBlockData.Shader      .Unbind();
 	}
 
 	void Renderer3D::RenderChunks()
@@ -283,15 +283,15 @@ namespace KuchCraft {
 		RendererCommand::EnableFaceCulling();
 		RendererCommand::EnableDepthTesting();
 
-		s_ChunkData.Shader->Bind();
-		s_ChunkData.VertexArray->Bind();
-		s_Data.QuadIndexBuffer->Bind();
+		s_ChunkData.Shader.Bind();
+		s_ChunkData.VertexArray.Bind();
+		s_Data.QuadIndexBuffer.Bind();
 
 		for (const auto& chunk : s_ChunkData.ChunksToRender)
 		{
 			uint32_t vertexOffset = 0;
 			const auto& drawList = chunk->GetDrawList();
-			s_ChunkData.Shader->SetFloat3("u_ChunkPosition", chunk->GetPosition());
+			s_ChunkData.Shader.SetFloat3("u_ChunkPosition", chunk->GetPosition());
 
 			for (uint32_t drawCallIndex = 0; drawCallIndex < drawList.GetDrawCallCount(); drawCallIndex++)
 			{
@@ -299,7 +299,7 @@ namespace KuchCraft {
 				if (indexCount != 0)
 				{
 					uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-					s_ChunkData.VertexBuffer->SetData(drawList.GetVerticesPtr(vertexOffset), vertexCount * sizeof(uint32_t));
+					s_ChunkData.VertexBuffer.SetData(drawList.GetVerticesPtr(vertexOffset), vertexCount * sizeof(uint32_t));
 
 					vertexOffset += vertexCount;
 
@@ -320,12 +320,12 @@ namespace KuchCraft {
 		RendererCommand::EnableFrontFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
 
-		s_SkyboxData.Shader      ->Bind();
-		s_SkyboxData.VertexArray ->Bind();
-		s_SkyboxData.VertexBuffer->Bind();
-		s_Data.QuadIndexBuffer   ->Bind();
+		s_SkyboxData.Shader      .Bind();
+		s_SkyboxData.VertexArray .Bind();
+		s_SkyboxData.VertexBuffer.Bind();
+		s_Data.QuadIndexBuffer   .Bind();
 
-		s_SkyboxData.Texture->Bind();
+		s_SkyboxData.Texture.Bind();
 		RendererCommand::DrawElements(cube_face_cout * quad_index_count);
 	}
 
@@ -337,11 +337,11 @@ namespace KuchCraft {
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableDepthTesting();
 
-		s_WaterData.Shader     ->Bind();
-		s_WaterData.VertexArray->Bind();
-		s_Data.QuadIndexBuffer ->Bind();
+		s_WaterData.Shader     .Bind();
+		s_WaterData.VertexArray.Bind();
+		s_Data.QuadIndexBuffer .Bind();
 
-		AssetManager::GetBlockTexture(BlockType::Water)->Bind(default_texture_slot);
+		AssetManager::GetBlockTexture(BlockType::Water).Bind(default_texture_slot);
 
 		for (const auto& chunk : s_ChunkData.Chunks)
 		{
@@ -351,7 +351,7 @@ namespace KuchCraft {
 			if (indexCount != 0)
 			{
 				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-				s_WaterData.VertexBuffer->SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
+				s_WaterData.VertexBuffer.SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
 	
 				RendererCommand::DrawElements(indexCount);
 			}
@@ -366,12 +366,12 @@ namespace KuchCraft {
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_OutlinedBlockData.Position);
 
-		s_OutlinedBlockData.Shader->Bind();
-		s_OutlinedBlockData.Shader->SetMat4("u_Transform", transform);
+		s_OutlinedBlockData.Shader.Bind();
+		s_OutlinedBlockData.Shader.SetMat4("u_Transform", transform);
 
-		s_OutlinedBlockData.VertexArray ->Bind();
-		s_OutlinedBlockData.VertexBuffer->Bind();
-		s_Data.QuadIndexBuffer          ->Bind();
+		s_OutlinedBlockData.VertexArray .Bind();
+		s_OutlinedBlockData.VertexBuffer.Bind();
+		s_Data.QuadIndexBuffer          .Bind();
 
 		RendererCommand::DrawElements(cube_index_count);
 	}

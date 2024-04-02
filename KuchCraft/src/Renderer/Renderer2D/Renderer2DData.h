@@ -18,17 +18,17 @@ namespace KuchCraft {
 
 	struct Renderer2DQuadData
 	{
-		Ref<Shader>		  Shader;
-		Ref<IndexBuffer>  IndexBuffer;
-		Ref<VertexArray>  VertexArray;
-		Ref<VertexBuffer> VertexBuffer;
+		Shader		 Shader;
+		IndexBuffer  IndexBuffer;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
 	};
 
 	struct Renderer2DFullScreenQuadData
 	{
-		Ref<Shader>		   Shader;
-		Ref<VertexArray>   VertexArray;
-		Ref<VertexBuffer>  VertexBuffer;
+		Shader		 Shader;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
 	};
 
 }

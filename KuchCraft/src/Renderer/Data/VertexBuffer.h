@@ -7,10 +7,10 @@ namespace KuchCraft {
 	class VertexBuffer
 	{
 	public:
-		static Ref<VertexBuffer> Create(uint32_t size, const void* data = nullptr, bool staticDraw = false);
-
-		VertexBuffer(uint32_t size, const void* data, bool staticDraw);
+		VertexBuffer();
 		~VertexBuffer();
+
+		void Create(uint32_t size, const void* data = nullptr, bool staticDraw = false);
 
 		void SetData(const void* data, uint32_t size);
 

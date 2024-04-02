@@ -7,11 +7,6 @@
 
 namespace KuchCraft {
 
-	Ref<FrameBuffer> FrameBuffer::Create(const FrameBufferSpecification& specification)
-	{
-		return CreateRef<FrameBuffer>(specification);
-	}
-
 	static GLenum TextureTarget(bool multisampled)
 	{
 		return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
@@ -90,9 +85,15 @@ namespace KuchCraft {
 		return 0;
 	}
 
-	FrameBuffer::FrameBuffer(const FrameBufferSpecification& specification)
-		: m_Specification(specification)
+	FrameBuffer::FrameBuffer()
 	{
+		
+	}
+
+	void FrameBuffer::Create(const FrameBufferSpecification& specification)
+	{
+		m_Specification = specification;
+
 		for (auto& spec : m_Specification.Attachments.Attachments)
 		{
 			if (IsDepthFormat(spec.TextureFormat))
