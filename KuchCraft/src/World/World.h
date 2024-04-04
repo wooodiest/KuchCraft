@@ -63,7 +63,6 @@ namespace KuchCraft {
 		// Chunk data
 		std::vector<Chunk*> m_Chunks{ world_chunk_size * world_chunk_size, nullptr }; // Temporary
 		std::vector<Chunk*> m_ChunksToUpdate;
-		std::vector<Chunk*> m_ChunksToRender;
 
 	private:
 		void Shutdown();

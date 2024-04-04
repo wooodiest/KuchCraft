@@ -137,10 +137,9 @@ namespace KuchCraft {
 				m_WorldStats.TotalRecreatedChunks++;
 				if (totalChunksRecreated == max_chunks_to_recreate)
 					break;
-			}
-			else
-				Renderer3D::DrawChunk(c);	
+			}	
 		}
+		Renderer3D::DrawChunks(m_ChunksToUpdate);
 
 		// Delete from memory chunks that are too far away
 		DeleteUnusedChunks(playerPosition);
@@ -378,7 +377,6 @@ namespace KuchCraft {
 				m_WorldStats.ChunksInMemory--;
 			}
 		}
-		m_ChunksToRender.clear();
 		m_ChunksToUpdate.clear();
 		s_Instance = nullptr;
 
