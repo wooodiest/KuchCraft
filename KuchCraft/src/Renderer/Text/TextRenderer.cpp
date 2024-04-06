@@ -59,6 +59,8 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
+		Renderer::s_Stats.TextTimer.Start();
+
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::DisableDepthTesting();
@@ -126,6 +128,8 @@ namespace KuchCraft {
 
 		}
 		delete[] textBuffer;
+
+		Renderer::s_Stats.TextTimer.Finish();
 	}
 
 	void TextRenderer::Clear()

@@ -332,6 +332,8 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
+		Renderer::s_Stats.ChunkTimer.Start();
+
 		RendererCommand::DisableBlending();
 		RendererCommand::EnableFaceCulling();
 		RendererCommand::EnableDepthTesting();
@@ -366,11 +368,15 @@ namespace KuchCraft {
 				}
 			}
 		}
+
+		Renderer::s_Stats.ChunkTimer.Finish();
 	}
 
 	void Renderer3D::RenderSkybox()
 	{
 		KC_PROFILE_FUNCTION();
+
+		Renderer::s_Stats.SkyboxTimer.Start();
 
 		RendererCommand::DisableBlending();
 		RendererCommand::EnableFrontFaceCulling();
@@ -386,11 +392,15 @@ namespace KuchCraft {
 
 		Renderer::s_Stats.DrawCalls++;
 		Renderer::s_Stats.Quads += cube_face_cout;
+
+		Renderer::s_Stats.SkyboxTimer.Finish();
 	}
 
 	void Renderer3D::RenderWater()
 	{
 		KC_PROFILE_FUNCTION();
+
+		Renderer::s_Stats.WaterTimer.Start();
 
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
@@ -418,6 +428,8 @@ namespace KuchCraft {
 				Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
 			}
 		}
+
+		Renderer::s_Stats.WaterTimer.Finish();
 	}
 
 	void Renderer3D::RenderOutlinedBlock()

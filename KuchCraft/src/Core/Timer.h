@@ -1,27 +1,31 @@
 #pragma once
 
+#include <chrono>
+
 namespace KuchCraft {
 
 	class Timer
 	{
 	public:
-		Timer()
+		Timer() {}
+		~Timer() {}
+
+		void Start()
 		{
-			Begin();
+			m_Start = std::chrono::high_resolution_clock::now();
 		}
 
-		static void OnUpdate(float dt);
+		void Finish()
+		{
+			m_Millis = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - m_Start).count() * 0.001f * 0.001f;
+		}
 
-		void Begin();
-		void End();
-
-		float Elapsed()       const { return m_LastTime;           }
-		float ElapsedMillis() const { return m_LastTime * 1000.0f; }
+		float GetElapsedMillis() const { return m_Millis; }
 
 	private:
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_Start;
-		float m_LastTime = 0.0f;
 
-		static float s_CurrentTimeElapsed;
+		float m_Millis = 0.0f;
 	};
+
 }

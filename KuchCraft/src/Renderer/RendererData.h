@@ -6,6 +6,8 @@
 #include "Renderer/Data/UniformBuffer.h"
 #include "Renderer/Data/Camera.h"
 
+#include "Core/Timer.h"
+
 namespace KuchCraft {
 
 	constexpr uint32_t default_texture_slot  = 0;
@@ -69,6 +71,12 @@ namespace KuchCraft {
 
 		uint32_t DrawCalls = 0;
 		uint32_t Quads     = 0;
+
+		Timer RenderTimer;
+		Timer ChunkTimer;
+		Timer WaterTimer;
+		Timer SkyboxTimer;
+		Timer TextTimer;
 
 		void Clear()
 		{
