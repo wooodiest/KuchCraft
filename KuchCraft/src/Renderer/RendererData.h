@@ -69,8 +69,9 @@ namespace KuchCraft {
 	{
 		std::string DebugText;
 
-		uint32_t DrawCalls = 0;
-		uint32_t Quads     = 0;
+		uint32_t DrawCalls      = 0;
+		uint32_t Quads          = 0;
+		uint32_t ChunksToRender = 0;
 
 		Timer RenderTimer;
 		Timer ChunkTimer;
@@ -80,8 +81,9 @@ namespace KuchCraft {
 
 		void Clear()
 		{
-			DrawCalls = 0;
-			Quads     = 0;
+			DrawCalls      = 0;
+			Quads          = 0;
+			ChunksToRender = 0;
 		}
 	};
 

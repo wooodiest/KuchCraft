@@ -32,7 +32,11 @@ namespace KuchCraft {
 		void SetKeptInMemoryChunksDistance(uint32_t distance);
 
 	private:
+		bool OnWindowResize(WindowResizeEvent& e);
+
+	private:
 		World* m_World = nullptr;
+		bool m_QuitStatus = false;
 
 		static KuchCraftSettings s_Settings;
 	};

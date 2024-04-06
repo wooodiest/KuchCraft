@@ -12,7 +12,6 @@ namespace KuchCraft {
 	struct WorldStats
 	{
 		uint32_t ActiveChunks   = 0;
-		uint32_t ChunksToRender = 0;
 
 		uint32_t ChunksInMemory       = 0;
 		uint32_t TotalBuiltChunks     = 0;

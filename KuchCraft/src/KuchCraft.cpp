@@ -28,20 +28,23 @@ namespace KuchCraft {
 		if (m_World)
 		{
 			m_World->OnUpdate(dt);
-
-			// Check to safety exit from world
-			if (m_World->GetQuitStatus()) // TODO: Move this outside end frame so it can render last frame befor quiting
-			{
-				delete m_World;
-				m_World = nullptr;
-			}
+			m_QuitStatus = m_World->GetQuitStatus();
 		}
 
 		Renderer::EndFrame(m_World ? &m_World->GetCamera() : nullptr);
+
+		if (m_QuitStatus)
+		{
+			delete m_World;
+			m_World = nullptr;
+		}
 	}
 
 	void KuchCraft::OnEvent(Event& event)
 	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowResizeEvent>(KC_BIND_EVENT_FN(KuchCraft::OnWindowResize));
+
 		if (m_World)
 			m_World->OnEvent(event);
 	}
@@ -69,6 +72,12 @@ namespace KuchCraft {
 		s_Settings.ChunksKeptInMemoryDistance = distance;
 		if (m_World)
 			m_World->ReloadChunks();
+	}
+
+	bool KuchCraft::OnWindowResize(WindowResizeEvent& e)
+	{
+		Renderer::OnViewportSizeChanged(e.GetWidth(), e.GetHeight());
+		return false;
 	}
 
 }

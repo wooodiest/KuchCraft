@@ -4,15 +4,12 @@
 #include "Core/Random.h"
 #include "Core/Core.h"
 
-#include "Renderer/Renderer.h"
-
 namespace KuchCraft {
 
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application()
 	{
-
 		Random::Init();
 		s_Instance = this;
 
@@ -74,8 +71,6 @@ namespace KuchCraft {
 		}
 
 		m_Minimized = false;
-		Renderer::OnViewportSizeChanged(e.GetWidth(), e.GetHeight()); // TODO dangerous renderer can be not initialized, move to game
-
 		return false;
 	}
 

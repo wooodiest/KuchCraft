@@ -18,7 +18,8 @@ namespace KuchCraft {
 		static void BeginFrame();
 		static void EndFrame(Camera* camera);
 
-		static const RendererInfo& GetInfo() { return s_Info; }
+		static const RendererInfo& GetInfo()             { return s_Info;  }
+		static const RendererStatistics& GetStatistics() { return s_Stats; }
 		static const std::string& GetDubugText();
 
 	private:

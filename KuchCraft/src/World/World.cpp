@@ -340,7 +340,7 @@ namespace KuchCraft {
 			"\n    Chunk ID: " + std::to_string(GetChunkIndex(m_Player.GetPosition())) +
 			"\n    Chunks:"
 			"\n      - active: " + std::to_string(m_WorldStats.ActiveChunks) +
-			"\n      - to render: " + std::to_string(m_WorldStats.ChunksToRender) +
+			"\n      - to render: " + std::to_string(Renderer::GetStatistics().ChunksToRender) +
 			"\n      - in memory: " + std::to_string(m_WorldStats.ChunksInMemory) +
 			"\n      - built: " + std::to_string(m_WorldStats.TotalBuiltChunks) +
 			"\n      - recreated: " + std::to_string(m_WorldStats.TotalRecreatedChunks);
@@ -351,7 +351,6 @@ namespace KuchCraft {
 	void World::ClearStats()
 	{
 		m_WorldStats.ActiveChunks   = 0;
-		m_WorldStats.ChunksToRender = 0;
 	}
 
 	void World::Shutdown()

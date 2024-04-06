@@ -78,6 +78,8 @@ namespace KuchCraft {
 		s_Data.RenderFrameBuffer.BindAndClear();
 
 		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_Data.CurrentCamera, s_ChunkData.ChunksToRender);
+		Renderer::s_Stats.ChunksToRender = s_ChunkData.ChunksToRender.size();
+
 		RenderChunks();
 		RenderSkybox();
 
