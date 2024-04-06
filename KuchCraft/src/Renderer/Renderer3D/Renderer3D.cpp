@@ -360,6 +360,9 @@ namespace KuchCraft {
 						Texture2D::Bind(drawList.GetTexture(drawCallIndex, textureIndex), textureIndex);
 
 					RendererCommand::DrawElements(indexCount);
+
+					Renderer::s_Stats.DrawCalls++;
+					Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
 				}
 			}
 		}
@@ -380,6 +383,9 @@ namespace KuchCraft {
 
 		s_SkyboxData.Texture.Bind();
 		RendererCommand::DrawElements(cube_face_cout * quad_index_count);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads += cube_face_cout;
 	}
 
 	void Renderer3D::RenderWater()
@@ -396,7 +402,7 @@ namespace KuchCraft {
 
 		AssetManager::GetBlockTexture(BlockType::Water).Bind(default_texture_slot);
 
-		for (const auto& chunk : s_ChunkData.Chunks)
+		for (const auto& chunk : s_ChunkData.ChunksToRender)
 		{
 			const auto& drawList = chunk->GetDrawList();
 			uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
@@ -407,6 +413,9 @@ namespace KuchCraft {
 				s_WaterData.VertexBuffer.SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
 	
 				RendererCommand::DrawElements(indexCount);
+
+				Renderer::s_Stats.DrawCalls++;
+				Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
 			}
 		}
 	}
@@ -426,6 +435,9 @@ namespace KuchCraft {
 		s_OutlinedBlockData.Shader.SetMat4("u_Transform", transform);
 
 		RendererCommand::DrawElements(cube_index_count);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads += cube_face_cout;
 	}
 
 	void Renderer3D::RenderTinted()
@@ -443,6 +455,9 @@ namespace KuchCraft {
 
 		Texture2D::Bind(s_Data.RenderFrameBuffer.GetColorAttachmentRendererID(), default_texture_slot);
 		RendererCommand::DrawArrays(quad_vertex_count_a);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads ++;
 	}
 
 	void Renderer3D::DrawChunk(Chunk* chunk)

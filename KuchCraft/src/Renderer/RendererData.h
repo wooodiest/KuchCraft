@@ -11,7 +11,6 @@ namespace KuchCraft {
 	constexpr uint32_t default_texture_slot  = 0;
 
 	// Vertex data
-	constexpr uint32_t triangle_index_count = 6;
 	constexpr uint32_t quad_index_count     = 6;
 	constexpr uint32_t quad_vertex_count    = 4;
 	constexpr uint32_t quad_vertex_count_a  = 6;
@@ -63,6 +62,20 @@ namespace KuchCraft {
 		std::shared_ptr<Camera> SpareCamera; // spare camera just in case, only care about ortho projection
 		UniformBuffer WorldDataUniformBuffer;
 	}; 
+
+	struct RendererStatistics
+	{
+		std::string DebugText;
+
+		uint32_t DrawCalls = 0;
+		uint32_t Quads     = 0;
+
+		void Clear()
+		{
+			DrawCalls = 0;
+			Quads     = 0;
+		}
+	};
 
 	// Cube - quad vertices
 	constexpr uint32_t vertices_bottom_index = 0;

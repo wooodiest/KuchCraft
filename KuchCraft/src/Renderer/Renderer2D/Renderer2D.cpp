@@ -1,11 +1,10 @@
 #include "kcpch.h"
 #include "Renderer/Renderer2D/Renderer2D.h"
 
+#include "Renderer/Renderer.h"
 #include "Renderer/RendererData.h"
 #include "Renderer/RendererCommand.h"
 #include "Renderer/Data/Texture2D.h"
-
-#include <glad/glad.h>
 
 namespace KuchCraft {
 
@@ -56,6 +55,9 @@ namespace KuchCraft {
 
 		Texture2D::Bind(rendererID, default_texture_slot);
 		RendererCommand::DrawArrays(quad_vertex_count_a);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads++;
 	}
 
 	void Renderer2D::PrepareQuadRendering()

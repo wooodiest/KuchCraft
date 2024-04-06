@@ -152,7 +152,7 @@ namespace KuchCraft {
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);
 
-		TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText(), { 6.0f, 25.0f });
+		TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), {6.0f, 25.0f});
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)

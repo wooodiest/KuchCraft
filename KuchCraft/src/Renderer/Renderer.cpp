@@ -19,6 +19,8 @@ namespace KuchCraft {
 	RendererData Renderer::s_Data;
 	RendererInfo Renderer::s_Info;
 
+	RendererStatistics Renderer::s_Stats;
+
 	void Renderer::Init()
 	{
 		KC_PROFILE_FUNCTION();
@@ -55,6 +57,8 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
+		s_Stats.Clear();
+
 		s_Data.CurrentCamera = camera ? camera : &(*s_Data.SpareCamera);
 
 		// Set camera uniform buffer
@@ -73,6 +77,16 @@ namespace KuchCraft {
 		Renderer2D::RenderFullScreenQuad(Renderer3D::GetRendererdColorAttachmentRendererID());
 
 		TextRenderer::Render();
+	}
+
+	const std::string& Renderer::GetDubugText()
+	{
+		s_Stats.DebugText =
+			"\nRenderer:"
+			"\n    Draw cals: " + std::to_string(s_Stats.DrawCalls) +
+			"\n    Quads: "     + std::to_string(s_Stats.Quads);
+
+		return s_Stats.DebugText;
 	}
 
 	void Renderer::PrepareRenderer()

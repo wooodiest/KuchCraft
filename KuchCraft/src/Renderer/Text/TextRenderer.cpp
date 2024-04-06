@@ -1,6 +1,8 @@
 #include "kcpch.h"
 #include "Renderer/Text/TextRenderer.h"
 
+#include "Renderer/Renderer.h"
+
 #include "Renderer/RendererCommand.h"
 
 #include "Core/Application.h"
@@ -107,6 +109,9 @@ namespace KuchCraft {
 						s_Data.UniformBuffer.SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
 						RendererCommand::DrawStripArraysInstanced(4, currentIndex);
 						currentIndex = 0;
+
+						Renderer::s_Stats.DrawCalls++;
+						Renderer::s_Stats.Quads += currentIndex;
 					}
 				}
 			}
@@ -114,6 +119,9 @@ namespace KuchCraft {
 			{
 				s_Data.UniformBuffer.SetData(textBuffer, s_Info.MaxCharacterUniformArrayLimit * sizeof(UniformText));
 				RendererCommand::DrawStripArraysInstanced(4, currentIndex);
+
+				Renderer::s_Stats.DrawCalls++;
+				Renderer::s_Stats.Quads += currentIndex;
 			}
 
 		}
