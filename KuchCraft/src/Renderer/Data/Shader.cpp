@@ -60,8 +60,6 @@ namespace KuchCraft {
 
 	uint32_t Shader::Compile(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
 	{
-		KC_PROFILE_FUNCTION();
-
 		std::string vertex   = ReadFile(vertexShaderPath);
 		std::string fragment = ReadFile(fragmentShaderPath);
 		PreProcess(vertex, additionalPreProcessValues);
@@ -119,8 +117,6 @@ namespace KuchCraft {
 
 	std::string Shader::ReadFile(const std::string& filepath)
 	{
-		KC_PROFILE_FUNCTION();
-
 		std::string result;
 		std::ifstream in(filepath, std::ios::in | std::ios::binary);
 		
@@ -151,8 +147,6 @@ namespace KuchCraft {
 
 	void Shader::PreProcess(std::string& file, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
 	{
-		KC_PROFILE_FUNCTION();
-
 		auto replace = [&](const std::string& from, const std::string& to) {
 			size_t pos = 0;
 			while ((pos = file.find(from, pos)) != std::string::npos)

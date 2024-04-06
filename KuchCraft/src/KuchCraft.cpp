@@ -9,16 +9,12 @@ namespace KuchCraft {
 
 	KuchCraft::KuchCraft()
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer::Init();
 		LoadWorld("Example");
 	}
 
 	KuchCraft::~KuchCraft()
 	{
-		KC_PROFILE_FUNCTION();
-
 		if (m_World)
 			delete m_World;
 		
@@ -27,8 +23,6 @@ namespace KuchCraft {
 
 	void KuchCraft::OnUpdate(float dt)
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer::BeginFrame();
 
 		if (m_World)
@@ -54,8 +48,6 @@ namespace KuchCraft {
 
 	void KuchCraft::LoadWorld(const std::string& path)
 	{
-		KC_PROFILE_FUNCTION();
-
 		if (m_World)
 		{
 			delete m_World;

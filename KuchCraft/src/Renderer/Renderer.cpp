@@ -23,8 +23,6 @@ namespace KuchCraft {
 
 	void Renderer::Init()
 	{
-		KC_PROFILE_FUNCTION();
-
 		LoadRendererInfo();
 		PrepareRenderer();
 		
@@ -36,8 +34,6 @@ namespace KuchCraft {
 
 	void Renderer::ShutDown()
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer3D  ::ShutDown();
 		Renderer2D  ::ShutDown();
 		TextRenderer::ShutDown();
@@ -46,8 +42,6 @@ namespace KuchCraft {
 
 	void Renderer::BeginFrame()
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer3D  ::Clear();
 		Renderer2D  ::Clear();
 		TextRenderer::Clear();
@@ -55,8 +49,6 @@ namespace KuchCraft {
 
 	void Renderer::EndFrame(Camera* camera)
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_Stats.RenderTimer.Start();
 		s_Stats.Clear();
 
@@ -99,8 +91,6 @@ namespace KuchCraft {
 
 	void Renderer::PrepareRenderer()
 	{
-		KC_PROFILE_FUNCTION();
-
 		if (s_Info.OpenGlLogs)
 			RendererCommand::EnableLogMessages();
 		
@@ -110,8 +100,6 @@ namespace KuchCraft {
 
 	void Renderer::LoadRendererInfo()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_Info = RendererInfo();
 	}
 

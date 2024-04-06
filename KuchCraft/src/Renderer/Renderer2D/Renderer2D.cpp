@@ -14,8 +14,6 @@ namespace KuchCraft {
 
 	void Renderer2D::Init()
 	{
-		KC_PROFILE_FUNCTION();
-
 		LoadRenderer2DInfo();
 
 		PrepareQuadRendering();
@@ -24,13 +22,11 @@ namespace KuchCraft {
 
 	void Renderer2D::ShutDown()
 	{
-		KC_PROFILE_FUNCTION();
+
 	}
 
 	void Renderer2D::LoadRenderer2DInfo()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_Info = Renderer2DInfo();
 	}
 
@@ -40,7 +36,7 @@ namespace KuchCraft {
 
 	void Renderer2D::Render()
 	{
-		KC_PROFILE_FUNCTION();
+
 	}
 
 	void Renderer2D::RenderFullScreenQuad(uint32_t rendererID)
@@ -62,8 +58,6 @@ namespace KuchCraft {
 
 	void Renderer2D::PrepareQuadRendering()
 	{
-		KC_PROFILE_FUNCTION();
-
 		uint32_t* indices = new uint32_t[s_Info.MaxIndices];
 		uint32_t  offset  = 0;
 		for (uint32_t i = 0; i < s_Info.MaxIndices; i += 6)
@@ -85,8 +79,6 @@ namespace KuchCraft {
 
 	void Renderer2D::PrepareFullScreenQuadRendering()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_FullScreenQuadData.VertexArray.Create();
 		s_FullScreenQuadData.VertexArray.Bind();
 

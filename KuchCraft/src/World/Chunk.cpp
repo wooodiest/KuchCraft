@@ -17,8 +17,6 @@ namespace KuchCraft {
 
 	void Chunk::Recreate()
 	{
-		KC_PROFILE_FUNCTION();
-
 		m_DrawList.StartRecreating();
 
 		Chunk* leftChunk   = World::Get().GetChunk({ m_Position.x - chunk_size_XZ, m_Position.y, m_Position.z                 });
@@ -121,8 +119,6 @@ namespace KuchCraft {
 
 	void Chunk::Build()
 	{
-		KC_PROFILE_FUNCTION();
-
 		// Check in file
 		bool needToGenerate = true; // World::LoadChunk(this);
 		// Else

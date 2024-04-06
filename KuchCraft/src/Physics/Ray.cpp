@@ -10,8 +10,6 @@ namespace KuchCraft {
 
     TargetedBlockInfo Ray::IsColliding(const AABB& aabb) const
 	{
-        KC_PROFILE_FUNCTION();
-
         float tMin = 0.0f;
         float tMax = Distance;
 

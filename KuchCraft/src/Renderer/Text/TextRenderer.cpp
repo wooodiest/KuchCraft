@@ -14,8 +14,6 @@ namespace KuchCraft {
 
 	void TextRenderer::Init()
 	{
-		KC_PROFILE_FUNCTION();
-
 		LoadTextInfo();
 
 		s_Data.VertexArray.Create();
@@ -52,13 +50,11 @@ namespace KuchCraft {
 
 	void TextRenderer::ShutDown()
 	{
-		KC_PROFILE_FUNCTION();
+
 	}
 
 	void TextRenderer::Render()
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer::s_Stats.TextTimer.Start();
 
 		RendererCommand::EnableBlending();
@@ -134,8 +130,6 @@ namespace KuchCraft {
 
 	void TextRenderer::Clear()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_Data.TextData.clear();
 	}
 

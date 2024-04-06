@@ -42,6 +42,5 @@
 
 #include "Core/Log.h"
 #include "Core/Core.h"
-#include "Core/Instrumentator.h"
 
 

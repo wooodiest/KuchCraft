@@ -26,8 +26,6 @@ namespace KuchCraft {
 
 	void Player::Init()
 	{
-		KC_PROFILE_FUNCTION();
-
 		m_PrevMousePosition = Input::GetMousePosition();
 
 		m_PhysicsBody.Init(player_width, player_height);
@@ -41,8 +39,6 @@ namespace KuchCraft {
 
 	void Player::OnUpdate(float dt)
 	{
-		KC_PROFILE_FUNCTION();
-
 		// Movement	
 		// Mouse
 		{
@@ -150,8 +146,6 @@ namespace KuchCraft {
 
 	TargetedBlockInfo Player::GetTargetBlockInfo()
 	{
-		KC_PROFILE_FUNCTION();
-
 		TargetedBlockInfo outputTargetedBlockInfo;
 
 		const glm::ivec3 absolutePosition{ m_Position };
@@ -257,8 +251,6 @@ namespace KuchCraft {
 
 	void Player::PlaceBlock(const glm::vec3& position, const Block& block)
 	{
-		KC_PROFILE_FUNCTION();
-
 		if (!m_TargetedBlock.Targeted)
 			return;
 
@@ -286,8 +278,6 @@ namespace KuchCraft {
 
 	void Player::DestroyBlock(const glm::vec3& position)
 	{
-		KC_PROFILE_FUNCTION();
-
 		if (!m_TargetedBlock.Targeted)
 			return;
 

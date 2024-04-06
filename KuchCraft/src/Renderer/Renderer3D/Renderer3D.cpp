@@ -21,8 +21,6 @@ namespace KuchCraft {
 
 	void Renderer3D::Init()
 	{
-		KC_PROFILE_FUNCTION();
-
 		LoadRenderer3DInfo();
 
 		PrepareChunks();
@@ -67,18 +65,16 @@ namespace KuchCraft {
 
 	void Renderer3D::ShutDown()
 	{
-		KC_PROFILE_FUNCTION();
+
 	}
 
 	void Renderer3D::LoadRenderer3DInfo()
 	{
-		KC_PROFILE_FUNCTION();
+
 	}
 
 	void Renderer3D::Render()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_Data.RenderFrameBuffer.BindAndClear();
 
 		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_Data.CurrentCamera, s_ChunkData.ChunksToRender);
@@ -98,8 +94,6 @@ namespace KuchCraft {
 
 	void Renderer3D::Clear()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_ChunkData.Chunks.        clear();
 		s_ChunkData.ChunksToRender.clear();
 
@@ -115,8 +109,6 @@ namespace KuchCraft {
 
 	void Renderer3D::PrepareChunks()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_ChunkData.VertexArray.Create();
 		s_ChunkData.VertexArray.Bind();
 
@@ -147,8 +139,6 @@ namespace KuchCraft {
 
 	void Renderer3D::PrepareSkybox()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_SkyboxData.VertexArray.Create();
 		s_SkyboxData.VertexArray.Bind();
 
@@ -211,8 +201,6 @@ namespace KuchCraft {
 
 	void Renderer3D::PrepareWater()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_WaterData.VertexArray.Create();
 		s_WaterData.VertexArray.Bind();
 
@@ -235,8 +223,6 @@ namespace KuchCraft {
 
 	void Renderer3D::PrepareOutlinedBlock()
 	{
-		KC_PROFILE_FUNCTION();
-		
 		s_OutlinedBlockData.VertexArray.Create();
 		s_OutlinedBlockData.VertexArray.Bind();
 
@@ -296,8 +282,6 @@ namespace KuchCraft {
 
 	void Renderer3D::PrepareTinted()
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_TintedData.VertexArray.Create();
 		s_TintedData.VertexArray.Bind();
 
@@ -330,8 +314,6 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderChunks()
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer::s_Stats.ChunkTimer.Start();
 
 		RendererCommand::DisableBlending();
@@ -374,8 +356,6 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderSkybox()
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer::s_Stats.SkyboxTimer.Start();
 
 		RendererCommand::DisableBlending();
@@ -398,8 +378,6 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderWater()
 	{
-		KC_PROFILE_FUNCTION();
-
 		Renderer::s_Stats.WaterTimer.Start();
 
 		RendererCommand::EnableBlending();

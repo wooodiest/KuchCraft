@@ -7,20 +7,16 @@ namespace KuchCraft {
 
 	void AssetManager::Init()
 	{
-		KC_PROFILE_FUNCTION();
-
 		PrepareBlocks();
 	}
 
 	void AssetManager::ShutDown()
 	{
-		KC_PROFILE_FUNCTION();
+
 	}
 
 	void AssetManager::PrepareBlocks()
 	{
-		KC_PROFILE_FUNCTION();
-
 		for (uint32_t i = first_index_of_block_types; i < absolute_number_of_block_types; i++)
 		{
 			Block block = Block((BlockType)i);

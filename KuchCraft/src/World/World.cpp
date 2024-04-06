@@ -19,8 +19,6 @@ namespace KuchCraft {
 	World::World(const std::string& path)
 		: filePath(path)
 	{
-		KC_PROFILE_FUNCTION();
-
 		s_Instance = this;
 		// Load data
 
@@ -34,9 +32,6 @@ namespace KuchCraft {
 
 	World::~World()
 	{
-		KC_PROFILE_FUNCTION();
-
-		// Free memory
 		Shutdown();
 	}
 
@@ -66,8 +61,6 @@ namespace KuchCraft {
 
 	void World::OnUpdate(float dt)
 	{
-		KC_PROFILE_FUNCTION();
-
 		ClearStats();
 
 		// Update necessary stuff
@@ -262,8 +255,6 @@ namespace KuchCraft {
 
 	void World::ReloadChunks()
 	{
-		KC_PROFILE_FUNCTION();
-
 		const auto& position          = m_Player.GetPosition();
 		const auto& graphicalSettings = KuchCraft::GetSettings();
 
@@ -291,8 +282,6 @@ namespace KuchCraft {
 
 	void World::DeleteUnusedChunks(const glm::vec3& position)
 	{
-		KC_PROFILE_FUNCTION();
-
 		const auto& graphicalSettings = KuchCraft::GetSettings();
 
 		// Get rid of chunks whose position is equal to
@@ -367,8 +356,6 @@ namespace KuchCraft {
 
 	void World::Shutdown()
 	{
-		KC_PROFILE_FUNCTION();
-
 		// Save data
 
 
@@ -390,8 +377,6 @@ namespace KuchCraft {
 
 	void World::PreLoadWorld()
 	{
-		KC_PROFILE_FUNCTION();
-
 		const auto& playerPosition    = m_Player.GetPosition();
 		const auto& graphicalSettings = KuchCraft::GetSettings();
 

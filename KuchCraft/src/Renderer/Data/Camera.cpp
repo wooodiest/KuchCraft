@@ -19,8 +19,6 @@ namespace KuchCraft {
 
 	void Camera::OnUpdate(const glm::vec3& position, const glm::vec2& rotation)
 	{
-		KC_PROFILE_FUNCTION();
-
 		UpdateFront(rotation);
 		UpdateView(position);
 	}
@@ -47,24 +45,18 @@ namespace KuchCraft {
 
 	void Camera::UpdateProjection(uint32_t width, uint32_t height)
 	{
-		KC_PROFILE_FUNCTION();
-
 		m_Projection      = glm::perspective(m_Fov, m_AspectRatio, m_Near, m_Far);
 		m_OrthoProjection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
 	}
 
 	void Camera::UpdateView(const glm::vec3& position)
 	{
-		KC_PROFILE_FUNCTION();
-
 		m_View           = glm::lookAt(position, position + m_Front, m_Up);
 		m_ViewProjection = m_Projection * m_View;
 	}
 
 	void Camera::UpdateFront(const glm::vec2& rotation)
 	{
-		KC_PROFILE_FUNCTION();
-
 		glm::vec3 front;
 		front.x = glm::cos(rotation.x) * glm::cos(rotation.y);
 		front.y = glm::sin(rotation.y);
