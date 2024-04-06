@@ -139,10 +139,15 @@ namespace KuchCraft {
 					break;
 			}	
 		}
-		Renderer3D::DrawChunks(m_ChunksToUpdate);
-
+		
 		// Delete from memory chunks that are too far away
 		DeleteUnusedChunks(playerPosition);
+
+		// Renderer draw commands
+		Renderer3D::DrawChunks(m_ChunksToUpdate);
+
+		if (GetBlock(m_Player.GetEyePosition()) == BlockType::Water)
+			Renderer3D::DrawWaterTinted();
 
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);

@@ -12,11 +12,12 @@
 
 namespace KuchCraft {
 
-	Renderer3DData            Renderer3D::s_Data;
-	Renderer3DChunkData       Renderer3D::s_ChunkData;
-	Renderer3DSkyboxData      Renderer3D::s_SkyboxData;
-	Renderer3DWaterData       Renderer3D::s_WaterData;
-	RendererOutlinedBlockData Renderer3D::s_OutlinedBlockData;
+	Renderer3DData              Renderer3D::s_Data;
+	Renderer3DChunkData         Renderer3D::s_ChunkData;
+	Renderer3DSkyboxData        Renderer3D::s_SkyboxData;
+	Renderer3DWaterData         Renderer3D::s_WaterData;
+	Renderer3DOutlinedBlockData Renderer3D::s_OutlinedBlockData;
+	Renderer3DTintedData        Renderer3D::s_TintedData;
 
 	void Renderer3D::Init()
 	{
@@ -28,6 +29,7 @@ namespace KuchCraft {
 		PrepareSkybox();
 		PrepareWater();
 		PrepareOutlinedBlock();
+		PrepareTinted();
 
 		// QuadIndexBuffer
 		uint32_t* indices = new uint32_t[max_indices_in_chunk];
@@ -46,11 +48,21 @@ namespace KuchCraft {
 		s_Data.QuadIndexBuffer.Create(indices, max_indices_in_chunk);
 		delete[] indices;
 
-		FrameBufferSpecification frameBufferSpecification;
-		frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::DEPTH24STENCIL8 };
-		frameBufferSpecification.Width  = Application::Get().GetWindow().GetWidth();
-		frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
-		s_Data.FrameBuffer.Create(frameBufferSpecification);
+		{
+			FrameBufferSpecification frameBufferSpecification;
+			frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::DEPTH24STENCIL8 };
+			frameBufferSpecification.Width = Application::Get().GetWindow().GetWidth();
+			frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
+			s_Data.RenderFrameBuffer.Create(frameBufferSpecification);
+		}
+
+		{
+			FrameBufferSpecification frameBufferSpecification;
+			frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8 };
+			frameBufferSpecification.Width  = Application::Get().GetWindow().GetWidth();
+			frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
+			s_TintedData.FrameBuffer.Create(frameBufferSpecification);
+		}
 	}
 
 	void Renderer3D::ShutDown()
@@ -67,7 +79,7 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_Data.FrameBuffer.BindAndClear();
+		s_Data.RenderFrameBuffer.BindAndClear();
 
 		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_Data.CurrentCamera, s_ChunkData.ChunksToRender);
 		RenderChunks();
@@ -78,7 +90,10 @@ namespace KuchCraft {
 
 		RenderWater();
 
-		s_Data.FrameBuffer.Unbind();
+		s_TintedData.FrameBuffer.BindAndClear();
+		RenderTinted();
+
+		s_TintedData.FrameBuffer.Unbind();
 	}
 
 	void Renderer3D::Clear()
@@ -89,11 +104,13 @@ namespace KuchCraft {
 		s_ChunkData.ChunksToRender.clear();
 
 		s_OutlinedBlockData.Status = false;
+		s_TintedData.Tinted        = false;
 	}
 
 	void Renderer3D::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
-		s_Data.FrameBuffer.Resize(width, height);
+		s_Data.RenderFrameBuffer.Resize(width, height);
+		s_TintedData.FrameBuffer.Resize(width, height);
 	}
 
 	void Renderer3D::PrepareChunks()
@@ -277,6 +294,40 @@ namespace KuchCraft {
 		s_OutlinedBlockData.Shader      .Unbind();
 	}
 
+	void Renderer3D::PrepareTinted()
+	{
+		KC_PROFILE_FUNCTION();
+
+		s_TintedData.VertexArray.Create();
+		s_TintedData.VertexArray.Bind();
+
+		float vertices[] = {
+			-1.0f, -1.0f, 0.0f, 0.0f,
+			 1.0f, -1.0f, 1.0f, 0.0f,
+			 1.0f,  1.0f, 1.0f, 1.0f,
+
+			-1.0f, -1.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 1.0f, 1.0f,
+			-1.0f,  1.0f, 0.0f, 1.0f
+		};
+
+		s_TintedData.VertexBuffer.Create(sizeof(vertices), vertices, true);
+		s_TintedData.VertexBuffer.SetBufferLayout({
+			{ ShaderDataType::Float2, "a_Position" },
+			{ ShaderDataType::Float2, "a_TexCoord" }
+		});
+
+		s_TintedData.VertexArray.SetVertexBuffer(s_TintedData.VertexBuffer);
+
+		s_TintedData.Shader.Create("assets/shaders/tinted.vert.glsl", "assets/shaders/tinted.frag.glsl");
+		s_TintedData.Shader.Bind();
+		s_TintedData.Shader.SetInt("u_Texture", default_texture_slot);
+
+		s_TintedData.VertexArray .Unbind();
+		s_TintedData.VertexBuffer.Unbind();
+		s_TintedData.Shader.      Unbind();
+	}
+
 	void Renderer3D::RenderChunks()
 	{
 		KC_PROFILE_FUNCTION();
@@ -366,16 +417,32 @@ namespace KuchCraft {
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_OutlinedBlockData.Position);
+		s_OutlinedBlockData.Shader.      Bind();
+		s_OutlinedBlockData.VertexArray. Bind();
+		s_OutlinedBlockData.VertexBuffer.Bind();
+		s_Data.QuadIndexBuffer.          Bind();
 
-		s_OutlinedBlockData.Shader.Bind();
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_OutlinedBlockData.Position);
 		s_OutlinedBlockData.Shader.SetMat4("u_Transform", transform);
 
-		s_OutlinedBlockData.VertexArray .Bind();
-		s_OutlinedBlockData.VertexBuffer.Bind();
-		s_Data.QuadIndexBuffer          .Bind();
-
 		RendererCommand::DrawElements(cube_index_count);
+	}
+
+	void Renderer3D::RenderTinted()
+	{
+		RendererCommand::DisableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::DisableDepthTesting();
+
+		s_TintedData.Shader.      Bind();
+		s_TintedData.VertexArray. Bind();
+		s_TintedData.VertexBuffer.Bind();
+
+		glm::vec4 tintedColor = s_TintedData.Tinted ? s_TintedData.Color : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+		s_TintedData.Shader.SetFloat4("u_Color", tintedColor);
+
+		Texture2D::Bind(s_Data.RenderFrameBuffer.GetColorAttachmentRendererID(), default_texture_slot);
+		RendererCommand::DrawArrays(quad_vertex_count_a);
 	}
 
 	void Renderer3D::DrawChunk(Chunk* chunk)
@@ -392,6 +459,11 @@ namespace KuchCraft {
 	{
 		s_OutlinedBlockData.Status   = true;
 		s_OutlinedBlockData.Position = position;
+	}
+
+	void Renderer3D::DrawWaterTinted()
+	{
+		s_TintedData.Tinted = true;
 	}
 
 }

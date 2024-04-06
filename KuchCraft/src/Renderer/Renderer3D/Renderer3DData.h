@@ -13,7 +13,7 @@ namespace KuchCraft {
 	struct Renderer3DData
 	{
 		IndexBuffer QuadIndexBuffer;
-		FrameBuffer FrameBuffer;
+		FrameBuffer RenderFrameBuffer;
 	};
 
 	struct Renderer3DChunkData
@@ -41,7 +41,7 @@ namespace KuchCraft {
 		VertexBuffer VertexBuffer;
 	};
 
-	struct RendererOutlinedBlockData
+	struct Renderer3DOutlinedBlockData
 	{
 		bool Status = false;
 		glm::vec3 Position{ 0.0f };
@@ -53,4 +53,14 @@ namespace KuchCraft {
 		VertexBuffer VertexBuffer;
 	};
 
+	struct Renderer3DTintedData
+	{
+		bool Tinted = false;
+		glm::vec4 Color{ 0.0f, 0.0f, 0.75f, 1.0f };
+
+		Shader       Shader;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
+		FrameBuffer  FrameBuffer;
+	};
 }

@@ -243,9 +243,12 @@ namespace KuchCraft {
 
 	void FrameBuffer::ClearDepthAttachment() const
 	{
-		GLfloat depthClearValue = 1.0f;
-		GLint stencilClearValue = 0;
-		glClearTexImage(m_DepthAttachment, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, &depthClearValue);
+		if (m_DepthAttachment)
+		{
+			GLfloat depthClearValue = 1.0f;
+			GLint stencilClearValue = 0;
+			glClearTexImage(m_DepthAttachment, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, &depthClearValue);
+		}
 	}
 
 	void FrameBuffer::Clear(const glm::vec4& color) const
