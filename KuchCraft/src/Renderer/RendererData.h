@@ -9,11 +9,6 @@
 
 namespace KuchCraft {
 
-	// Constances
-	constexpr bool opengl_logs = true;
-
-	// GPU
-	constexpr uint32_t max_texture_slots     = 32; // Max value 128
 	constexpr uint32_t default_texture_slot  = 0;
 
 	// Vertex data
@@ -24,10 +19,6 @@ namespace KuchCraft {
 	constexpr uint32_t cube_vertex_count    = 24;
 	constexpr uint32_t cube_index_count     = 36;
 	constexpr uint32_t cube_face_cout       = 6;
-
-	constexpr glm::vec4 white_color     { 1.0f, 1.0f, 1.0f, 1.0f };
-	constexpr glm::vec4 water_tint_color{ 0.0f, 0.0f, 0.7f, 1.0f };
-	constexpr glm::vec4 clear_color     { 0.8f, 0.8f, 1.0f, 1.0f };
 
 	// Chunk data
 	constexpr int max_quads_in_chunk    = chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_face_cout;
@@ -59,6 +50,12 @@ namespace KuchCraft {
 		glm::mat4 ViewProjection;
 		glm::mat4 AbsoluteViewProjection;
 		glm::mat4 OrthoProjection;
+	};
+
+	struct RendererInfo
+	{
+		uint32_t MaxTextureSlots = 32;
+		bool     OpenGlLogs      = true;
 	};
 
 	struct RendererData
@@ -112,9 +109,5 @@ namespace KuchCraft {
 		Vertex{{ 0.0f, 1.0f, 1.0f }, { 1.0f,  1.0f }, 0.0f },
 		Vertex{{ 0.0f, 1.0f, 0.0f }, { 0.75f, 1.0f }, 0.0f }
 	};
-
-
-
-
 
 }

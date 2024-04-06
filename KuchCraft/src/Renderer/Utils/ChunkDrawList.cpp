@@ -3,7 +3,7 @@
 
 #include "Renderer/Renderer.h"
 #include "Renderer/AssetManager.h"
-
+#include "Renderer/Renderer.h"
 namespace KuchCraft {
 
 	ChunkDrawList::ChunkDrawList()
@@ -32,7 +32,7 @@ namespace KuchCraft {
 		m_VertexData.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_vertex_count);
 
 		m_Textures.clear();
-		m_Textures.reserve(max_texture_slots);
+		m_Textures.reserve(Renderer::GetInfo().MaxTextureSlots);
 
 		m_IndexCount.clear();
 		m_IndexCount.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_index_count);
@@ -53,6 +53,16 @@ namespace KuchCraft {
 		m_IndexCount.   shrink_to_fit();
 		m_Textures.     shrink_to_fit();
 		m_WaterVertices.shrink_to_fit();
+	}
+
+	uint32_t ChunkDrawList::GetTextureCount(uint32_t drawCallIndex) const
+	{
+		return (uint32_t)m_Textures.size() - drawCallIndex * Renderer::GetInfo().MaxTextureSlots;
+	}
+
+	uint32_t ChunkDrawList::GetTexture(uint32_t drawCallIndex, uint32_t index) const
+	{
+		return m_Textures[drawCallIndex * Renderer::GetInfo().MaxTextureSlots + index]; ;
 	}
 
 	void ChunkDrawList::NewDrawCall()
@@ -91,7 +101,7 @@ namespace KuchCraft {
 		// If we haven't found the texture, check whether we have a new one or whether we have used all slots
 		if (texSlot == -1.0f)
 		{
-			if (m_TextureSlotHelper->GetCurrentSlot() == max_texture_slots)
+			if (m_TextureSlotHelper->GetCurrentSlot() == Renderer::GetInfo().MaxTextureSlots)
 				NewDrawCall();
 
 			texSlot = (float)m_TextureSlotHelper->GetCurrentSlot();
@@ -137,12 +147,19 @@ namespace KuchCraft {
 
 	TextureSlotHelper::TextureSlotHelper()
 	{
+		m_Slots = new uint32_t[Renderer::GetInfo().MaxTextureSlots];
 		ClearSlots();
+	}
+
+	TextureSlotHelper::~TextureSlotHelper()
+	{
+		delete[] m_Slots;
 	}
 
 	void TextureSlotHelper::ClearSlots()
 	{
-		std::memset(m_Slots, 0, max_texture_slots * sizeof(uint32_t));
+		for (uint32_t i = 0; i < Renderer::GetInfo().MaxTextureSlots; i++)
+			m_Slots[i] = 0;
 		m_CurrentSlot = 0;
 	}
 

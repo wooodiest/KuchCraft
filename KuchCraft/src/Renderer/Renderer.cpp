@@ -16,7 +16,8 @@
 
 namespace KuchCraft {
 
-	RendererData Renderer::s_RendererData;
+	RendererData Renderer::s_Data;
+	RendererInfo Renderer::s_Info;
 
 	void Renderer::Init()
 	{
@@ -54,16 +55,16 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		s_RendererData.CurrentCamera = camera ? camera : &(*s_RendererData.SpareCamera);
+		s_Data.CurrentCamera = camera ? camera : &(*s_Data.SpareCamera);
 
 		// Set camera uniform buffer
 		{
 			UniformBufferCameraData buffer{
-				s_RendererData.CurrentCamera->GetViewProjection(),
-				s_RendererData.CurrentCamera->GetAbsoluteViewProjection(),
-				s_RendererData.CurrentCamera->GetOrthoProjection()
+				s_Data.CurrentCamera->GetViewProjection(),
+				s_Data.CurrentCamera->GetAbsoluteViewProjection(),
+				s_Data.CurrentCamera->GetOrthoProjection()
 			};
-			s_RendererData.WorldDataUniformBuffer.SetData(&buffer, sizeof(buffer));
+			s_Data.WorldDataUniformBuffer.SetData(&buffer, sizeof(buffer));
 		}
 
 		Renderer3D::Render();
@@ -78,11 +79,11 @@ namespace KuchCraft {
 	{
 		KC_PROFILE_FUNCTION();
 
-		if (opengl_logs)
+		if (s_Info.OpenGlLogs)
 			RendererCommand::EnableLogMessages();
 		
-		s_RendererData.WorldDataUniformBuffer.Create(sizeof(UniformBufferCameraData), 0);
-		s_RendererData.SpareCamera = std::make_shared<Camera>();
+		s_Data.WorldDataUniformBuffer.Create(sizeof(UniformBufferCameraData), 0);
+		s_Data.SpareCamera = std::make_shared<Camera>();
 	}
 
 	void Renderer::LoadRendererInfo()
@@ -94,7 +95,7 @@ namespace KuchCraft {
 	{
 		Renderer3D::OnViewportSizeChanged(width, height);
 
-		s_RendererData.SpareCamera->UpdateProjection(width, height);
+		s_Data.SpareCamera->UpdateProjection(width, height);
 	}
 
 }

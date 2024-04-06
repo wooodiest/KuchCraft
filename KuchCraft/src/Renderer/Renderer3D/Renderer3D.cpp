@@ -69,7 +69,7 @@ namespace KuchCraft {
 
 		s_Data.FrameBuffer.BindAndClear();
 
-		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_RendererData.CurrentCamera, s_ChunkData.ChunksToRender);
+		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_Data.CurrentCamera, s_ChunkData.ChunksToRender);
 		RenderChunks();
 		RenderSkybox();
 
@@ -111,15 +111,17 @@ namespace KuchCraft {
 		s_ChunkData.VertexArray.SetVertexBuffer(s_ChunkData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> chunkShaderData;
-		chunkShaderData["##max_texture_slots"] = std::to_string(max_texture_slots);
+		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
+		chunkShaderData["##max_texture_slots"] = std::to_string(maxTextureSlots);
 
 		s_ChunkData.Shader.Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl", chunkShaderData);
 		s_ChunkData.Shader.Bind();
 
-		int samplers[max_texture_slots];
-		for (int i = 0; i < max_texture_slots; i++)
+		int* samplers = new int[maxTextureSlots];
+		for (int i = 0; i < maxTextureSlots; i++)
 			samplers[i] = i;
-		s_ChunkData.Shader.SetIntArray("u_Textures", samplers, max_texture_slots);
+		s_ChunkData.Shader.SetIntArray("u_Textures", samplers, maxTextureSlots);
+		delete[] samplers;
 
 		s_ChunkData.VertexArray .Unbind();
 		s_ChunkData.VertexBuffer.Unbind();

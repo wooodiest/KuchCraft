@@ -18,12 +18,15 @@ namespace KuchCraft {
 		static void BeginFrame();
 		static void EndFrame(Camera* camera);
 
+		static const RendererInfo& GetInfo() { return s_Info; }
+
 	private:
-		static RendererData s_RendererData;
+		static RendererData s_Data;
+		static RendererInfo s_Info;
 
 		static void PrepareRenderer();
-		static void LoadRendererInfo();
-		 
+		static void LoadRendererInfo();	 
+
 	public:
 		friend class Renderer3D;
 
