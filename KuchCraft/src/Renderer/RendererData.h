@@ -4,7 +4,6 @@
 #include "World/WorldData.h"
 
 #include "Renderer/Data/UniformBuffer.h"
-
 #include "Renderer/Data/Camera.h"
 
 namespace KuchCraft {

@@ -8,12 +8,11 @@
 
 namespace KuchCraft {
 
-	struct Renderer2dInfo
+	struct Renderer2DInfo
 	{
 		uint32_t MaxQuads    = 20000;
 		uint32_t MaxVertices = MaxQuads * 4;
 		uint32_t MaxIndices  = MaxQuads * 6;
-		uint32_t MaxTextureSlots = 32; // TODO: Get from Renderer::
 	};
 
 	struct Renderer2DQuadData

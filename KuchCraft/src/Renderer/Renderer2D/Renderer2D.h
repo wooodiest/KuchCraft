@@ -22,7 +22,7 @@ namespace KuchCraft {
 		static void PrepareFullScreenQuadRendering();
 
 	private:
-		static Renderer2dInfo               s_Info;
+		static Renderer2DInfo               s_Info;
 		static Renderer2DQuadData           s_QuadData;
 		static Renderer2DFullScreenQuadData s_FullScreenQuadData;
 

@@ -274,7 +274,7 @@ namespace KuchCraft {
 
 	void TextRenderer::LoadTextInfo()
 	{
-		// TODO: load TextRendererInfo from file
+		s_Info = TextRendererInfo();
 	}
 
 }

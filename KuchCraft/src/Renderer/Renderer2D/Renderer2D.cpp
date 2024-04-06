@@ -9,7 +9,7 @@
 
 namespace KuchCraft {
 
-	Renderer2dInfo               Renderer2D::s_Info;
+	Renderer2DInfo               Renderer2D::s_Info;
 	Renderer2DQuadData           Renderer2D::s_QuadData;
 	Renderer2DFullScreenQuadData Renderer2D::s_FullScreenQuadData;
 
@@ -31,6 +31,8 @@ namespace KuchCraft {
 	void Renderer2D::LoadRenderer2DInfo()
 	{
 		KC_PROFILE_FUNCTION();
+
+		s_Info = Renderer2DInfo();
 	}
 
 	void Renderer2D::Clear()

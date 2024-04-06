@@ -89,6 +89,8 @@ namespace KuchCraft {
 	void Renderer::LoadRendererInfo()
 	{
 		KC_PROFILE_FUNCTION();
+
+		s_Info = RendererInfo();
 	}
 
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
