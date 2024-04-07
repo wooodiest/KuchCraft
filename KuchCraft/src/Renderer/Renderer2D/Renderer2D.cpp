@@ -62,14 +62,14 @@ namespace KuchCraft {
 		s_QuadData.VertexOffset  = 0;
 		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
 
-		StartBatch();
+		StartQuadsBatch();
 
 		for (uint32_t i = 0; i < s_QuadData.Vertices.size(); i += quad_vertex_count)
 		{
 			if (s_QuadData.IndexCount == s_Info.MaxIndices)
-				NextBatch();
+				NextQuadsBatch();
 
-			if (s_QuadData.Vertices[i].TexIndex == 0.0f) // just color
+			if (s_QuadData.Vertices[i].TexIndex == 0.0f) // just color, TexIndex temporarily holds the texture rendererID
 			{
 				s_QuadData.Vertices[i + 0].TexIndex = 0.0f;
 				s_QuadData.Vertices[i + 1].TexIndex = 0.0f;
@@ -78,16 +78,13 @@ namespace KuchCraft {
 
 				s_QuadData.IndexCount += quad_index_count;
 			}
-			else // texture
+			else // textures
 			{	
 				float textureIndex = 0.0f;
-				for (uint32_t i = 1; i < s_QuadData.TextureSlotIndex; i++)
 				for (uint32_t j = 1; j < s_QuadData.TextureSlotIndex; j++)
 				{
-					if (s_QuadData.TextureSlots[i] == s_QuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
 					if (s_QuadData.TextureSlots[j] == s_QuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
 					{
-						textureIndex = (float)i;
 						textureIndex = (float)j;
 						break;
 					}
@@ -96,7 +93,7 @@ namespace KuchCraft {
 				if (textureIndex == 0.0f)
 				{
 					if (s_QuadData.TextureSlotIndex >= maxTextureSlots)
-						NextBatch();
+						NextQuadsBatch();
 
 					textureIndex = (float)s_QuadData.TextureSlotIndex;
 					s_QuadData.TextureSlots[s_QuadData.TextureSlotIndex] = s_QuadData.Vertices[i].TexIndex;
@@ -113,10 +110,10 @@ namespace KuchCraft {
 			}
 		}
 
-		Flush();
+		FlushQuads();
 	}
 
-	void Renderer2D::Flush()
+	void Renderer2D::FlushQuads()
 	{
 		if (s_QuadData.IndexCount == 0)
 			return;
@@ -135,16 +132,16 @@ namespace KuchCraft {
 		Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
 	}
 
-	void Renderer2D::StartBatch()
+	void Renderer2D::StartQuadsBatch()
 	{
 		s_QuadData.IndexCount       = 0;
 		s_QuadData.TextureSlotIndex = 1;
 	}
 
-	void Renderer2D::NextBatch()
+	void Renderer2D::NextQuadsBatch()
 	{
-		Flush();
-		StartBatch();
+		FlushQuads();
+		StartQuadsBatch();
 	}
 
 	void Renderer2D::RenderFullScreenQuad(uint32_t rendererID)
@@ -332,7 +329,7 @@ namespace KuchCraft {
 			vertex.Position     = transform * quad_vertex_positions[i];
 			vertex.Color        = tintColor;
 			vertex.TexCoord     = quad_vertex_tex_coords[i] * tilingFactor;
-			vertex.TexIndex     = (float)texture.GetRendererID();
+			vertex.TexIndex     = (float)texture.GetRendererID(); // TexIndex temporarily holds the texture rendererID
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
@@ -365,6 +362,40 @@ namespace KuchCraft {
 	{
 		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, color);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		DrawRotatedQuad(position, size, { 0.0f, 0.0f, rotation }, color);
+	}
+
+	void Renderer2D::DrawRotatedQuadN(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, size, { 0.0f, 0.0f, rotation }, color);
+	}
+
+	void Renderer2D::DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, color);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
+	{
+		DrawRotatedQuad(position, size, rotation, color);
+	}
+
+	void Renderer2D::DrawRotatedQuadN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, size, rotation, color);
+	}
+
+	void Renderer2D::DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, rotation, color);
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
@@ -411,6 +442,23 @@ namespace KuchCraft {
 		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
 	}
 
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawRotatedQuad(position, size, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawRotatedQuadN(const glm::vec3& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, size, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
+	}
+
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
@@ -438,7 +486,7 @@ namespace KuchCraft {
 			vertex.Position     = transform * quad_vertex_positions[i];
 			vertex.Color        = tintColor;
 			vertex.TexCoord     = quad_vertex_tex_coords[i] * tilingFactor;
-			vertex.TexIndex     = (float)texture.GetRendererID();
+			vertex.TexIndex     = (float)texture.GetRendererID(); // TexIndex temporarily holds the texture rendererID
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}

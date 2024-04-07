@@ -6,11 +6,15 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/Text/TextRenderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
+#include "Renderer/Renderer2D/Renderer2D.h"
+#include "Renderer/AssetManager.h"
 
 #include "World/WorldGenerator.h"
 
 #include "Core/Core.h"
 #include "Core/Utils.h"
+
+#include "Core/Application.h"
 
 namespace KuchCraft {
 
@@ -146,6 +150,49 @@ namespace KuchCraft {
 			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);
 
 		TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), {6.0f, 25.0f});
+
+		// Tmp, example
+		{
+			auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+			glm::vec3 hotbarPosition{ 0.5f * width, 33.0f, 1.0f };
+			Renderer2D::DrawQuad(hotbarPosition, { 273.0f, 33.0f }, AssetManager::GetHotbarTexture());
+
+			glm::vec3 hotbarSelectionPosition{ 0.5f * width - 3 * 60.0f, 34.0f, 1.0f };
+			Renderer2D::DrawQuad(hotbarSelectionPosition, { 33.0f, 33.0f }, AssetManager::GetHotbarSelectionTexture());
+
+			Renderer2D::DrawQuadN({ 0.5f, 0.5f, 1.0f }, { 15.0f, 15.0f }, AssetManager::GetCrosshairTexture());
+
+			// Hearts
+			glm::vec3 heartInitialPosition{ 0.5f * width - 273.0f, 80.0f, 1.0f };
+
+			for (float i = 0; i < 10; i++)
+			{
+				if (i < 6)
+					Renderer2D::DrawQuad({ heartInitialPosition.x + i * 2 * 11.0f + 13.0f, heartInitialPosition.y , 1.0f }, { 13.0f, 13.0f }, AssetManager::GetHeartFullTexture());
+				else
+					Renderer2D::DrawQuad({ heartInitialPosition.x + i * 2 * 11.0f + 13.0f, heartInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetHeartEmptyTexture());
+			}
+
+			// Armor
+			glm::vec3 armorInitialPosition{ 0.5f * width - 273.0f, 105.0f, 1.0f };
+			for (float i = 0; i < 10; i++)
+			{
+				if (i < 3)
+					Renderer2D::DrawQuad({ armorInitialPosition.x + i * 2 * 11.0f + 13.0f, armorInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetArmorFullTexture());
+				else
+					Renderer2D::DrawQuad({ armorInitialPosition.x + i * 2 * 11.0f + 13.0f, armorInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetArmorEmptyTexture());
+			}
+
+			// Food
+			glm::vec3 foodInitialPosition{ 0.5f * width + 273.0f, 80.0f, 1.0f };
+			for (float i = 0; i < 10; i++)
+			{
+				if (i < 6)
+					Renderer2D::DrawQuad({ foodInitialPosition.x - i * 2 * 11.0f - 13.0f, foodInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetFoodEmptyTexture());
+				else
+					Renderer2D::DrawQuad({ foodInitialPosition.x - i * 2 * 11.0f - 13.0f, foodInitialPosition.y , 1.0f }, { 13.0f, 13.0f }, AssetManager::GetFoodFullTexture());
+			}
+		}
 	}
 
 	void World::SetBlock(const glm::vec3& position, const Block& block)
