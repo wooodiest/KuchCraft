@@ -109,6 +109,11 @@ namespace KuchCraft {
 		glBindTextureUnit(slot, m_RendererID);
 	}
 
+	void Texture2D::Setdata(void* data, uint32_t size)
+	{
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_TextureSpecification.Width, m_TextureSpecification.Height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	}
+
 	void Texture2D::Bind(uint32_t rendererID, uint32_t slot)
 	{
 		glBindTextureUnit(slot, rendererID);

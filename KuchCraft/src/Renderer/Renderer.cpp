@@ -69,6 +69,8 @@ namespace KuchCraft {
 		DefaultFrameBuffer::BindAndClear();
 		Renderer2D::RenderFullScreenQuad(Renderer3D::GetRendererdColorAttachmentRendererID());
 
+		Renderer2D::Render();
+
 		TextRenderer::Render();
 
 		s_Stats.RenderTimer.Finish();
@@ -81,10 +83,11 @@ namespace KuchCraft {
 			"\n    Draw cals: " + std::to_string(s_Stats.DrawCalls) +
 			"\n    Quads: "     + std::to_string(s_Stats.Quads) +
 			"\n    Render time: "         + std::to_string(s_Stats.RenderTimer.GetElapsedMillis()) + "ms" +
-			"\n      - chunks:      "     + std::to_string(s_Stats.ChunkTimer.GetElapsedMillis())  + "ms" + 
-			"\n      - skybox:      "     + std::to_string(s_Stats.SkyboxTimer.GetElapsedMillis()) + "ms" +
-			"\n      - water:         "   + std::to_string(s_Stats.WaterTimer.GetElapsedMillis())  + "ms" +
-			"\n      - text:            " + std::to_string(s_Stats.TextTimer.GetElapsedMillis())   + "ms";
+			"\n      - chunks:        "     + std::to_string(s_Stats.ChunkTimer.GetElapsedMillis())  + "ms" + 
+			"\n      - skybox:        "     + std::to_string(s_Stats.SkyboxTimer.GetElapsedMillis()) + "ms" +
+			"\n      - water:           "   + std::to_string(s_Stats.WaterTimer.GetElapsedMillis())  + "ms" +
+			"\n      - text:              " + std::to_string(s_Stats.TextTimer.GetElapsedMillis())   + "ms" +
+			"\n      - renderer2D: "        + std::to_string(s_Stats.Renderer2DTimer.GetElapsedMillis()) + "ms";
 
 		return s_Stats.DebugText;
 	}

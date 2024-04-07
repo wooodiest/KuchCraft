@@ -5,6 +5,7 @@
 #include "Renderer/Data/VertexBuffer.h"
 #include "Renderer/Data/VertexArray.h"
 #include "Renderer/Data/UniformBuffer.h"
+#include "Renderer/Data/Texture2D.h"
 
 namespace KuchCraft {
 
@@ -15,12 +16,28 @@ namespace KuchCraft {
 		uint32_t MaxIndices  = MaxQuads * 6;
 	};
 
+	struct QuadVertex
+	{
+		glm::vec3 Position { 0.0f, 0.0f, 0.0f       };
+		glm::vec4 Color    { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec2 TexCoord { 0.0f, 0.0f             };
+		float     TexIndex     = 0.0f;
+	};
+
 	struct Renderer2DQuadData
 	{
 		Shader		 Shader;
 		IndexBuffer  IndexBuffer;
 		VertexArray  VertexArray;
 		VertexBuffer VertexBuffer;
+
+		Texture2D WhiteTexture;
+
+		std::vector<QuadVertex> Vertices;
+		uint32_t* TextureSlots;
+		uint32_t  TextureSlotIndex = 1;
+		uint32_t  IndexCount   = 0;
+		uint32_t  VertexOffset = 0;
 	};
 
 	struct Renderer2DFullScreenQuadData
@@ -28,6 +45,20 @@ namespace KuchCraft {
 		Shader		 Shader;
 		VertexArray  VertexArray;
 		VertexBuffer VertexBuffer;
+	};
+
+	constexpr glm::vec4 quad_vertex_positions[4] = {
+		{ -1.0f, -1.0f, 0.0f, 1.0f },
+		{  1.0f, -1.0f, 0.0f, 1.0f },
+		{  1.0f,  1.0f, 0.0f, 1.0f },
+		{ -1.0f,  1.0f, 0.0f, 1.0f }
+	};
+
+	constexpr glm::vec2 quad_vertex_tex_coords[4] = {
+		{ 0.0f, 0.0f }, 
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f },
+		{ 0.0f, 1.0f }
 	};
 
 }

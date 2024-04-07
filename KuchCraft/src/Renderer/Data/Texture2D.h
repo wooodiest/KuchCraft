@@ -35,6 +35,9 @@ namespace KuchCraft
 		uint32_t GetRendererID() const { return m_RendererID; }
 		void Bind(uint32_t slot) const;
 
+		// TODO: only works for rgba
+		void Setdata(void* data, uint32_t size);
+
 		static void Bind(uint32_t rendererID, uint32_t slot);
 
 	private:
