@@ -82,10 +82,13 @@ namespace KuchCraft {
 			{	
 				float textureIndex = 0.0f;
 				for (uint32_t i = 1; i < s_QuadData.TextureSlotIndex; i++)
+				for (uint32_t j = 1; j < s_QuadData.TextureSlotIndex; j++)
 				{
 					if (s_QuadData.TextureSlots[i] == s_QuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
+					if (s_QuadData.TextureSlots[j] == s_QuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
 					{
 						textureIndex = (float)i;
+						textureIndex = (float)j;
 						break;
 					}
 				}
