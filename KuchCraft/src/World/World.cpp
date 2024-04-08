@@ -152,6 +152,17 @@ namespace KuchCraft {
 
 		// Tmp, example
 		{
+			// 3D quads
+			static glm::vec3 quadRotation{ 0.0f, 0.0f, 0.0f };
+			quadRotation.y += glm::radians(45.0f) * dt;
+			Renderer3D::DrawQuad({ 2000.0f, 65.0f, 2000.0f }, quadRotation, { 2.0f, 0.5f }, { 1.0f, 0.0f, 0.0f, 1.0f });
+
+			static glm::vec3 texturedQuadRotation{ 0.0f, 0.0f, 0.0f };
+			texturedQuadRotation.y -= glm::radians(45.0f) * dt;
+			texturedQuadRotation.x += glm::radians(30.0f) * dt;
+			Renderer3D::DrawQuad({ 1995.0f, 65.0f, 1990.0f }, texturedQuadRotation, { 2.0f, 1.0f }, AssetManager::GetBlockTexture(Block(BlockType::DiamondOre)));
+
+			// Rendere2D: some ui
 			auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 			glm::vec3 hotbarPosition{ 0.5f * width, 33.0f, 1.0f };
 			Renderer2D::DrawQuad(hotbarPosition, { 273.0f, 33.0f }, AssetManager::GetHotbarTexture());

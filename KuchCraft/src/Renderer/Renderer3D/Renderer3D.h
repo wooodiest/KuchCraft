@@ -12,6 +12,9 @@ namespace KuchCraft {
 		static void DrawOutlinedBlock(const glm::vec3& position);
 		static void DrawWaterTinted();
 
+		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const glm::vec4& color);
+		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
+
 	private:
 		static void Init();
 		static void ShutDown();
@@ -30,6 +33,7 @@ namespace KuchCraft {
 		static void PrepareWater();
 		static void PrepareOutlinedBlock();
 		static void PrepareTinted();
+		static void PrepareQuads();
 
 		static void RenderChunks();
 		static void RenderSkybox();
@@ -37,16 +41,23 @@ namespace KuchCraft {
 		static void RenderOutlinedBlock();
 		static void RenderTinted();
 
+		static void RenderQuads();
+		static void FlushQuads();
+		static void StartQuadsBatch();
+		static void NextQuadsBatch();
+
 	private:
 		Renderer3D() = default;
 
 	private:
 		static Renderer3DData              s_Data;
+		static Renderer3DInfo              s_Info;
 		static Renderer3DChunkData         s_ChunkData;
 		static Renderer3DSkyboxData        s_SkyboxData;
 		static Renderer3DWaterData         s_WaterData;
 		static Renderer3DOutlinedBlockData s_OutlinedBlockData;
 		static Renderer3DTintedData        s_TintedData;
+		static Renderer3DQuadData          s_QuadData;
 
 	public:
 		friend class Renderer;

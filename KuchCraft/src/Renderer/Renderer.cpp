@@ -77,10 +77,11 @@ namespace KuchCraft {
 			"\n    Draw cals: " + std::to_string(s_Stats.DrawCalls) +
 			"\n    Quads: "     + std::to_string(s_Stats.Quads) +
 			"\n    Render time: "          + std::to_string(s_Stats.RenderTimer.GetElapsedMillis()) + "ms" +
-			"\n      - chunks:      "      + std::to_string(s_Stats.ChunkTimer.GetElapsedMillis())  + "ms" + 
-			"\n      - skybox:      "      + std::to_string(s_Stats.SkyboxTimer.GetElapsedMillis()) + "ms" +
-			"\n      - water:         "    + std::to_string(s_Stats.WaterTimer.GetElapsedMillis())  + "ms" +
-			"\n      - 2D:              "        + std::to_string(s_Stats.Renderer2DTimer.GetElapsedMillis()) + "ms";
+			"\n      - 2D:              "  + std::to_string(s_Stats.Renderer2DTimer.GetElapsedMillis()) + "ms" 
+			"\n      - 3D:              "  + std::to_string(s_Stats.Renderer3DTimer.GetElapsedMillis()) + "ms"
+			"\n      -> chunks:     "      + std::to_string(s_Stats.ChunkTimer.GetElapsedMillis())  + "ms" + 
+			"\n      -> skybox:     "      + std::to_string(s_Stats.SkyboxTimer.GetElapsedMillis()) + "ms" +
+			"\n      -> water:        "    + std::to_string(s_Stats.WaterTimer.GetElapsedMillis())  + "ms";
 
 		return s_Stats.DebugText;
 	}

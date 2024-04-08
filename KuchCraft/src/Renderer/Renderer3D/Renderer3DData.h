@@ -6,9 +6,17 @@
 #include "Renderer/Data/VertexArray.h"
 #include "Renderer/Data/FrameBuffer.h"
 #include "Renderer/Data/CubeMapTexture.h"
+#include "Renderer/Renderer2D/Renderer2DData.h"
 #include "World/Chunk.h"
 
 namespace KuchCraft {
+
+	struct Renderer3DInfo
+	{
+		uint32_t MaxQuads = 20000;
+		uint32_t MaxVertices = MaxQuads * 4;
+		uint32_t MaxIndices = MaxQuads * 6;
+	};
 
 	struct Renderer3DData
 	{
@@ -63,4 +71,21 @@ namespace KuchCraft {
 		VertexBuffer VertexBuffer;
 		FrameBuffer  FrameBuffer;
 	};
+
+	struct Renderer3DQuadData
+	{
+		Shader		 Shader;
+		IndexBuffer  IndexBuffer;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
+
+		Texture2D WhiteTexture;
+
+		std::vector<QuadVertex> Vertices;
+		uint32_t* TextureSlots;
+		uint32_t  TextureSlotIndex = 1;
+		uint32_t  IndexCount       = 0;
+		uint32_t  VertexOffset     = 0;
+	};
+
 }
