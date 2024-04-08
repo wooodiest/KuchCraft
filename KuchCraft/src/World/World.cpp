@@ -162,6 +162,10 @@ namespace KuchCraft {
 			texturedQuadRotation.x += glm::radians(30.0f) * dt;
 			Renderer3D::DrawQuad({ 1995.0f, 65.0f, 1990.0f }, texturedQuadRotation, { 2.0f, 1.0f }, AssetManager::GetBlockTexture(Block(BlockType::DiamondOre)));
 
+			static glm::vec3 fontRotation{ 0.0f, 0.0f, 0.0f };
+			fontRotation.y += glm::radians(30.0f) * dt;
+			Renderer3D::DrawText("JD2000", { 1990.0f, 70.0f, 1990.0f }, fontRotation, { 0.0f, 1.0f, 1.0f, 1.0 });
+			
 			// Rendere2D: some ui
 			auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 			glm::vec3 hotbarPosition{ 0.5f * width, 33.0f, 1.0f };

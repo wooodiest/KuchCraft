@@ -2,6 +2,11 @@
 
 #include "Renderer/Renderer3D/Renderer3DData.h"
 
+// lOVE windows.h <3
+#ifdef DrawText
+	#undef DrawText
+#endif
+
 namespace KuchCraft {
 
 	class Renderer3D
@@ -14,6 +19,12 @@ namespace KuchCraft {
 
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const glm::vec4& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
+
+		static void DrawText(const std::string& text, const TextStyle3D& textStyle);
+		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation);
+		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color);
+		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, float fontSize);
+		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color, float fontSize);
 
 	private:
 		static void Init();
@@ -33,6 +44,7 @@ namespace KuchCraft {
 		static void PrepareWater();
 		static void PrepareOutlinedBlock();
 		static void PrepareTinted();
+		static void PrepareTextRendering();
 		static void PrepareQuads();
 
 		static void RenderChunks();
@@ -40,6 +52,7 @@ namespace KuchCraft {
 		static void RenderWater();
 		static void RenderOutlinedBlock();
 		static void RenderTinted();
+		static void RenderText();
 
 		static void RenderQuads();
 		static void FlushQuads();
@@ -58,6 +71,8 @@ namespace KuchCraft {
 		static Renderer3DOutlinedBlockData s_OutlinedBlockData;
 		static Renderer3DTintedData        s_TintedData;
 		static Renderer3DQuadData          s_QuadData;
+		static Renderer3DTextInfo           s_TextInfo;
+		static Renderer3DTextData           s_TextData;
 
 	public:
 		friend class Renderer;

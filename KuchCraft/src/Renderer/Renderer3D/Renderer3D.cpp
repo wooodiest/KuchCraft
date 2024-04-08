@@ -20,6 +20,8 @@ namespace KuchCraft {
 	Renderer3DOutlinedBlockData Renderer3D::s_OutlinedBlockData;
 	Renderer3DTintedData        Renderer3D::s_TintedData;
 	Renderer3DQuadData          Renderer3D::s_QuadData;
+	Renderer3DTextInfo          Renderer3D::s_TextInfo;
+	Renderer3DTextData          Renderer3D::s_TextData;
 
 	void Renderer3D::Init()
 	{
@@ -30,6 +32,7 @@ namespace KuchCraft {
 		PrepareWater();
 		PrepareOutlinedBlock();
 		PrepareTinted();
+		PrepareTextRendering();
 		PrepareQuads();
 
 		// QuadIndexBuffer
@@ -73,7 +76,8 @@ namespace KuchCraft {
 
 	void Renderer3D::LoadRenderer3DInfo()
 	{
-		s_Info = Renderer3DInfo();
+		s_Info     = Renderer3DInfo();
+		s_TextInfo = Renderer3DTextInfo();
 	}
 
 	void Renderer3D::Render()
@@ -95,6 +99,8 @@ namespace KuchCraft {
 
 		RenderWater();
 
+		RenderText(); // TODO: think of place to put this and fix depth testing issues
+
 		s_TintedData.FrameBuffer.BindAndClear();
 		RenderTinted();
 
@@ -112,6 +118,8 @@ namespace KuchCraft {
 		s_TintedData.Tinted        = false;
 
 		s_QuadData.Vertices.clear();
+
+		s_TextData.Data.clear();
 	}
 
 	void Renderer3D::OnViewportSizeChanged(uint32_t width, uint32_t height)
@@ -325,6 +333,40 @@ namespace KuchCraft {
 		s_TintedData.Shader.      Unbind();
 	}
 
+	void Renderer3D::PrepareTextRendering()
+	{
+		s_TextData.VertexArray.Create();
+		s_TextData.VertexArray.Bind();
+
+		float vertices[] = {
+			0.0f, 1.0f,
+			0.0f, 0.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,
+		};
+
+		s_TextData.VertexBuffer.Create(sizeof(vertices), vertices, true);
+		s_TextData.VertexBuffer.SetBufferLayout({
+			{ ShaderDataType::Float2, "a_Position" }
+		});
+
+		s_TextData.VertexArray.SetVertexBuffer(s_TextData.VertexBuffer);
+
+		std::unordered_map<std::string, std::string> textShaderData;
+		textShaderData["##max_text_uniform_array_limit"] = std::to_string(s_TextInfo.MaxCharacterUniformArrayLimit);
+
+		s_TextData.Texture.Create(s_TextInfo.FontPath, s_TextInfo.FontTextureSize, s_TextInfo.FontCharactersCount);
+
+		s_TextData.Shader.Create("assets/shaders/text3D.vert.glsl", "assets/shaders/text3D.frag.glsl", textShaderData);
+		s_TextData.Shader.Bind();
+
+		s_TextData.UniformBuffer.Create(s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer2DUniformText), 2);
+
+		s_TextData.VertexArray.Unbind();
+		s_TextData.VertexBuffer.Unbind();
+		s_TextData.Shader.Unbind();
+	}
+
 	void Renderer3D::RenderChunks()
 	{
 		Renderer::s_Stats.ChunkTimer.Start();
@@ -461,6 +503,81 @@ namespace KuchCraft {
 
 		Renderer::s_Stats.DrawCalls++;
 		Renderer::s_Stats.Quads ++;
+	}
+
+	void Renderer3D::RenderText()
+	{
+		RendererCommand::EnableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::DisableDepthTesting();
+
+		s_TextData.Shader.Bind();
+		s_TextData.Texture.Bind();
+
+		s_TextData.VertexArray.Bind();
+		s_TextData.VertexBuffer.Bind();
+
+		Renderer3DUniformText* textBuffer = new Renderer3DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
+
+		for (const auto& [text, textStyle] : s_TextData.Data)
+		{
+			s_TextData.Shader.SetFloat4("u_Color", textStyle.Color);
+
+			glm::vec2 currentPosition = textStyle.Position;
+			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
+
+			const glm::mat4 rotation = glm::toMat4(glm::quat(textStyle.Rotation));
+
+			uint32_t currentIndex = 0;
+			for (auto c = text.begin(); c != text.end(); c++)
+			{
+				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);
+
+				if (*c == '\n')
+				{
+					currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
+					currentPosition.x = textStyle.Position.x;
+				}
+				else if (*c == ' ')
+				{
+					currentPosition.x += (character.Advance >> 6) * scale;
+				}
+				else
+				{
+					float xpos = currentPosition.x + character.Bearing.x * scale;
+					float ypos = currentPosition.y - (textStyle.FontSize - character.Bearing.y) * scale;
+
+					textBuffer[currentIndex].Transform = glm::translate(glm::mat4(1.0f), { xpos, ypos, textStyle.Position.z }) *
+						rotation *
+						glm::scale(glm::mat4(1.0f), { s_TextInfo.FontTextureSize * scale, s_TextInfo.FontTextureSize * scale, 0 });
+
+					textBuffer[currentIndex].Letter.x = (float)character.ID;
+
+					currentPosition.x += (character.Advance >> 6) * scale;
+					currentIndex++;
+
+					if (currentIndex == s_TextInfo.MaxCharacterUniformArrayLimit)
+					{
+						s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer3DUniformText));
+						RendererCommand::DrawStripArraysInstanced(4, currentIndex);
+						currentIndex = 0;
+
+						Renderer::s_Stats.DrawCalls++;
+						Renderer::s_Stats.Quads += currentIndex;
+					}
+				}
+			}
+			if (currentIndex)
+			{
+				s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer3DUniformText));
+				RendererCommand::DrawStripArraysInstanced(4, currentIndex);
+
+				Renderer::s_Stats.DrawCalls++;
+				Renderer::s_Stats.Quads += currentIndex;
+			}
+
+		}
+		delete[] textBuffer;
 	}
 
 	void Renderer3D::RenderQuads()
@@ -674,6 +791,55 @@ namespace KuchCraft {
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
+	}
+
+	void Renderer3D::DrawText(const std::string& text, const TextStyle3D& textStyle)
+	{
+		s_TextData.Data.emplace_back(text, textStyle);
+	}
+
+	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation)
+	{
+		DrawText(text, TextStyle3D{
+			s_TextInfo.DefaultFontColor,
+			position,
+			rotation,
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color)
+	{
+		DrawText(text, TextStyle3D{
+			color,
+			position,
+			rotation,
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, float fontSize)
+	{
+		DrawText(text, TextStyle3D{
+			s_TextInfo.DefaultFontColor,
+			position,
+			rotation,
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color, float fontSize)
+	{
+		DrawText(text, TextStyle3D{
+			color,
+			position,
+			rotation,
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
 	}
 
 }

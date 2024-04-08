@@ -350,7 +350,7 @@ namespace KuchCraft {
 		s_TextData.VertexBuffer.Create(sizeof(vertices), vertices, true);
 		s_TextData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float2, "a_Position" }
-			});
+		});
 
 		s_TextData.VertexArray.SetVertexBuffer(s_TextData.VertexBuffer);
 
