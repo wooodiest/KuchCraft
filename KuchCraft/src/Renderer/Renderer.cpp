@@ -1,7 +1,6 @@
 #include "kcpch.h"
 #include "Renderer/Renderer.h"
 
-#include "Renderer/Text/TextRenderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
 #include "Renderer/Renderer2D/Renderer2D.h"
 #include "Renderer/AssetManager.h"
@@ -27,7 +26,6 @@ namespace KuchCraft {
 		PrepareRenderer();
 		
 		AssetManager::Init();
-		TextRenderer::Init();
 		Renderer2D  ::Init();
 		Renderer3D  ::Init();
 	}
@@ -36,7 +34,6 @@ namespace KuchCraft {
 	{
 		Renderer3D  ::ShutDown();
 		Renderer2D  ::ShutDown();
-		TextRenderer::ShutDown();
 		AssetManager::ShutDown();
 	}
 
@@ -44,7 +41,6 @@ namespace KuchCraft {
 	{
 		Renderer3D  ::Clear();
 		Renderer2D  ::Clear();
-		TextRenderer::Clear();
 	}
 
 	void Renderer::EndFrame(Camera* camera)
@@ -71,8 +67,6 @@ namespace KuchCraft {
 
 		Renderer2D::Render();
 
-		TextRenderer::Render();
-
 		s_Stats.RenderTimer.Finish();
 	}
 
@@ -86,8 +80,7 @@ namespace KuchCraft {
 			"\n      - chunks:      "      + std::to_string(s_Stats.ChunkTimer.GetElapsedMillis())  + "ms" + 
 			"\n      - skybox:      "      + std::to_string(s_Stats.SkyboxTimer.GetElapsedMillis()) + "ms" +
 			"\n      - water:         "    + std::to_string(s_Stats.WaterTimer.GetElapsedMillis())  + "ms" +
-			"\n      - text:            "  + std::to_string(s_Stats.TextTimer.GetElapsedMillis())   + "ms" +
-			"\n      - 2D quads:  "        + std::to_string(s_Stats.Renderer2DTimer.GetElapsedMillis()) + "ms";
+			"\n      - 2D:              "        + std::to_string(s_Stats.Renderer2DTimer.GetElapsedMillis()) + "ms";
 
 		return s_Stats.DebugText;
 	}

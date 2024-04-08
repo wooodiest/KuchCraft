@@ -6,6 +6,7 @@
 #include "Renderer/Data/VertexArray.h"
 #include "Renderer/Data/UniformBuffer.h"
 #include "Renderer/Data/Texture2D.h"
+#include "Renderer/Data/FontTexture.h"
 
 namespace KuchCraft {
 
@@ -45,6 +46,43 @@ namespace KuchCraft {
 		Shader		 Shader;
 		VertexArray  VertexArray;
 		VertexBuffer VertexBuffer;
+	};
+
+	struct TextStyle2D
+	{
+		glm::vec4 Color;
+		glm::vec3 Position;
+		float     FontSize;
+		float     FontSpacing;
+	};
+
+	struct Renderer2DUniformText
+	{
+		glm::mat4 Transform;
+		glm::vec4 Letter{ 0.0f }; // weird alignment
+	};
+
+	struct Renderer2DTextData
+	{
+		Shader        Shader;
+		VertexArray   VertexArray;
+		VertexBuffer  VertexBuffer;
+		UniformBuffer UniformBuffer;
+		FontTexture   Texture;
+
+		std::vector<std::pair<std::string, TextStyle2D>> Data;
+	};
+
+	struct Renderer2DTextInfo
+	{
+		std::string FontPath           = "assets/fonts/Roboto-Regular.ttf";
+		glm::vec4   DefaultFontColor   = { 1.0f, 1.0f, 1.0f, 1.0f };
+		float       DefaultFontSize    = 24.0f;
+		float       DefaultFontSpacing = 1.3f;
+
+		uint32_t MaxCharacterUniformArrayLimit = 400;
+		uint32_t FontTextureSize               = 256;
+		uint32_t FontCharactersCount           = 128;
 	};
 
 	constexpr glm::vec4 quad_vertex_positions[4] = {

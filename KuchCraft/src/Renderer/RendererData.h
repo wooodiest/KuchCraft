@@ -77,7 +77,6 @@ namespace KuchCraft {
 		Timer ChunkTimer;
 		Timer WaterTimer;
 		Timer SkyboxTimer;
-		Timer TextTimer;
 		Timer Renderer2DTimer;
 
 		void Clear()

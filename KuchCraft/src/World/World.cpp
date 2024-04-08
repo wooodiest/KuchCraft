@@ -4,7 +4,6 @@
 #include "KuchCraft.h"
 
 #include "Renderer/Renderer.h"
-#include "Renderer/Text/TextRenderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
 #include "Renderer/Renderer2D/Renderer2D.h"
 #include "Renderer/AssetManager.h"
@@ -149,7 +148,7 @@ namespace KuchCraft {
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);
 
-		TextRenderer::TextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), {6.0f, 25.0f});
+		Renderer2D::DrawTextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), { 6.0f, 25.0f });
 
 		// Tmp, example
 		{

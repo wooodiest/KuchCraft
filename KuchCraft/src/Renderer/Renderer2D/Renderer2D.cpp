@@ -15,6 +15,8 @@ namespace KuchCraft {
 	Renderer2DInfo               Renderer2D::s_Info;
 	Renderer2DQuadData           Renderer2D::s_QuadData;
 	Renderer2DFullScreenQuadData Renderer2D::s_FullScreenQuadData;
+	Renderer2DTextInfo           Renderer2D::s_TextInfo;
+	Renderer2DTextData           Renderer2D::s_TextData;
 
 	void Renderer2D::Init()
 	{
@@ -22,6 +24,7 @@ namespace KuchCraft {
 
 		PrepareQuadRendering();
 		PrepareFullScreenQuadRendering();
+		PrepareTextRendering();
 	}
 
 	void Renderer2D::ShutDown()
@@ -37,6 +40,8 @@ namespace KuchCraft {
 	void Renderer2D::Clear()
 	{
 		s_QuadData.Vertices.clear();
+
+		s_TextData.Data.clear();
 	}
 
 	void Renderer2D::Render()
@@ -44,6 +49,7 @@ namespace KuchCraft {
 		Renderer::s_Stats.Renderer2DTimer.Start();
 
 		RenderQuads();
+		RenderText();
 
 		Renderer::s_Stats.Renderer2DTimer.Finish();
 	}
@@ -161,6 +167,77 @@ namespace KuchCraft {
 		Renderer::s_Stats.Quads++;
 	}
 
+	void Renderer2D::RenderText()
+	{
+		RendererCommand::EnableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::DisableDepthTesting();
+
+		s_TextData.Shader.Bind();
+		s_TextData.Texture.Bind();
+
+		s_TextData.VertexArray.Bind();
+		s_TextData.VertexBuffer.Bind();
+
+		Renderer2DUniformText* textBuffer = new Renderer2DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
+
+		for (const auto& [text, textStyle] : s_TextData.Data)
+		{
+			s_TextData.Shader.SetFloat4("u_Color", textStyle.Color);
+
+			glm::vec2 currentPosition = textStyle.Position;
+			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
+
+			uint32_t currentIndex = 0;
+			for (auto c = text.begin(); c != text.end(); c++)
+			{
+				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);
+
+				if (*c == '\n')
+				{
+					currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
+					currentPosition.x = textStyle.Position.x;
+				}
+				else if (*c == ' ')
+				{
+					currentPosition.x += (character.Advance >> 6) * scale;
+				}
+				else
+				{
+					float xpos = currentPosition.x + character.Bearing.x * scale;
+					float ypos = currentPosition.y - (textStyle.FontSize - character.Bearing.y) * scale;
+
+					textBuffer[currentIndex].Transform = glm::translate(glm::mat4(1.0f), { xpos, ypos, textStyle.Position.z }) *
+						glm::scale(glm::mat4(1.0f), { s_TextInfo.FontTextureSize * scale, s_TextInfo.FontTextureSize * scale, 0 });
+					textBuffer[currentIndex].Letter.x = (float)character.ID;
+
+					currentPosition.x += (character.Advance >> 6) * scale;
+					currentIndex++;
+
+					if (currentIndex == s_TextInfo.MaxCharacterUniformArrayLimit)
+					{
+						s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer2DUniformText));
+						RendererCommand::DrawStripArraysInstanced(4, currentIndex);
+						currentIndex = 0;
+
+						Renderer::s_Stats.DrawCalls++;
+						Renderer::s_Stats.Quads += currentIndex;
+					}
+				}
+			}
+			if (currentIndex)
+			{
+				s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer2DUniformText));
+				RendererCommand::DrawStripArraysInstanced(4, currentIndex);
+
+				Renderer::s_Stats.DrawCalls++;
+				Renderer::s_Stats.Quads += currentIndex;
+			}
+
+		}
+		delete[] textBuffer;
+	}
+
 	void Renderer2D::PrepareQuadRendering()
 	{
 		s_QuadData.VertexArray.Create();
@@ -168,10 +245,10 @@ namespace KuchCraft {
 
 		s_QuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(QuadVertex));
 		s_QuadData.VertexBuffer.SetBufferLayout({
-			{ ShaderDataType::Float3, "a_Position"     },
-			{ ShaderDataType::Float4, "a_Color"        },
-			{ ShaderDataType::Float2, "a_TexCoor"      },
-			{ ShaderDataType::Float,  "a_TexIndex"     }
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color"    },
+			{ ShaderDataType::Float2, "a_TexCoor"  },
+			{ ShaderDataType::Float,  "a_TexIndex" }
 		});
 
 		s_QuadData.VertexArray.SetVertexBuffer(s_QuadData.VertexBuffer);
@@ -256,6 +333,40 @@ namespace KuchCraft {
 		s_FullScreenQuadData.VertexArray .Unbind();
 		s_FullScreenQuadData.VertexBuffer.Unbind();
 		s_FullScreenQuadData.Shader      .Unbind();
+	}
+
+	void Renderer2D::PrepareTextRendering()
+	{
+		s_TextData.VertexArray.Create();
+		s_TextData.VertexArray.Bind();
+
+		float vertices[] = {
+			0.0f, 1.0f,
+			0.0f, 0.0f,
+			1.0f, 1.0f,
+			1.0f, 0.0f,
+		};
+
+		s_TextData.VertexBuffer.Create(sizeof(vertices), vertices, true);
+		s_TextData.VertexBuffer.SetBufferLayout({
+			{ ShaderDataType::Float2, "a_Position" }
+			});
+
+		s_TextData.VertexArray.SetVertexBuffer(s_TextData.VertexBuffer);
+
+		std::unordered_map<std::string, std::string> textShaderData;
+		textShaderData["##max_text_uniform_array_limit"] = std::to_string(s_TextInfo.MaxCharacterUniformArrayLimit);
+
+		s_TextData.Texture.Create(s_TextInfo.FontPath, s_TextInfo.FontTextureSize, s_TextInfo.FontCharactersCount);
+
+		s_TextData.Shader.Create("assets/shaders/text2D.vert.glsl", "assets/shaders/text2D.frag.glsl", textShaderData);
+		s_TextData.Shader.Bind();
+
+		s_TextData.UniformBuffer.Create(s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer2DUniformText), 1);
+
+		s_TextData.VertexArray.Unbind();
+		s_TextData.VertexBuffer.Unbind();
+		s_TextData.Shader.Unbind();
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -504,5 +615,265 @@ namespace KuchCraft {
 		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, rotation, texture, tilingFactor, tintColor);
 	}
 
+	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle)
+	{
+		s_TextData.Data.emplace_back(text, textStyle);
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x, position.y, 0.0f },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x, position.y, 0.0f },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position, const glm::vec4& color)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x, position.y, 0.0f },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x, position.y, 0.0f },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			position,
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			position,
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec4& color)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			position,
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec4& color, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			position,
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x * width, position.y * height, 0.0f },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position, float fontSize)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x * width, position.y * height, 0.0f },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position, const glm::vec4& color)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x * width, position.y * height, 0.0f },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x * width, position.y * height, 0.0f },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x * width, position.y * height, position.z },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position, float fontSize)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x * width, position.y * height, position.z },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position, const glm::vec4& color)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x * width, position.y * height, position.z },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position, const glm::vec4& color, float fontSize)
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x * width, position.y * height, position.z },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x, Application::Get().GetWindow().GetHeight() -position.y, 0.0f },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position, const glm::vec4& color)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			s_TextInfo.DefaultFontColor,
+			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position, const glm::vec4& color)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			s_TextInfo.DefaultFontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
+
+	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position, const glm::vec4& color, float fontSize)
+	{
+		DrawText(text, TextStyle2D{
+			color,
+			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			fontSize,
+			s_TextInfo.DefaultFontSpacing
+		});
+	}
 
 }
