@@ -27,7 +27,7 @@ namespace KuchCraft {
 
 		// Set data
 		WorldGenerator::Init(4206999);
-		m_Player = Player({ 2000.0f, 75.0f, 2000.0f }, { 0.0f, 0.0f }, GameMode::Creative);
+		m_Player = Player({ 2019.0f, 69.0f, 1993.0f }, { glm::radians(180.0f), 0.0f}, GameMode::Creative);
 
 		// Loading stuff
 		PreLoadWorld();
@@ -162,9 +162,9 @@ namespace KuchCraft {
 			texturedQuadRotation.x += glm::radians(30.0f) * dt;
 			Renderer3D::DrawQuad({ 1995.0f, 65.0f, 1990.0f }, texturedQuadRotation, { 2.0f, 1.0f }, AssetManager::GetBlockTexture(Block(BlockType::DiamondOre)));
 
-			static glm::vec3 fontRotation{ 0.0f, 0.0f, 0.0f };
-			fontRotation.y += glm::radians(30.0f) * dt;
-			Renderer3D::DrawText("JD2000", { 1990.0f, 70.0f, 1990.0f }, fontRotation, { 0.0f, 1.0f, 1.0f, 1.0 });
+			static glm::vec3 fontRotation{ 0.0f, glm::radians(90.0f), 0.0f};
+			fontRotation.y += glm::radians(10.0f) * dt;
+			Renderer3D::DrawText("JD2000", { 1940.0f, 70.0f, 1970.0f }, fontRotation, { 1.0f, 0.0f, 1.0f, 1.0 }, 3.0f);
 			
 			// Rendere2D: some ui
 			auto& [width, height] = Application::Get().GetWindow().GetWindowSize();

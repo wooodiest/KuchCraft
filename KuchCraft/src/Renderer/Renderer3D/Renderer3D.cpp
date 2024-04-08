@@ -511,10 +511,10 @@ namespace KuchCraft {
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::DisableDepthTesting();
 
-		s_TextData.Shader.Bind();
+		s_TextData.Shader. Bind();
 		s_TextData.Texture.Bind();
 
-		s_TextData.VertexArray.Bind();
+		s_TextData.VertexArray. Bind();
 		s_TextData.VertexBuffer.Bind();
 
 		Renderer3DUniformText* textBuffer = new Renderer3DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
@@ -526,7 +526,9 @@ namespace KuchCraft {
 			glm::vec2 currentPosition = textStyle.Position;
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
 
-			const glm::mat4 rotation = glm::toMat4(glm::quat(textStyle.Rotation));
+			glm::mat4 rotation = glm::translate(glm::mat4(1.0f), textStyle.Position) * 
+				glm::toMat4(glm::quat(textStyle.Rotation)) *
+				glm::translate(glm::mat4(1.0f), -textStyle.Position);
 
 			uint32_t currentIndex = 0;
 			for (auto c = text.begin(); c != text.end(); c++)
@@ -547,9 +549,8 @@ namespace KuchCraft {
 					float xpos = currentPosition.x + character.Bearing.x * scale;
 					float ypos = currentPosition.y - (textStyle.FontSize - character.Bearing.y) * scale;
 
-					textBuffer[currentIndex].Transform = glm::translate(glm::mat4(1.0f), { xpos, ypos, textStyle.Position.z }) *
-						rotation *
-						glm::scale(glm::mat4(1.0f), { s_TextInfo.FontTextureSize * scale, s_TextInfo.FontTextureSize * scale, 0 });
+					textBuffer[currentIndex].Transform = rotation * glm::translate(glm::mat4(1.0f), { xpos, ypos, textStyle.Position.z }) *
+						glm::scale(glm::mat4(1.0f), { s_TextInfo.FontTextureSize * scale, s_TextInfo.FontTextureSize * scale, 1.0f });
 
 					textBuffer[currentIndex].Letter.x = (float)character.ID;
 
