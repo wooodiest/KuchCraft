@@ -171,7 +171,8 @@ namespace KuchCraft {
 	{
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
-		RendererCommand::DisableDepthTesting();
+		//RendererCommand::DisableDepthTesting();
+		RendererCommand::EnableLessEqualDepthTesting();
 
 		s_TextData.Shader.Bind();
 		s_TextData.Texture.Bind();
@@ -181,14 +182,12 @@ namespace KuchCraft {
 
 		Renderer2DUniformText* textBuffer = new Renderer2DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
 
+		uint32_t currentIndex = 0;
 		for (const auto& [text, textStyle] : s_TextData.Data)
 		{
-			s_TextData.Shader.SetFloat4("u_Color", textStyle.Color);
-
 			glm::vec2 currentPosition = textStyle.Position;
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
 
-			uint32_t currentIndex = 0;
 			for (auto c = text.begin(); c != text.end(); c++)
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);
@@ -209,6 +208,9 @@ namespace KuchCraft {
 
 					textBuffer[currentIndex].Transform = glm::translate(glm::mat4(1.0f), { xpos, ypos, textStyle.Position.z }) *
 						glm::scale(glm::mat4(1.0f), { s_TextInfo.FontTextureSize * scale, s_TextInfo.FontTextureSize * scale, 0 });
+
+					textBuffer[currentIndex].Color = textStyle.Color;
+
 					textBuffer[currentIndex].Letter.x = (float)character.ID;
 
 					currentPosition.x += (character.Advance >> 6) * scale;
@@ -225,16 +227,17 @@ namespace KuchCraft {
 					}
 				}
 			}
-			if (currentIndex)
-			{
-				s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer2DUniformText));
-				RendererCommand::DrawStripArraysInstanced(4, currentIndex);
-
-				Renderer::s_Stats.DrawCalls++;
-				Renderer::s_Stats.Quads += currentIndex;
-			}
-
 		}
+
+		if (currentIndex)
+		{
+			s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer2DUniformText));
+			RendererCommand::DrawStripArraysInstanced(4, currentIndex);
+
+			Renderer::s_Stats.DrawCalls++;
+			Renderer::s_Stats.Quads += currentIndex;
+		}
+
 		delete[] textBuffer;
 	}
 
@@ -494,7 +497,7 @@ namespace KuchCraft {
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
 	{
-		DrawRotatedQuad(position, size, rotation, color);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
 	}
 
 	void Renderer2D::DrawRotatedQuadN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)

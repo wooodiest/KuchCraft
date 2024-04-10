@@ -12,6 +12,7 @@ layout(std140, binding = 0) uniform UniformCameraData
 struct TextData
 {
 	mat4 Transform;
+	vec4 Color;
 	vec4 Letter;
 };
 

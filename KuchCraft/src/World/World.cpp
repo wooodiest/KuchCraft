@@ -316,6 +316,7 @@ namespace KuchCraft {
 
 	void World::ReloadChunks()
 	{
+		//TODO: Fix
 		const auto& position          = m_Player.GetPosition();
 		const auto& graphicalSettings = KuchCraft::GetSettings();
 
