@@ -58,6 +58,14 @@ namespace KuchCraft {
 
 			if (m_Rotation.y > max_pitch)
 				m_Rotation.y = max_pitch;
+
+			constexpr float yaw_boundary = glm::radians(360.0f);
+
+			if (m_Rotation.x > yaw_boundary)
+				m_Rotation.x -= yaw_boundary;
+
+			if (m_Rotation.x < 0.0f)
+				m_Rotation.x += yaw_boundary;
 		}
 
 		// Keyboard
