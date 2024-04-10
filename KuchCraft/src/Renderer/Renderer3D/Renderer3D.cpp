@@ -519,10 +519,9 @@ namespace KuchCraft {
 
 		Renderer3DUniformText* textBuffer = new Renderer3DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
 
+		uint32_t currentIndex = 0;
 		for (const auto& [text, textStyle] : s_TextData.Data)
 		{
-			s_TextData.Shader.SetFloat4("u_Color", textStyle.Color);
-
 			glm::vec2 currentPosition = textStyle.Position;
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
 
@@ -530,7 +529,6 @@ namespace KuchCraft {
 				glm::toMat4(glm::quat(textStyle.Rotation)) *
 				glm::translate(glm::mat4(1.0f), -textStyle.Position);
 
-			uint32_t currentIndex = 0;
 			for (auto c = text.begin(); c != text.end(); c++)
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);
@@ -554,6 +552,8 @@ namespace KuchCraft {
 
 					textBuffer[currentIndex].Letter.x = (float)character.ID;
 
+					textBuffer[currentIndex].Color = textStyle.Color;
+
 					currentPosition.x += (character.Advance >> 6) * scale;
 					currentIndex++;
 
@@ -568,16 +568,17 @@ namespace KuchCraft {
 					}
 				}
 			}
-			if (currentIndex)
-			{
-				s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer3DUniformText));
-				RendererCommand::DrawStripArraysInstanced(4, currentIndex);
-
-				Renderer::s_Stats.DrawCalls++;
-				Renderer::s_Stats.Quads += currentIndex;
-			}
-
 		}
+
+		if (currentIndex)
+		{
+			s_TextData.UniformBuffer.SetData(textBuffer, s_TextInfo.MaxCharacterUniformArrayLimit * sizeof(Renderer3DUniformText));
+			RendererCommand::DrawStripArraysInstanced(4, currentIndex);
+
+			Renderer::s_Stats.DrawCalls++;
+			Renderer::s_Stats.Quads += currentIndex;
+		}
+
 		delete[] textBuffer;
 	}
 

@@ -100,6 +100,7 @@ namespace KuchCraft {
 	struct Renderer3DUniformText
 	{
 		glm::mat4 Transform;
+		glm::vec4 Color{ 1.0f };
 		glm::vec4 Letter{ 0.0f }; // weird alignment
 	};
 
