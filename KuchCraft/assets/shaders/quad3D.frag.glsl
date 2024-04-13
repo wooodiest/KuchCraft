@@ -6,7 +6,7 @@ in vec4 v_Color;
 in vec2 v_TexCoord;
 in flat float v_TexIndex;
 
-uniform sampler2D u_Textures[##max_texture_slots];
+uniform sampler2D u_Textures[#max_texture_slots];
 
 void main()
 {

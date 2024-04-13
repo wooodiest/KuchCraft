@@ -164,7 +164,7 @@ namespace KuchCraft {
 	void Shader::PreProcessIncludes(std::string& file)
 	{
 		size_t pos = 0;
-		const std::string includeDirective = "##include \"";
+		const std::string includeDirective = "#include \"";
 		while ((pos = file.find(includeDirective, pos)) != std::string::npos)
 		{
 			size_t endPos = file.find("\"", pos + includeDirective.length());

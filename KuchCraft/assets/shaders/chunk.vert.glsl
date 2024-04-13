@@ -1,7 +1,7 @@
 #version 450 core
 
-##include "assets/shaders/chunk_info.glsl"
-##include "assets/shaders/utils/matrix_transformations.glsl"
+#include "assets/shaders/chunk_info.glsl"
+#include "assets/shaders/utils/matrix_transformations.glsl"
 
 layout (location = 0) in uint a_PackedData;
 
@@ -33,7 +33,7 @@ void main()
 							u_ChunkPosition.z + float((a_PackedData >> 12 ) & 0x1F))
 						);
 
-	v_TexCoord  = texCoords[index];
+	v_TexCoord  = chunk_vertex_data[index].UV;
 	v_TexIndex  = (a_PackedData >> 22 ) & 0x7F;
-	gl_Position = u_ViewProjection * transform * vertexPositions[index];
+	gl_Position = u_ViewProjection * transform * chunk_vertex_data[index].Position;
 }

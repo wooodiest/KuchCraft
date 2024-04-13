@@ -4,7 +4,7 @@ layout (location = 0) out vec4 color;
 
 in vec2 v_TexCoord;
 
-const float border_radius = ##outlined_block_border_radius;
+const float border_radius = #outlined_block_border_radius;
 
 void main()
 {
@@ -14,5 +14,5 @@ void main()
 		discard;
 	}
 		
-	color = vec4(##outlined_block_border_color);
+	color = vec4(#outlined_block_border_color);
 }

@@ -13,7 +13,7 @@ struct TextData
 
 layout(std140, binding = 2) uniform UniformTextData
 {
-	TextData u_Text[##max_text_uniform_array_limit];
+	TextData u_Text[#max_text_uniform_array_limit];
 };
 
 in vec2 v_TexCoord;

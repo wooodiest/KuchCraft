@@ -142,7 +142,7 @@ namespace KuchCraft {
 
 		std::unordered_map<std::string, std::string> chunkShaderData;
 		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
-		chunkShaderData["##max_texture_slots"] = std::to_string(maxTextureSlots);
+		chunkShaderData["#max_texture_slots"] = std::to_string(maxTextureSlots);
 
 		s_ChunkData.Shader.Create("assets/shaders/chunk.vert.glsl", "assets/shaders/chunk.frag.glsl", chunkShaderData);
 		s_ChunkData.Shader.Bind();
@@ -290,8 +290,8 @@ namespace KuchCraft {
 		s_OutlinedBlockData.VertexArray.SetVertexBuffer(s_OutlinedBlockData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> outlinedBlockShaderData;
-		outlinedBlockShaderData["##outlined_block_border_radius"] = std::to_string(s_OutlinedBlockData.BorderRadius);
-		outlinedBlockShaderData["##outlined_block_border_color"]  = VecToString(s_OutlinedBlockData.Color);
+		outlinedBlockShaderData["#outlined_block_border_radius"] = std::to_string(s_OutlinedBlockData.BorderRadius);
+		outlinedBlockShaderData["#outlined_block_border_color"]  = VecToString(s_OutlinedBlockData.Color);
 
 		s_OutlinedBlockData.Shader.Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl", outlinedBlockShaderData);
 		s_OutlinedBlockData.Shader.Bind();
@@ -353,7 +353,7 @@ namespace KuchCraft {
 		s_TextData.VertexArray.SetVertexBuffer(s_TextData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> textShaderData;
-		textShaderData["##max_text_uniform_array_limit"] = std::to_string(s_TextInfo.MaxCharacterUniformArrayLimit);
+		textShaderData["#max_text_uniform_array_limit"] = std::to_string(s_TextInfo.MaxCharacterUniformArrayLimit);
 
 		s_TextData.Texture.Create(s_TextInfo.FontPath, s_TextInfo.FontTextureSize, s_TextInfo.FontCharactersCount);
 
@@ -721,7 +721,7 @@ namespace KuchCraft {
 		
 		std::unordered_map<std::string, std::string> quadShaderData;
 		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
-		quadShaderData["##max_texture_slots"] = std::to_string(maxTextureSlots);
+		quadShaderData["#max_texture_slots"] = std::to_string(maxTextureSlots);
 
 		s_QuadData.Shader.Create("assets/shaders/quad3D.vert.glsl", "assets/shaders/quad3D.frag.glsl", quadShaderData);
 		s_QuadData.Shader.Bind();

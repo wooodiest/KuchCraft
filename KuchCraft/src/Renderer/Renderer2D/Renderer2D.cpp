@@ -284,7 +284,7 @@ namespace KuchCraft {
 		
 		std::unordered_map<std::string, std::string> quadShaderData;
 		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
-		quadShaderData["##max_texture_slots"] = std::to_string(maxTextureSlots);
+		quadShaderData["#max_texture_slots"] = std::to_string(maxTextureSlots);
 
 		s_QuadData.Shader.Create("assets/shaders/quad2D.vert.glsl", "assets/shaders/quad2D.frag.glsl", quadShaderData);
 		s_QuadData.Shader.Bind();
@@ -358,7 +358,7 @@ namespace KuchCraft {
 		s_TextData.VertexArray.SetVertexBuffer(s_TextData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> textShaderData;
-		textShaderData["##max_text_uniform_array_limit"] = std::to_string(s_TextInfo.MaxCharacterUniformArrayLimit);
+		textShaderData["#max_text_uniform_array_limit"] = std::to_string(s_TextInfo.MaxCharacterUniformArrayLimit);
 
 		s_TextData.Texture.Create(s_TextInfo.FontPath, s_TextInfo.FontTextureSize, s_TextInfo.FontCharactersCount);
 
