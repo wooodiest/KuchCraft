@@ -32,8 +32,13 @@ void main()
 							u_ChunkPosition.y + float((a_PackedData >> 5  ) & 0x7F),
 							u_ChunkPosition.z + float((a_PackedData >> 12 ) & 0x1F))
 						);
+	
+	// tmp, todo extract from packed data
+	uint rotation = 2; 
 
-	v_TexCoord  = chunk_vertex_data[index].UV;
+	v_TexCoord  = index < 8 ? 
+		rotated_uv[index * 4 + rotation] : chunk_vertex_data[index].UV + vec2(0.25 * rotation, 0.0);
+
 	v_TexIndex  = (a_PackedData >> 22 ) & 0x7F;
 	gl_Position = u_ViewProjection * transform * chunk_vertex_data[index].Position;
 }
