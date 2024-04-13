@@ -147,6 +147,8 @@ namespace KuchCraft {
 
 	void Shader::PreProcess(std::string& file, const std::unordered_map<std::string, std::string>& additionalPreProcessValues)
 	{
+		PreProcessIncludes(file);
+
 		auto replace = [&](const std::string& from, const std::string& to) {
 			size_t pos = 0;
 			while ((pos = file.find(from, pos)) != std::string::npos)
@@ -157,6 +159,27 @@ namespace KuchCraft {
 		};
 
 		std::for_each(additionalPreProcessValues.begin(), additionalPreProcessValues.end(), [&](const auto& pair) { replace(pair.first, pair.second); });
+	}
+
+	void Shader::PreProcessIncludes(std::string& file)
+	{
+		size_t pos = 0;
+		const std::string includeDirective = "##include \"";
+		while ((pos = file.find(includeDirective, pos)) != std::string::npos)
+		{
+			size_t endPos = file.find("\"", pos + includeDirective.length());
+			if (endPos == std::string::npos)
+			{
+				KC_ERROR("Invalid include directive in shader : {0}", includeDirective.c_str());
+				return;
+			}
+
+			std::string includePath = file.substr(pos + includeDirective.length(), endPos - (pos + includeDirective.length()));
+			std::string includeContent = ReadFile(includePath);
+
+			file.replace(pos, endPos + 1 - pos, includeContent);
+			pos += includeContent.length();
+		}
 	}
 
 	void Shader::Bind() const

@@ -1,5 +1,8 @@
 #version 450 core
 
+##include "assets/shaders/chunk_info.glsl"
+##include "assets/shaders/utils/matrix_transformations.glsl"
+
 layout (location = 0) in uint a_PackedData;
 
 layout(std140, binding = 0) uniform UniformCameraData
@@ -13,92 +16,6 @@ uniform vec3 u_ChunkPosition;
 
 out vec2 v_TexCoord;
 out flat uint v_TexIndex;
-
-const vec4 vertexPositions[24] = vec4[](
-	/* bottom */
-    vec4(1.0, 0.0, 1.0, 1.0),
-    vec4(0.0, 0.0, 1.0, 1.0),
-	vec4(0.0, 0.0, 0.0, 1.0),
-	vec4(1.0, 0.0, 0.0, 1.0),
-
-	/* top */
-	vec4(0.0, 1.0, 1.0, 1.0),
-    vec4(1.0, 1.0, 1.0, 1.0),
-	vec4(1.0, 1.0, 0.0, 1.0),
-	vec4(0.0, 1.0, 0.0, 1.0),
-
-	/* front */
-	vec4(0.0, 0.0, 1.0, 1.0),
-    vec4(1.0, 0.0, 1.0, 1.0),
-	vec4(1.0, 1.0, 1.0, 1.0),
-	vec4(0.0, 1.0, 1.0, 1.0),
-
-	/* right */
-	vec4(1.0, 0.0, 1.0, 1.0),
-    vec4(1.0, 0.0, 0.0, 1.0),
-	vec4(1.0, 1.0, 0.0, 1.0),
-	vec4(1.0, 1.0, 1.0, 1.0),
-
-	/* behind */
-	vec4(1.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 0.0, 1.0),
-	vec4(0.0, 1.0, 0.0, 1.0),
-	vec4(1.0, 1.0, 0.0, 1.0),
-
-	/* left */
-	vec4(0.0, 0.0, 0.0, 1.0),
-    vec4(0.0, 0.0, 1.0, 1.0),
-	vec4(0.0, 1.0, 1.0, 1.0),
-	vec4(0.0, 1.0, 0.0, 1.0)
-);
-
-const vec2 texCoords[24] = vec2[](
-	/* bottom */
-    vec2(0.25, 0.5),
-    vec2(0.0,  0.5),
-    vec2(0.0,  0.0),
-    vec2(0.25, 0.0),
-
-	/* top */
-	vec2(0.25, 0.0),
-    vec2(0.5,  0.0),
-	vec2(0.5,  0.5),
-	vec2(0.25, 0.5),
-
-	/* front */
-	vec2(0.0,  0.5),
-    vec2(0.25, 0.5),
-	vec2(0.25, 1.0),
-	vec2(0.0,  1.0),
-
-	/* right */
-	vec2(0.25, 0.5),
-    vec2(0.5,  0.5),
-	vec2(0.5,  1.0),
-	vec2(0.25, 1.0),
-
-	/* behind */
-	vec2(0.5,  0.5),
-    vec2(0.75, 0.5),
-	vec2(0.75, 1.0),
-	vec2(0.5,  1.0),
-
-	/* left */
-	vec2(0.75, 0.5),
-    vec2(1.0,  0.5),
-	vec2(1.0,  1.0),
-	vec2(0.75, 1.0)
-);
-
-mat4 TranslationMatrix(vec3 translation)
-{
-    return mat4(
-        vec4(1.0, 0.0, 0.0, 0.0),
-        vec4(0.0, 1.0, 0.0, 0.0),
-        vec4(0.0, 0.0, 1.0, 0.0),
-        vec4(translation  , 1.0)
-    );
-}
 
 void main()
 {

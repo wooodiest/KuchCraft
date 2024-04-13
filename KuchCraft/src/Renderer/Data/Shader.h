@@ -24,6 +24,7 @@ namespace KuchCraft {
 	private:
 		std::string ReadFile(const std::string& filepath);
 		void PreProcess(std::string& file, const std::unordered_map<std::string, std::string>& additionalPreProcessValues);
+		void PreProcessIncludes(std::string& file);
 		uint32_t Compile(const std::string& vertexShaderPath, const std::string& fragmentShaderPath, const std::unordered_map<std::string, std::string>& additionalPreProcessValues);
 
 	private:
