@@ -19,7 +19,7 @@ namespace KuchCraft {
 
 	void AssetManager::PrepareBlocks()
 	{
-		for (uint32_t i = first_index_of_block_types; i < absolute_number_of_block_types; i++)
+		for (uint32_t i = first_index_of_block_types; i <= absolute_number_of_block_types; i++)
 		{
 			Block block = Block((BlockType)i);
 

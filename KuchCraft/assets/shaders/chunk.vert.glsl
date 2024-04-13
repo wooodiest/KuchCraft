@@ -54,10 +54,10 @@ const vec4 vertexPositions[24] = vec4[](
 
 const vec2 texCoords[24] = vec2[](
 	/* bottom */
-    vec2(0.25, 0.0),
+    vec2(0.25, 0.5),
+    vec2(0.0,  0.5),
     vec2(0.0,  0.0),
-	vec2(0.0,  0.5),
-	vec2(0.25, 0.5),
+    vec2(0.25, 0.0),
 
 	/* top */
 	vec2(0.25, 0.0),

@@ -9,7 +9,6 @@ namespace KuchCraft {
 		{
 			case BlockType::Air:    return true;
 			case BlockType::Water:  return true;
-			case BlockType::None:   return true;
 		}
 		return false;
 	}
@@ -20,7 +19,6 @@ namespace KuchCraft {
 		{
 			case BlockType::Air:    return false;
 			case BlockType::Water:  return false;
-			case BlockType::None:   return false;
 		}
 		return true;
 	}
