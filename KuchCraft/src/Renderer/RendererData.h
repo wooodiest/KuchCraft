@@ -54,7 +54,7 @@ namespace KuchCraft {
 
 	struct RendererInfo
 	{
-		uint32_t MaxTextureSlots = 32;
+		uint32_t MaxTextureSlots = 64;
 		bool     OpenGlLogs      = true;
 	};
 
