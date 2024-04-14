@@ -32,18 +32,18 @@ namespace KuchCraft {
 				for (int z = 0; z < chunk_size_XZ; z++)
 				{
 					if (y == 0)
-						chunk->Block[x][y][z].blockType = BlockType::Bedrock;
+						chunk->Block[x][y][z].Type = BlockType::Bedrock;
 					else
 					{
 						if (y < 60)
 						{
 							if (Random::Int(0, 1000) == 0)
-								chunk->Block[x][y][z].blockType = BlockType::Air;
+								chunk->Block[x][y][z].Type = BlockType::Air;
 							else
-								chunk->Block[x][y][z].blockType = static_cast<BlockType>(block);
+								chunk->Block[x][y][z].Type = static_cast<BlockType>(block);
 						}
 						else
-							chunk->Block[x][y][z].blockType = BlockType::Air;
+							chunk->Block[x][y][z].Type = BlockType::Air;
 					}
 
 				}
@@ -135,7 +135,7 @@ namespace KuchCraft {
 				{
 					if (y < s_SeeLevel - 1)
 					{
-						if (chunk->Block[x][y + 1][z].blockType == BlockType::Air)
+						if (chunk->Block[x][y + 1][z].Type == BlockType::Air)
 						{
 							chunk->Block[x][y + 1][z] = Block(BlockType::Water);
 						}
@@ -160,8 +160,8 @@ namespace KuchCraft {
 						break;
 
 					// We dont want trees to be next to rach other
-					if (treeProb && chunk->Block[x][y][z].blockType == BlockType::Grass
-						&& chunk->Block[x][y + 1][z].blockType == BlockType::Air)
+					if (treeProb && chunk->Block[x][y][z].Type == BlockType::Grass
+						&& chunk->Block[x][y + 1][z].Type == BlockType::Air)
 					{
 						if (chunk->Block[x - 1][y + 1][z] == Block(BlockType::OakLog) ||
 							chunk->Block[x + 1][y + 1][z] == Block(BlockType::OakLog) ||

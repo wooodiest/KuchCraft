@@ -5,7 +5,7 @@ namespace KuchCraft {
 
 	bool Block::IsTransparent(const Block& block)
 	{
-		switch (block.blockType)
+		switch (block.Type)
 		{
 			case BlockType::Air:    return true;
 			case BlockType::Water:  return true;
@@ -15,7 +15,7 @@ namespace KuchCraft {
 
 	bool Block::IsSolid(const Block& block)
 	{
-		switch (block.blockType)
+		switch (block.Type)
 		{
 			case BlockType::Air:    return false;
 			case BlockType::Water:  return false;

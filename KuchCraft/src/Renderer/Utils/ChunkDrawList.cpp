@@ -107,19 +107,21 @@ namespace KuchCraft {
 		//   5B - position.x | 0B	//
 		//   7B - position.y | 5B	//
 		//   5B - position.z | 12B  //
-		//   5B - index      | 17B  //
-		//   7B - texture    | 22B  //
+		//	 2B - rotation   | 17B  //
+		//   5B - index      | 19B  //
+		//   7B - texture    | 24B  //
 		uint32_t packedData = 0;
-		packedData |= ((position.x & 0x1F)        << 0 ) |
-				      ((position.y & 0x7F)        << 5 ) |
-				      ((position.z & 0x1F)        << 12) |
-					  (((uint32_t)texSlot & 0x7F) << 22);
+		packedData |= ((position.x & 0x1F)              << 0 ) |
+				      ((position.y & 0x7F)              << 5 ) |
+				      ((position.z & 0x1F)              << 12) |
+					  (((uint8_t)block.Rotation & 0x3)  << 17) |
+					  (((uint8_t)texSlot        & 0x7F) << 24);
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
 			// every vertex quad has stride of 4
 			uint32_t index = verticesIndex * 4 + i;
-			uint32_t data  = packedData | ((index & 0x1F) << 17);
+			uint32_t data  = packedData | ((index & 0x1F) << 19);
 
 			m_VertexData.push_back(data);
 		}

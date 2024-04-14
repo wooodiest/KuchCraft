@@ -23,22 +23,22 @@ void main()
 	//   5B - position.x | 0B	//
 	//   7B - position.y | 5B	//
 	//   5B - position.z | 12B  //
-	//   5B - index      | 17B  //
-	//   7B - texture    | 22B  //
+	//   2B - rotation   | 17B  //
+	//   5B - index      | 19B  //
+	//   7B - texture    | 24B  //
 
-	uint index      = (a_PackedData >> 17 ) & 0x1F; 
+	uint index      = (a_PackedData >> 19 ) & 0x1F; 
 	mat4 transform  = TranslationMatrix(vec3(
 							u_ChunkPosition.x + float((a_PackedData       ) & 0x1F),
 							u_ChunkPosition.y + float((a_PackedData >> 5  ) & 0x7F),
 							u_ChunkPosition.z + float((a_PackedData >> 12 ) & 0x1F))
 						);
 	
-	// tmp, todo extract from packed data
-	uint rotation = 2; 
+	uint rotation = uint((a_PackedData >> 17) & 0x3); 
 
 	v_TexCoord  = index < 8 ? 
 		rotated_uv[index * 4 + rotation] : chunk_vertex_data[index].UV + vec2(0.25 * rotation, 0.0);
 
-	v_TexIndex  = (a_PackedData >> 22 ) & 0x7F;
+	v_TexIndex  = (a_PackedData >> 24 ) & 0x7F;
 	gl_Position = u_ViewProjection * transform * chunk_vertex_data[index].Position;
 }

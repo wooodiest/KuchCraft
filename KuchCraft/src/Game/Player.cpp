@@ -121,31 +121,19 @@ namespace KuchCraft {
 		std::string gameMode;
 		switch (m_GameMode)
 		{
-			case KuchCraft::GameMode::Survival:  gameMode = "Survival"; break;
-			case KuchCraft::GameMode::Creative:  gameMode = "Creative"; break;
+			case KuchCraft::GameMode::Survival:  gameMode = "Survival";  break;
+			case KuchCraft::GameMode::Creative:  gameMode = "Creative";  break;
 			case KuchCraft::GameMode::Spectator: gameMode = "Spectator"; break;
 		}
 
 		m_DebugText =
 			  "\nPlayer:"
-			  "\n   Position: "  + VecToString(m_Position) 
-			+ "\n   Rotation: "  + VecToString(glm::vec2(glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y)))
+			  "\n   Position: "  + VecToString(m_Position, 2)
+			+ "\n   Rotation: "  + VecToString(glm::vec2{ glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y) }, 2);
 			+ "\n   Gamemode: "  + gameMode;
 
 		if (m_TargetedBlock.Targeted)
-		{
-			m_DebugText += "\n   Targeted block: " + World::Get().GetBlock(m_TargetedBlock.Position).GetName();
-			switch (m_TargetedBlock.Plane)
-			{
-				case PlaneDirection::Left:   m_DebugText += " - left - ";   break;
-				case PlaneDirection::Right:  m_DebugText += " - right - ";  break;
-				case PlaneDirection::Bottom: m_DebugText += " - bottom - "; break;
-				case PlaneDirection::Top:    m_DebugText += " - top - ";    break;
-				case PlaneDirection::Behind: m_DebugText += " - behind - "; break;
-				case PlaneDirection::Front:  m_DebugText += " - front - ";  break;
-			}
-			m_DebugText += VecToString(m_TargetedBlock.Position);
-		}
+			m_DebugText += "\n   Targeted block - " + World::Get().GetBlock(m_TargetedBlock.Position).GetName() + " : " + VecToString(glm::ivec3{m_TargetedBlock.Position});
 		else
 			m_DebugText += "\n   Targeted block: none";
 
@@ -249,7 +237,8 @@ namespace KuchCraft {
 			case MouseCode::ButtonRight:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_block_types))));
+					PlaceBlock(m_TargetedBlock.Position, Block(BlockType::None, (BlockRotation)Random::UInt(0, 3)));
+					//PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_block_types))));
 				return false;
 			}
 		}
@@ -257,7 +246,7 @@ namespace KuchCraft {
 		return false;
 	}
 
-	void Player::PlaceBlock(const glm::vec3& position, const Block& block)
+	void Player::PlaceBlock(const glm::vec3& position, Block& block)
 	{
 		if (!m_TargetedBlock.Targeted)
 			return;
@@ -281,7 +270,20 @@ namespace KuchCraft {
 		if (playerAABB.IsColliding(blockAABB))
 			return;
 		else
+		{
+			// Calculate block rotation
+			float rotation = m_Rotation.x;
+			if (      rotation >= glm::radians(90.0f - 45.0f) && rotation < glm::radians(90.0f + 45.0f))	
+				block.Rotation = BlockRotation::Deg180;
+			else if (rotation >= glm::radians(180.0f - 45.0f) && rotation < glm::radians(180.0f + 45.0f))
+				block.Rotation = BlockRotation::Deg270;
+			else if (rotation >= glm::radians(270.0f - 45.0f) && rotation < glm::radians(270.0f + 45.0f))
+				block.Rotation = BlockRotation::Deg0;
+			else
+				block.Rotation = BlockRotation::Deg90;
+
 			World::Get().SetBlock(newPosition, block);
+		}
 	}
 
 	void Player::DestroyBlock(const glm::vec3& position)

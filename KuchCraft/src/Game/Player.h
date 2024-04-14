@@ -58,7 +58,7 @@ namespace KuchCraft {
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
-		void PlaceBlock(const glm::vec3& position, const Block& block);
+		void PlaceBlock(const glm::vec3& position, Block& block);
 		void DestroyBlock(const glm::vec3& position);
 
 		TargetedBlockInfo GetTargetBlockInfo();

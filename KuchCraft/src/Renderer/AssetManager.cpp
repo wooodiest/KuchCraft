@@ -27,7 +27,7 @@ namespace KuchCraft {
 			std::replace(blockName.begin(), blockName.end(), ' ', '_');
 
 			const std::string path = s_BlockData.Path + blockName + s_BlockData.Extension;
-			s_BlockData.Textures[block.blockType].Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
+			s_BlockData.Textures[block.Type].Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
 		}
 	}
 
