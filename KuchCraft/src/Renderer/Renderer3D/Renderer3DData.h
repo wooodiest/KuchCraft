@@ -13,9 +13,9 @@ namespace KuchCraft {
 
 	struct Renderer3DInfo
 	{
-		uint32_t MaxQuads = 20000;
+		uint32_t MaxQuads    = 20000;
 		uint32_t MaxVertices = MaxQuads * 4;
-		uint32_t MaxIndices = MaxQuads * 6;
+		uint32_t MaxIndices  = MaxQuads * 6;
 	};
 
 	struct Renderer3DData
@@ -75,13 +75,36 @@ namespace KuchCraft {
 	struct Renderer3DQuadData
 	{
 		Shader		 Shader;
-		IndexBuffer  IndexBuffer;
 		VertexArray  VertexArray;
 		VertexBuffer VertexBuffer;
 
 		Texture2D WhiteTexture;
 
 		std::vector<QuadVertex> Vertices;
+		uint32_t* TextureSlots;
+		uint32_t  TextureSlotIndex = 1;
+		uint32_t  IndexCount       = 0;
+		uint32_t  VertexOffset     = 0;
+	};
+
+	struct CubeVertex
+	{
+		glm::vec3 Position{ 0.0f, 0.0f, 0.0f };
+		glm::vec3 Normal  { 0.0f, 0.0f, 0.0f };
+		glm::vec4 Color   { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec2 TexCoord{ 0.0f, 0.0f };
+		float     TexIndex = 0.0f;
+	};
+
+	struct Renderer3DCubeData
+	{
+		Shader		 Shader;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
+
+		Texture2D WhiteTexture;
+
+		std::vector<CubeVertex> Vertices;
 		uint32_t* TextureSlots;
 		uint32_t  TextureSlotIndex = 1;
 		uint32_t  IndexCount       = 0;
@@ -125,6 +148,147 @@ namespace KuchCraft {
 		uint32_t MaxCharacterUniformArrayLimit = 400;
 		uint32_t FontTextureSize               = 512;
 		uint32_t FontCharactersCount           = 128;
+	};
+
+	struct CubeVertexHelper
+	{
+		glm::vec4 Position{ 0.0f, 0.0f, 0.0f, 1.0f };
+		glm::vec4 Normal  { 0.0f, 0.0f, 0.0f, 0.0f };
+		glm::vec2 UV      { 0.0f, 0.0f };
+	};
+
+	constexpr CubeVertexHelper cube_vertices[] = {
+		/* bottom */
+		CubeVertexHelper{ 
+			glm::vec4(0.5f, -0.5f, 0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, -1.0f, 0.0f),
+			glm::vec2(0.25f, 0.5f)
+		},
+		CubeVertexHelper{
+			glm::vec4(-0.5f, -0.5f, 0.5f, 1.0f), 
+			glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+			glm::vec2(0.0f, 0.5f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(-0.5f, -0.5f, -0.5f, 1.0f),
+			glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+			glm::vec2(0.0f, 0.0f)
+		},
+		CubeVertexHelper{ 
+			glm::vec4(0.5f, -0.5f, -0.5f, 1.0f),
+			glm::vec4(0.0f, -1.0f, 0.0f, 0.0f),
+			glm::vec2(0.25f, 0.0f)
+		},
+
+		/* top */
+		CubeVertexHelper{ 
+			glm::vec4(-0.5f, 0.5f, 0.5f, 1.0f),
+			glm::vec4(0.0f, 1.0f, 0.0f, 0.0f),
+			glm::vec2(0.25f, 0.0f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+			glm::vec4(0.0f, 1.0f, 0.0f, 0.0f),
+			glm::vec2(0.5f, 0.0f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(0.5f, 0.5f, -0.5f, 1.0f),
+			glm::vec4(0.0f, 1.0f, 0.0f, 0.0f),
+			glm::vec2(0.5f, 0.5f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(-0.5f, 0.5f, -0.5f, 1.0f),
+			glm::vec4(0.0f, 1.0f, 0.0f, 0.0f), 
+			glm::vec2(0.25f, 0.5f) 
+		},
+
+		/* front */
+		CubeVertexHelper{ 
+			glm::vec4(-0.5f, -0.5f, 0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+			glm::vec2(0.0f, 0.5f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(0.5f, -0.5f, 0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+			glm::vec2(0.25f, 0.5f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+			glm::vec2(0.25f, 1.0f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(-0.5f, 0.5f, 0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, 1.0f, 0.0f),
+			glm::vec2(0.0f, 1.0f)
+		},
+
+		/* right */
+		CubeVertexHelper{
+			glm::vec4(0.5f, -0.5f, 0.5f, 1.0f), 
+			glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
+			glm::vec2(0.25f, 0.5f) 
+		},
+		CubeVertexHelper{
+			glm::vec4(0.5f, -0.5f, -0.5f, 1.0f), 
+			glm::vec4(1.0f, 0.0f, 0.0f, 0.0f), 
+			glm::vec2(0.5f, 0.5f) 
+		},
+		CubeVertexHelper{
+			glm::vec4(0.5f, 0.5f, -0.5f, 1.0f),
+			glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
+			glm::vec2(0.5f, 1.0f)
+		},
+		CubeVertexHelper{
+			glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+			glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),
+			glm::vec2(0.25f, 1.0f) 
+		},
+
+		/* behind */
+		CubeVertexHelper{
+			glm::vec4(0.5f, -0.5f, -0.5f, 1.0f), 
+			glm::vec4(0.0f, 0.0f, -1.0f, 0.0f),
+			glm::vec2(0.5f, 0.5f) 
+		},
+		CubeVertexHelper{
+			glm::vec4(-0.5f, -0.5f, -0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, -1.0f, 0.0f),
+			glm::vec2(0.75f, 0.5f) 
+		},
+		CubeVertexHelper{
+			glm::vec4(-0.5f, 0.5f, -0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, -1.0f, 0.0f),
+			glm::vec2(0.75f, 1.0f) 
+		},
+		CubeVertexHelper{ 
+			glm::vec4(0.5f, 0.5f, -0.5f, 1.0f),
+			glm::vec4(0.0f, 0.0f, -1.0f, 0.0f),
+			glm::vec2(0.5f, 1.0f) 
+		},
+
+		/* left */
+		CubeVertexHelper{ 
+			glm::vec4(-0.5f, -0.5f, -0.5f, 1.0f),
+			glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f),
+			glm::vec2(0.75f, 0.5f)
+		 },
+		CubeVertexHelper{
+			 glm::vec4(-0.5f, -0.5f, 0.5f, 1.0f),
+			 glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f),
+			 glm::vec2(1.0f, 0.5f) 
+		},
+		CubeVertexHelper{
+			glm::vec4(-0.5f, 0.5f, 0.5f, 1.0f),
+			glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f), 
+			glm::vec2(1.0f, 1.0f) 
+		},
+		CubeVertexHelper{
+			glm::vec4(-0.5f, 0.5f, -0.5f, 1.0f),
+			glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f), 
+			glm::vec2(0.75f, 1.0f) 
+		},
 	};
 
 }

@@ -152,6 +152,14 @@ namespace KuchCraft {
 
 		// Tmp, example
 		{
+			// Cubes/ lines
+			Renderer3D::DrawBlock({ 2000.0f, 62.0f, 2000.0f }, Block(BlockType::None, BlockRotation::Deg90));
+
+			Renderer3D::DrawCube({ 2000.0f, 70.0f, 2000.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
+			Renderer3D::DrawCube({ 2000.0f, 80.0f, 2000.0f }, { 0.0f ,0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetHeartFullTexture());
+				
+			Renderer3D::DrawLine({ 2000.0f, 65.0f, 2000.0f }, { 1940.0f, 70.0f, 1970.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
+
 			// 3D quads
 			static glm::vec3 quadRotation{ 0.0f, 0.0f, 0.0f };
 			quadRotation.y += glm::radians(45.0f) * dt;

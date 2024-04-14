@@ -20,6 +20,7 @@ namespace KuchCraft {
 	Renderer3DOutlinedBlockData Renderer3D::s_OutlinedBlockData;
 	Renderer3DTintedData        Renderer3D::s_TintedData;
 	Renderer3DQuadData          Renderer3D::s_QuadData;
+	Renderer3DCubeData          Renderer3D::s_CubeData;
 	Renderer3DTextInfo          Renderer3D::s_TextInfo;
 	Renderer3DTextData          Renderer3D::s_TextData;
 
@@ -34,11 +35,13 @@ namespace KuchCraft {
 		PrepareTinted();
 		PrepareTextRendering();
 		PrepareQuads();
+		PrepareCubes();
 
 		// QuadIndexBuffer
-		uint32_t* indices = new uint32_t[max_indices_in_chunk];
+		uint32_t  indexBufferElementCount = s_Info.MaxIndices > max_indices_in_chunk ? s_Info.MaxIndices : max_indices_in_chunk;
+		uint32_t* indices = new uint32_t[indexBufferElementCount];
 		uint32_t  offset = 0;
-		for (uint32_t i = 0; i < max_indices_in_chunk; i += quad_index_count)
+		for (uint32_t i = 0; i < indexBufferElementCount; i += quad_index_count)
 		{
 			indices[i + 0] = offset + 0;
 			indices[i + 1] = offset + 1;
@@ -49,7 +52,7 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		s_Data.QuadIndexBuffer.Create(indices, max_indices_in_chunk);
+		s_Data.QuadIndexBuffer.Create(indices, indexBufferElementCount);
 		delete[] indices;
 
 		{
@@ -71,7 +74,8 @@ namespace KuchCraft {
 
 	void Renderer3D::ShutDown()
 	{
-
+		delete s_QuadData.TextureSlots;
+		delete s_CubeData.TextureSlots;
 	}
 
 	void Renderer3D::LoadRenderer3DInfo()
@@ -95,6 +99,7 @@ namespace KuchCraft {
 		if (s_OutlinedBlockData.Status)
 			RenderOutlinedBlock();
 
+		RenderCubes();
 		RenderQuads();
 
 		RenderWater();
@@ -118,6 +123,7 @@ namespace KuchCraft {
 		s_TintedData.Tinted        = false;
 
 		s_QuadData.Vertices.clear();
+		s_CubeData.Vertices.clear();
 
 		s_TextData.Data.clear();
 	}
@@ -375,9 +381,9 @@ namespace KuchCraft {
 		RendererCommand::EnableFaceCulling();
 		RendererCommand::EnableDepthTesting();
 
-		s_ChunkData.Shader.Bind();
+		s_ChunkData.Shader.     Bind();
 		s_ChunkData.VertexArray.Bind();
-		s_Data.QuadIndexBuffer.Bind();
+		s_Data.QuadIndexBuffer. Bind();
 
 		for (const auto& chunk : s_ChunkData.ChunksToRender)
 		{
@@ -591,7 +597,7 @@ namespace KuchCraft {
 		s_QuadData.Shader.      Bind();
 		s_QuadData.VertexArray. Bind();
 		s_QuadData.VertexBuffer.Bind();
-		s_QuadData.IndexBuffer. Bind();
+		s_Data.QuadIndexBuffer. Bind();
 
 		s_QuadData.VertexOffset  = 0;
 		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
@@ -678,6 +684,102 @@ namespace KuchCraft {
 		StartQuadsBatch();
 	}
 
+	void Renderer3D::RenderCubes()
+	{
+		RendererCommand::DisableBlending();
+		RendererCommand::EnableFaceCulling();
+		RendererCommand::EnableLessEqualDepthTesting();
+
+		s_CubeData.Shader.      Bind();
+		s_CubeData.VertexArray. Bind();
+		s_CubeData.VertexBuffer.Bind();
+		s_Data.QuadIndexBuffer. Bind();
+
+		s_CubeData.VertexOffset  = 0;
+		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
+
+		StartCubesBatch();
+
+		for (uint32_t i = 0; i < s_CubeData.Vertices.size(); i += quad_vertex_count)
+		{
+			if (s_CubeData.IndexCount == s_Info.MaxIndices)
+				NextCubesBatch();
+
+			if (s_CubeData.Vertices[i].TexIndex == 0.0f) // just color, TexIndex temporarily holds the texture rendererID
+			{
+				s_CubeData.Vertices[i + 0].TexIndex = 0.0f;
+				s_CubeData.Vertices[i + 1].TexIndex = 0.0f;
+				s_CubeData.Vertices[i + 2].TexIndex = 0.0f;
+				s_CubeData.Vertices[i + 3].TexIndex = 0.0f;
+
+				s_CubeData.IndexCount += quad_index_count;
+			}
+			else // textures
+			{	
+				float textureIndex = 0.0f;
+				for (uint32_t j = 1; j < s_CubeData.TextureSlotIndex; j++)
+				{
+					if (s_CubeData.TextureSlots[j] == s_CubeData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
+					{
+						textureIndex = (float)j;
+						break;
+					}
+				}
+
+				if (textureIndex == 0.0f)
+				{
+					if (s_CubeData.TextureSlotIndex >= maxTextureSlots)
+						NextCubesBatch();
+
+					textureIndex = (float)s_CubeData.TextureSlotIndex;
+					s_CubeData.TextureSlots[s_CubeData.TextureSlotIndex] = s_CubeData.Vertices[i].TexIndex;
+
+					s_CubeData.TextureSlotIndex++;
+				}
+
+				s_CubeData.Vertices[i + 0].TexIndex = textureIndex;
+				s_CubeData.Vertices[i + 1].TexIndex = textureIndex;
+				s_CubeData.Vertices[i + 2].TexIndex = textureIndex;
+				s_CubeData.Vertices[i + 3].TexIndex = textureIndex;
+
+				s_CubeData.IndexCount += quad_index_count;
+			}
+		}
+
+		FlushCubes();
+	}
+
+	void Renderer3D::FlushCubes()
+	{
+		if (s_CubeData.IndexCount == 0)
+			return;
+
+		uint32_t vertexCount = s_CubeData.IndexCount / quad_index_count * quad_vertex_count;
+
+		s_CubeData.VertexBuffer.SetData(&s_CubeData.Vertices[s_CubeData.VertexOffset], vertexCount * sizeof(CubeVertex));
+		s_CubeData.VertexOffset = vertexCount;
+
+		for (uint32_t i = 0; i < s_CubeData.TextureSlotIndex; i++)
+			Texture2D::Bind(s_CubeData.TextureSlots[i], i);
+		
+		RendererCommand::DrawElements(s_CubeData.IndexCount);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
+	}
+
+	void Renderer3D::StartCubesBatch()
+	{
+		s_CubeData.IndexCount = 0;
+		s_CubeData.TextureSlotIndex = 1;
+	}
+
+	void Renderer3D::NextCubesBatch()
+	{
+		FlushCubes();
+		StartCubesBatch();
+	}
+
 	void Renderer3D::PrepareQuads()
 	{
 		s_QuadData.VertexArray.Create();
@@ -692,22 +794,6 @@ namespace KuchCraft {
 		});
 
 		s_QuadData.VertexArray.SetVertexBuffer(s_QuadData.VertexBuffer);
-
-		uint32_t* indices = new uint32_t[s_Info.MaxIndices];
-		uint32_t  offset  = 0;
-		for (uint32_t i = 0; i < s_Info.MaxIndices; i += 6)
-		{
-			indices[i + 0] = offset + 0;
-			indices[i + 1] = offset + 1;
-			indices[i + 2] = offset + 2;
-			indices[i + 3] = offset + 2;
-			indices[i + 4] = offset + 3;
-			indices[i + 5] = offset + 0;
-
-			offset += 4;
-		}
-		s_QuadData.IndexBuffer.Create(indices, s_Info.MaxIndices);
-		delete[] indices;
 
 		{
 			TextureSpecification spec;
@@ -737,10 +823,58 @@ namespace KuchCraft {
 
 		s_QuadData.Vertices.reserve(s_Info.MaxVertices);
 
-		s_QuadData.IndexBuffer .Unbind();
 		s_QuadData.VertexArray. Unbind();
 		s_QuadData.VertexBuffer.Unbind();
 		s_QuadData.Shader.      Unbind();
+	}
+
+	void Renderer3D::PrepareCubes()
+	{
+		s_CubeData.VertexArray.Create();
+		s_CubeData.VertexArray.Bind();
+
+		s_CubeData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(QuadVertex));
+		s_CubeData.VertexBuffer.SetBufferLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float3, "a_Normal"   },
+			{ ShaderDataType::Float4, "a_Color"    },
+			{ ShaderDataType::Float2, "a_TexCoor"  },
+			{ ShaderDataType::Float,  "a_TexIndex" }
+		});
+
+		s_CubeData.VertexArray.SetVertexBuffer(s_CubeData.VertexBuffer);
+
+		{
+			TextureSpecification spec;
+			spec.Width = 1;
+			spec.Height = 1;
+			s_CubeData.WhiteTexture.Create(spec);
+
+			uint32_t white = 0xffffffff;
+			s_CubeData.WhiteTexture.Setdata(&white, sizeof(uint32_t));
+		}
+		
+		std::unordered_map<std::string, std::string> cubeShaderData;
+		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
+		cubeShaderData["#max_texture_slots"] = std::to_string(maxTextureSlots);
+
+		s_CubeData.Shader.Create("assets/shaders/cube.vert.glsl", "assets/shaders/cube.frag.glsl", cubeShaderData);
+		s_CubeData.Shader.Bind();
+
+		int* samplers = new int[maxTextureSlots];
+		for (int i = 0; i < maxTextureSlots; i++)
+			samplers[i] = i;
+		s_CubeData.Shader.SetIntArray("u_Textures", samplers, maxTextureSlots);
+		delete[] samplers;
+
+		s_CubeData.TextureSlots    = new uint32_t[maxTextureSlots];
+		s_CubeData.TextureSlots[0] = s_CubeData.WhiteTexture.GetRendererID();
+
+		s_CubeData.Vertices.reserve(s_Info.MaxVertices);
+
+		s_CubeData.VertexArray. Unbind();
+		s_CubeData.VertexBuffer.Unbind();
+		s_CubeData.Shader.      Unbind();
 	}
 
 	void Renderer3D::DrawChunk(Chunk* chunk)
@@ -751,6 +885,49 @@ namespace KuchCraft {
 	void Renderer3D::DrawChunks(const std::vector<Chunk*>& chunks)
 	{
 		s_ChunkData.Chunks.insert(s_ChunkData.Chunks.end(), chunks.begin(), chunks.end());
+	}
+
+	void Renderer3D::DrawBlock(const glm::vec3& position, const Block& block)
+	{
+		constexpr glm::vec3 block_initial_displacement{ 0.5f, 0.5f, 0.5f };
+		glm::vec3 blockPosition = glm::vec3{ (int)position.x, (int)position.y, (int)position.z } + block_initial_displacement;
+
+		DrawCube(blockPosition, { 0.0f, -glm::radians(90.0f * (float)block.Rotation), 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetBlockTexture(block));
+	}
+
+	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)
+	{
+		glm::mat4 rotationMatrix = glm::toMat4(glm::quat(rotation));
+		glm::mat4 transform      = glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), size);
+
+		for (uint32_t i = 0; i < cube_vertex_count; i++)
+		{
+			CubeVertex vertex;
+			vertex.Position = transform      * cube_vertices[i].Position;
+			vertex.Normal   = rotationMatrix * cube_vertices[i].Normal;
+			vertex.Color    = color;
+			vertex.TexCoord = cube_vertices[i].UV;
+
+			s_CubeData.Vertices.emplace_back(vertex);
+		}
+	}
+
+	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		glm::mat4 rotationMatrix = glm::toMat4(glm::quat(rotation));
+		glm::mat4 transform      = glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), size);
+
+		for (uint32_t i = 0; i < cube_vertex_count; i++)
+		{
+			CubeVertex vertex;
+			vertex.Position = transform      * cube_vertices[i].Position;
+			vertex.Normal   = rotationMatrix * cube_vertices[i].Normal;
+			vertex.Color    = tintColor;
+			vertex.TexCoord = cube_vertices[i].UV;
+			vertex.TexIndex = (float)texture.GetRendererID();
+
+			s_CubeData.Vertices.emplace_back(vertex);
+		}
 	}
 
 	void Renderer3D::DrawOutlinedBlock(const glm::vec3& position)
@@ -793,6 +970,14 @@ namespace KuchCraft {
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
+	}
+
+	void Renderer3D::DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color, float thickness)
+	{
+		glm::vec3 direction = end - start;
+		glm::vec3 rotation  = glm::eulerAngles(glm::quatLookAt(glm::normalize(direction), glm::vec3(0.0f, 1.0f, 0.0f)));
+
+		DrawCube(start + direction * 0.5f, rotation, glm::vec3(thickness, thickness, glm::length(direction)), color);
 	}
 
 	void Renderer3D::DrawText(const std::string& text, const TextStyle3D& textStyle)

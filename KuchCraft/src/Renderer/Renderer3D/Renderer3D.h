@@ -16,8 +16,12 @@ namespace KuchCraft {
 	public:
 		static void DrawChunk(Chunk* chunk);
 		static void DrawChunks(const std::vector<Chunk*>& chunks);
-		static void DrawOutlinedBlock(const glm::vec3& position);
-		static void DrawWaterTinted();
+
+		static void DrawBlock(const glm::vec3& position, const Block& block);
+		static void DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color);
+		static void DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
+
+		static void DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color = glm::vec4(1.0f), float thickness = 0.1f);
 
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const glm::vec4& color);
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
@@ -27,6 +31,9 @@ namespace KuchCraft {
 		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color);
 		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, float fontSize);
 		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color, float fontSize);
+
+		static void DrawWaterTinted();
+		static void DrawOutlinedBlock(const glm::vec3& position);
 
 	private:
 		static void Init();
@@ -48,6 +55,7 @@ namespace KuchCraft {
 		static void PrepareTinted();
 		static void PrepareTextRendering();
 		static void PrepareQuads();
+		static void PrepareCubes();
 
 		static void RenderChunks();
 		static void RenderSkybox();
@@ -61,6 +69,11 @@ namespace KuchCraft {
 		static void StartQuadsBatch();
 		static void NextQuadsBatch();
 
+		static void RenderCubes();
+		static void FlushCubes();
+		static void StartCubesBatch();
+		static void NextCubesBatch();
+
 	private:
 		Renderer3D() = default;
 
@@ -73,8 +86,9 @@ namespace KuchCraft {
 		static Renderer3DOutlinedBlockData s_OutlinedBlockData;
 		static Renderer3DTintedData        s_TintedData;
 		static Renderer3DQuadData          s_QuadData;
-		static Renderer3DTextInfo           s_TextInfo;
-		static Renderer3DTextData           s_TextData;
+		static Renderer3DCubeData          s_CubeData;
+		static Renderer3DTextInfo          s_TextInfo;
+		static Renderer3DTextData          s_TextData;
 
 	public:
 		friend class Renderer;
