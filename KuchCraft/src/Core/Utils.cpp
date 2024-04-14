@@ -42,6 +42,14 @@ namespace KuchCraft {
 		return std::to_string(vec.x) + ", " + std::to_string(vec.y) + ", " + std::to_string(vec.z) + ", " + std::to_string(vec.w);
 	}
 
+	std::string FloatToString(float value, uint8_t precision)
+	{
+		std::ostringstream stream;
+		stream << std::fixed << std::setprecision(precision);
+		stream << value;
+		return stream.str();
+	}
+
 	std::string BoolToString(bool value)
 	{
 		return value ? "true" : "false";

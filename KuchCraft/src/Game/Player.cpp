@@ -237,8 +237,7 @@ namespace KuchCraft {
 			case MouseCode::ButtonRight:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					PlaceBlock(m_TargetedBlock.Position, Block(BlockType::None, (BlockRotation)Random::UInt(0, 3)));
-					//PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_block_types))));
+					PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_block_types))));
 				return false;
 			}
 		}

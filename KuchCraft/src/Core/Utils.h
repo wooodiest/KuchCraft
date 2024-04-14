@@ -14,6 +14,8 @@ namespace KuchCraft {
 
 	std::string VecToString(const glm::ivec4& vec);
 
+	std::string FloatToString(float value, uint8_t precision = 6);
+
 	std::string BoolToString(bool value);
 
 }
