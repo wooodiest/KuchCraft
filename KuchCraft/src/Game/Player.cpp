@@ -129,7 +129,7 @@ namespace KuchCraft {
 		m_DebugText =
 			  "\nPlayer:"
 			  "\n   Position: "  + VecToString(m_Position, 2)
-			+ "\n   Rotation: "  + VecToString(glm::vec2{ glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y) }, 2);
+			+ "\n   Rotation: "  + VecToString(glm::vec2{ glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y) }, 2)
 			+ "\n   Gamemode: "  + gameMode;
 
 		if (m_TargetedBlock.Targeted)
@@ -237,7 +237,7 @@ namespace KuchCraft {
 			case MouseCode::ButtonRight:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(2, total_number_of_block_types))));
+					PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(1, absolute_number_of_block_types))));
 				return false;
 			}
 		}

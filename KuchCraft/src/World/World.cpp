@@ -276,7 +276,7 @@ namespace KuchCraft {
 		if (chunk)
 		{
 			if (position.y < 0.0f || position.y >= chunk_size_Y)
-				return Block(BlockType::None);
+				return Block(BlockType::Air);
 
 			const int x = static_cast<int>(std::fmod(position.x, chunk_size_XZ));
 			const int y = static_cast<int>(std::fmod(position.y, chunk_size_Y));
@@ -284,7 +284,7 @@ namespace KuchCraft {
 
 			return chunk->Block[x][y][z];
 		}
-		return Block(BlockType::None);	
+		return Block(BlockType::Air);	
 	}
 
 	int World::GetChunkIndex(const glm::vec3& position)
