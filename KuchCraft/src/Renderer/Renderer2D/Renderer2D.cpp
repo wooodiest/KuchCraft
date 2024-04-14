@@ -188,6 +188,13 @@ namespace KuchCraft {
 			glm::vec2 currentPosition = textStyle.Position;
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
 
+			// adjust the height at which the text starts
+			if (!text.empty())
+			{
+				const FontCharacter& character = s_TextData.Texture.GetCharacter(text[0]);
+				currentPosition.y -= (character.Size.y) * scale;
+			}
+
 			for (auto c = text.begin(); c != text.end(); c++)
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);

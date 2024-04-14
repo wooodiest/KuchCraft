@@ -529,11 +529,19 @@ namespace KuchCraft {
 		for (const auto& [text, textStyle] : s_TextData.Data)
 		{
 			glm::vec2 currentPosition = textStyle.Position;
+
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
 
-			glm::mat4 rotation = glm::translate(glm::mat4(1.0f), textStyle.Position) * 
+			glm::mat4 rotation = glm::translate(glm::mat4(1.0f), textStyle.Position) *
 				glm::toMat4(glm::quat(textStyle.Rotation)) *
 				glm::translate(glm::mat4(1.0f), -textStyle.Position);
+
+			// adjust the height at which the text starts
+			if (!text.empty())
+			{
+				const FontCharacter& character = s_TextData.Texture.GetCharacter(text[0]);
+				currentPosition.y -= (character.Size.y) * scale * (1.0f + textStyle.FontSpacing);
+			}
 
 			for (auto c = text.begin(); c != text.end(); c++)
 			{

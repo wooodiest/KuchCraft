@@ -148,7 +148,7 @@ namespace KuchCraft {
 		if (m_Player.GetTargetedBlockStatus())
 			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedBlock().Position);
 
-		Renderer2D::DrawTextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), { 6.0f, 25.0f });
+		Renderer2D::DrawTextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), { 5.0f, 5.0f });
 
 		// Tmp, example
 		{
