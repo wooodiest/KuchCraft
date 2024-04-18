@@ -77,9 +77,9 @@ namespace KuchCraft {
 		m_IndexCount[GetCurrentDrawCallIndex()] += quad_index_count;
 	}
 
-	void ChunkDrawList::Add(const glm::ivec3& position, uint32_t verticesIndex, const Block& block)
+	void ChunkDrawList::Add(const glm::ivec3& position, uint32_t verticesIndex, const Item& item)
 	{
-		uint32_t texture = AssetManager::GetBlockTexture(block).GetRendererID();
+		uint32_t texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
 		float    texSlot = -1.0f;
 
 		// Check if the texture already has assigned slot
@@ -114,7 +114,7 @@ namespace KuchCraft {
 		packedData |= ((position.x & 0x1F)              << 0 ) |
 				      ((position.y & 0x7F)              << 5 ) |
 				      ((position.z & 0x1F)              << 12) |
-					  (((uint8_t)block.Rotation & 0x3)  << 17) |
+					  (((uint8_t)item.Rotation & 0x3)   << 17) |
 					  (((uint8_t)texSlot        & 0x7F) << 24);
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)

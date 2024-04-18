@@ -1,7 +1,7 @@
 #include "kcpch.h"
 #include "Physics/PlayerPhysicsBody.h"
 
-#include "World/Block.h"
+#include "World/Item.h"
 #include "World/World.h"
 
 namespace KuchCraft {
@@ -216,9 +216,9 @@ namespace KuchCraft {
 						glm::vec3{ x + block_size, y + block_size, z + block_size} };
 
 					const glm::vec3& blockPosition = blockAABB.Min;
-					const Block block = World::Get().GetBlock(blockPosition);
+					const Item block = World::Get().GetItem(blockPosition);
 
-					if (!block.IsSolid())
+					if (!block.IsSolidBlock())
 						continue;
 
 					// Check intersection status
@@ -277,9 +277,9 @@ namespace KuchCraft {
 					glm::vec3{ absolutePosition.x + x + block_size, absolutePosition.y + block_size, absolutePosition.z + z + block_size} };
 
 				const glm::vec3& blockPosition = blockAABB.Min;
-				const Block block = World::Get().GetBlock(blockPosition);
+				const Item block = World::Get().GetItem(blockPosition);
 
-				if (!block.IsSolid())
+				if (!block.IsSolidBlock())
 					continue;
 				
 				if (!playerAABB.IsColliding(blockAABB))
@@ -297,6 +297,6 @@ namespace KuchCraft {
 	}
 	bool PlayerPhysicsBody::IsInWater()
 	{
-		return World::Get().GetBlock(m_Position) == BlockType::Water;
+		return World::Get().GetItem(m_Position).Type == ItemType::Water;
 	}
 }

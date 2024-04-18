@@ -7,7 +7,7 @@ namespace KuchCraft {
 	class AssetManager
 	{
 	public:
-		static Texture2D& GetBlockTexture(BlockType type) { return s_BlockData.Textures[type]; }
+		static Texture2D& GetItemTexture(ItemType type) { return s_BlockData.Textures[type]; }
 
 		static Texture2D& GetHotbarTexture()          { return s_UIData.HotbarTexture;          }
 		static Texture2D& GetHotbarSelectionTexture() { return s_UIData.HotbarSelectionTexture; }

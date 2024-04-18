@@ -34,8 +34,8 @@ namespace KuchCraft {
 		void OnUpdate(float dt);
 
 		// Utils
-		void  SetBlock(const glm::vec3& position, const Block& block);
-		Block GetBlock(const glm::vec3& position);
+		void SetItem(const glm::vec3& position, const Item& item);
+		Item GetItem(const glm::vec3& position);
 
 		int    GetChunkIndex(const glm::vec3& position);
 		Chunk* GetChunk(const glm::vec3& position);

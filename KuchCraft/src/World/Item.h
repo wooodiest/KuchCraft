@@ -16,6 +16,8 @@ namespace KuchCraft {
 		Item(ItemType type, ItemRotation rotation);
 		~Item();
 
+		const std::string& GetName() const { return s_ItemNames[Type]; }
+
 	public:
 		inline bool IsSolidBlock()       const { return (uint32_t)Type >= item_type_solid_block_begin       && (uint32_t)Type <= item_type_solid_block_end;       }
 		inline bool IsTransparentBlock() const { return (uint32_t)Type >= item_type_transparent_block_begin && (uint32_t)Type <= item_type_transparent_block_end; }

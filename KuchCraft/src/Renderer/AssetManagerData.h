@@ -1,15 +1,15 @@
 #pragma once
 
 #include "Renderer/Data/Texture2D.h"
-#include "World/Block.h"
+#include "World/Item.h"
 
 namespace KuchCraft {
 
 	struct AssetManagerBlockData
 	{
-		std::string Path      = "assets/textures/blocks/";
+		std::string Path      = "assets/textures/items/";
 		std::string Extension = ".png";
-		std::map<BlockType, Texture2D> Textures;
+		std::map<ItemType, Texture2D> Textures;
 	};
 
 	struct AssetManagerUIData

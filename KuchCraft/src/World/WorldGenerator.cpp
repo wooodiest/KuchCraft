@@ -20,39 +20,6 @@ namespace KuchCraft {
 		// Clear 
 	}
 
-	void WorldGenerator::FillWithRandomBlocks(Chunk* chunk)
-	{
-		int count = (int)BlockType::None - 1;
-		int block = Random::Int(1, count);
-
-		for (int x = 0; x < chunk_size_XZ; x++)
-		{
-			for (int y = 0; y < chunk_size_Y; y++)
-			{
-				for (int z = 0; z < chunk_size_XZ; z++)
-				{
-					if (y == 0)
-						chunk->Block[x][y][z].Type = BlockType::Bedrock;
-					else
-					{
-						if (y < 60)
-						{
-							if (Random::Int(0, 1000) == 0)
-								chunk->Block[x][y][z].Type = BlockType::Air;
-							else
-								chunk->Block[x][y][z].Type = static_cast<BlockType>(block);
-						}
-						else
-							chunk->Block[x][y][z].Type = BlockType::Air;
-					}
-
-				}
-			}
-		}
-	}
-
-
-
 	void WorldGenerator::Generate(Chunk* chunk)
 	{
 		auto& position = chunk->GetPosition();
@@ -81,37 +48,37 @@ namespace KuchCraft {
 							if (y == s_SeeLevel - 1 || y == s_SeeLevel)
 							{
 								if (peresistance > 1.0)
-									chunk->Block[x][y][z] = Block(BlockType::Grass);
+									chunk->Items[x][y][z] = Item(ItemType::GrassBlock);
 								else
-									chunk->Block[x][y][z] = Block(BlockType::Sand);
+									chunk->Items[x][y][z] = Item(ItemType::Sand);
 							}
 							else
 							{
-								Block block = s_SeeLevel - y >= 6 ? Block(BlockType::Gravel) : Block(BlockType::Sand);
+								Item block = s_SeeLevel - y >= 6 ? Item(ItemType::Gravel) : Item(ItemType::Sand);
 								if (y == height - 1)
-									chunk->Block[x][y][z] = block;
+									chunk->Items[x][y][z] = block;
 								else if (y == height - 2)
-									chunk->Block[x][y][z] = block;
+									chunk->Items[x][y][z] = block;
 								else if (y == height - 3)
-									chunk->Block[x][y][z] = block;
+									chunk->Items[x][y][z] = block;
 								else if (y == height - 4)
-									chunk->Block[x][y][z] = block;
+									chunk->Items[x][y][z] = block;
 								else
-									chunk->Block[x][y][z] = Block(BlockType::Stone);
+									chunk->Items[x][y][z] = Item(ItemType::Stone);
 							}
 						}
 						else
 						{
 							if (y == height - 1)
-								chunk->Block[x][y][z] = Block(BlockType::Grass);
+								chunk->Items[x][y][z] = Item(ItemType::GrassBlock);
 							else if (y == height - 2)
-								chunk->Block[x][y][z] = Block(BlockType::Dirt);
+								chunk->Items[x][y][z] = Item(ItemType::Dirt);
 							else if (y == height - 3)
-								chunk->Block[x][y][z] = Block(BlockType::Dirt);
+								chunk->Items[x][y][z] = Item(ItemType::Dirt);
 							else if (y == height - 4)
-								chunk->Block[x][y][z] = Block(BlockType::Dirt);
+								chunk->Items[x][y][z] = Item(ItemType::Dirt);
 							else
-								chunk->Block[x][y][z] = Block(BlockType::Stone);
+								chunk->Items[x][y][z] = Item(ItemType::Stone);
 						}
 
 					}
@@ -124,7 +91,7 @@ namespace KuchCraft {
 		{
 			for (int z = 0; z < chunk_size_XZ; z++)
 			{
-				chunk->Block[x][0][z] = Block(BlockType::Bedrock);
+				chunk->Items[x][0][z] = Item(ItemType::Bedrock);
 			}
 		}
 		for (int x = 0; x < chunk_size_XZ; x++)
@@ -135,9 +102,9 @@ namespace KuchCraft {
 				{
 					if (y < s_SeeLevel - 1)
 					{
-						if (chunk->Block[x][y + 1][z].Type == BlockType::Air)
+						if (chunk->Items[x][y + 1][z].Type == ItemType::Air)
 						{
-							chunk->Block[x][y + 1][z] = Block(BlockType::Water);
+							chunk->Items[x][y + 1][z] = Item(ItemType::Water);
 						}
 					}
 				}
@@ -160,53 +127,53 @@ namespace KuchCraft {
 						break;
 
 					// We dont want trees to be next to rach other
-					if (treeProb && chunk->Block[x][y][z].Type == BlockType::Grass
-						&& chunk->Block[x][y + 1][z].Type == BlockType::Air)
+					if (treeProb && chunk->Items[x][y][z].Type == ItemType::GrassBlock
+						&& chunk->Items[x][y + 1][z].Type == ItemType::Air)
 					{
-						if (chunk->Block[x - 1][y + 1][z] == Block(BlockType::OakLog) ||
-							chunk->Block[x + 1][y + 1][z] == Block(BlockType::OakLog) ||
-							chunk->Block[x][y + 1][z - 1] == Block(BlockType::OakLog) ||
-							chunk->Block[x][y + 1][z + 1] == Block(BlockType::OakLog) ||
-							chunk->Block[x - 1][y + 1][z - 1] == Block(BlockType::OakLog) ||
-							chunk->Block[x - 1][y + 1][z + 1] == Block(BlockType::OakLog) ||
-							chunk->Block[x + 1][y + 1][z - 1] == Block(BlockType::OakLog) ||
-							chunk->Block[x + 1][y + 1][z + 1] == Block(BlockType::OakLog))
+						if (chunk->Items[x - 1][y + 1][z].Type == Item(ItemType::OakLog).Type ||
+							chunk->Items[x + 1][y + 1][z].Type == Item(ItemType::OakLog).Type ||
+							chunk->Items[x][y + 1][z - 1].Type == Item(ItemType::OakLog).Type ||
+							chunk->Items[x][y + 1][z + 1].Type == Item(ItemType::OakLog).Type ||
+							chunk->Items[x - 1][y + 1][z - 1].Type == Item(ItemType::OakLog).Type ||
+							chunk->Items[x - 1][y + 1][z + 1].Type == Item(ItemType::OakLog).Type ||
+							chunk->Items[x + 1][y + 1][z - 1].Type == Item(ItemType::OakLog).Type ||
+							chunk->Items[x + 1][y + 1][z + 1].Type == Item(ItemType::OakLog).Type)
 							break;
 
 						// tree
-						chunk->Block[x][y + 1][z] = Block(BlockType::OakLog);
-						chunk->Block[x][y + 2][z] = Block(BlockType::OakLog);
-						chunk->Block[x][y + 3][z] = Block(BlockType::OakLog);
-						chunk->Block[x][y + 4][z] = Block(BlockType::OakLog);
+						chunk->Items[x][y + 1][z] = Item(ItemType::OakLog);
+						chunk->Items[x][y + 2][z] = Item(ItemType::OakLog);
+						chunk->Items[x][y + 3][z] = Item(ItemType::OakLog);
+						chunk->Items[x][y + 4][z] = Item(ItemType::OakLog);
 
-						chunk->Block[x - 1][y + 4][z] = Block(BlockType::Leaves);
-						chunk->Block[x + 1][y + 4][z] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 4][z - 1] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 4][z + 1] = Block(BlockType::Leaves);
+						chunk->Items[x - 1][y + 4][z] = Item(ItemType::Leaves);
+						chunk->Items[x + 1][y + 4][z] = Item(ItemType::Leaves);
+						chunk->Items[x][y + 4][z - 1] = Item(ItemType::Leaves);
+						chunk->Items[x][y + 4][z + 1] = Item(ItemType::Leaves);
 
-						chunk->Block[x][y + 5][z]     = Block(BlockType::Leaves);
-						chunk->Block[x - 1][y + 5][z] = Block(BlockType::Leaves);
-						chunk->Block[x + 1][y + 5][z] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 5][z - 1] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 5][z + 1] = Block(BlockType::Leaves);
+						chunk->Items[x][y + 5][z]     =Item(ItemType::Leaves);
+						chunk->Items[x - 1][y + 5][z] =Item(ItemType::Leaves);
+						chunk->Items[x + 1][y + 5][z] =Item(ItemType::Leaves);
+						chunk->Items[x][y + 5][z - 1] =Item(ItemType::Leaves);
+						chunk->Items[x][y + 5][z + 1] =Item(ItemType::Leaves);
 
-						chunk->Block[x - 1][y + 5][z - 1] = Block(BlockType::Leaves);
-						chunk->Block[x - 1][y + 5][z + 1] = Block(BlockType::Leaves);
-						chunk->Block[x + 1][y + 5][z - 1] = Block(BlockType::Leaves);
-						chunk->Block[x + 1][y + 5][z + 1] = Block(BlockType::Leaves);
+						chunk->Items[x - 1][y + 5][z - 1] = Item(ItemType::Leaves);
+						chunk->Items[x - 1][y + 5][z + 1] = Item(ItemType::Leaves);
+						chunk->Items[x + 1][y + 5][z - 1] = Item(ItemType::Leaves);
+						chunk->Items[x + 1][y + 5][z + 1] = Item(ItemType::Leaves);
 
-						chunk->Block[x - 2][y + 5][z] = Block(BlockType::Leaves);
-						chunk->Block[x + 2][y + 5][z] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 5][z - 2] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 5][z + 2] = Block(BlockType::Leaves);
+						chunk->Items[x - 2][y + 5][z] = Item(ItemType::Leaves);
+						chunk->Items[x + 2][y + 5][z] = Item(ItemType::Leaves);
+						chunk->Items[x][y + 5][z - 2] = Item(ItemType::Leaves);
+						chunk->Items[x][y + 5][z + 2] = Item(ItemType::Leaves);
 
-						chunk->Block[x][y + 6][z]     = Block(BlockType::Leaves);
-						chunk->Block[x - 1][y + 6][z] = Block(BlockType::Leaves);
-						chunk->Block[x + 1][y + 6][z] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 6][z - 1] = Block(BlockType::Leaves);
-						chunk->Block[x][y + 6][z + 1] = Block(BlockType::Leaves);
+						chunk->Items[x][y + 6][z]     = Item(ItemType::Leaves);
+						chunk->Items[x - 1][y + 6][z] = Item(ItemType::Leaves);
+						chunk->Items[x + 1][y + 6][z] = Item(ItemType::Leaves);
+						chunk->Items[x][y + 6][z - 1] = Item(ItemType::Leaves);
+						chunk->Items[x][y + 6][z + 1] = Item(ItemType::Leaves);
 
-						chunk->Block[x][y + 7][z] = Block(BlockType::Leaves);
+						chunk->Items[x][y + 7][z] = Item(ItemType::Leaves);
 
 						break;
 					}

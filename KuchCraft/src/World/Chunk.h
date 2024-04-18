@@ -1,6 +1,6 @@
 #pragma once
 
-#include "World/Block.h"
+#include "World/Item.h"
 
 #include "Renderer/Utils/ChunkDrawList.h"
 
@@ -9,7 +9,7 @@ namespace KuchCraft {
 	class Chunk
 	{
 	public:
-		Block Block[chunk_size_XZ][chunk_size_Y][chunk_size_XZ];
+		Item Items[chunk_size_XZ][chunk_size_Y][chunk_size_XZ];
 
 	public:
 		Chunk(const glm::vec3& position);

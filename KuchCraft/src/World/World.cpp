@@ -15,6 +15,8 @@
 
 #include "Core/Application.h"
 
+#include "World/Item.h"
+
 namespace KuchCraft {
 
 	World* World::s_Instance = nullptr;
@@ -142,7 +144,7 @@ namespace KuchCraft {
 		// Renderer draw commands
 		Renderer3D::DrawChunks(m_ChunksToUpdate);
 
-		if (GetBlock(m_Player.GetEyePosition()) == BlockType::Water)
+		if (GetItem(m_Player.GetEyePosition()).Type == ItemType::Water)
 			Renderer3D::DrawWaterTinted();
 
 		if (m_Player.GetTargetedBlockStatus())
@@ -153,29 +155,36 @@ namespace KuchCraft {
 		// Tmp, example
 		{
 			// Cubes/ lines
-			Renderer3D::DrawBlock({ 2000.0f, 62.0f, 2000.0f }, Block(BlockType::None, BlockRotation::Deg90));
-
+			Renderer3D::DrawItem({ 2000.0f, 62.0f, 2000.0f }, Item(ItemType::None, ItemRotation::Deg90));
+			
 			Renderer3D::DrawCube({ 2000.0f, 70.0f, 2000.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
 			Renderer3D::DrawCube({ 2000.0f, 80.0f, 2000.0f }, { 0.0f ,0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetHeartFullTexture());
 				
 			Renderer3D::DrawLine({ 2000.0f, 65.0f, 2000.0f }, { 1940.0f, 70.0f, 1970.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
-
+			
 			// 3D quads
 			static glm::vec3 quadRotation{ 0.0f, 0.0f, 0.0f };
 			quadRotation.y += glm::radians(45.0f) * dt;
 			Renderer3D::DrawQuad({ 2000.0f, 65.0f, 2000.0f }, quadRotation, { 2.0f, 0.5f }, { 1.0f, 0.0f, 0.0f, 1.0f });
-
+			
 			static glm::vec3 texturedQuadRotation{ 0.0f, 0.0f, 0.0f };
 			texturedQuadRotation.y -= glm::radians(45.0f) * dt;
 			texturedQuadRotation.x += glm::radians(30.0f) * dt;
-			Renderer3D::DrawQuad({ 1995.0f, 65.0f, 1990.0f }, texturedQuadRotation, { 2.0f, 1.0f }, AssetManager::GetBlockTexture(Block(BlockType::DiamondOre)));
-
+			Renderer3D::DrawQuad({ 1995.0f, 65.0f, 1990.0f }, texturedQuadRotation, { 2.0f, 1.0f }, AssetManager::GetItemTexture(ItemType::DiamondOre));
+			
 			static glm::vec3 fontRotation{ 0.0f, glm::radians(90.0f), 0.0f};
 			fontRotation.y += glm::radians(10.0f) * dt;
 			Renderer3D::DrawText("JD2000", { 1940.0f, 70.0f, 1970.0f }, fontRotation, { 1.0f, 0.0f, 1.0f, 1.0 }, 3.0f);
 			
+			// TODO: additional random position and angle dissplacement
+			Renderer3D::DrawQuad({ 2016.5f, 69.5f, 1993.5f }, { 0.0f, glm::radians(45.0f        ), 0.0f }, { 0.5f, 0.5f }, AssetManager::GetItemTexture(ItemType::RedTulipan));
+			Renderer3D::DrawQuad({ 2016.45f, 69.5f, 1993.5f }, { 0.0f, glm::radians(45.0f + 90.0f), 0.0f }, { 0.5f, 0.5f }, AssetManager::GetItemTexture(ItemType::RedTulipan));
+
 			// Rendere2D: some ui
 			auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+			Renderer2D::DrawQuad({ 150.0f, height - 150.0f, 0.0f }, { 150.0f, 150.0f }, { 1.0f, 1.0f, 1.0f, 0.5f });
+
 			glm::vec3 hotbarPosition{ 0.5f * width, 33.0f, 1.0f };
 			Renderer2D::DrawQuad(hotbarPosition, { 273.0f, 33.0f }, AssetManager::GetHotbarTexture());
 
@@ -217,7 +226,7 @@ namespace KuchCraft {
 		}
 	}
 
-	void World::SetBlock(const glm::vec3& position, const Block& block)
+	void World::SetItem(const glm::vec3& position, const Item& block)
 	{
 		Chunk* chunk = GetChunk(position);
 		if (chunk)
@@ -226,7 +235,7 @@ namespace KuchCraft {
 			const int y = static_cast<int>(std::fmod(position.y, chunk_size_Y  ));
 			const int z = static_cast<int>(std::fmod(position.z, chunk_size_XZ ));
 
-			chunk->Block[x][y][z] = block;
+			chunk->Items[x][y][z] = block;
 			chunk->Recreate();
 			m_WorldStats.TotalRecreatedChunks++;
 
@@ -270,21 +279,21 @@ namespace KuchCraft {
 		}
 	}
 
-	Block World::GetBlock(const glm::vec3& position)
+	Item World::GetItem(const glm::vec3& position)
 	{
 		Chunk* chunk = GetChunk(position);
 		if (chunk)
 		{
 			if (position.y < 0.0f || position.y >= chunk_size_Y)
-				return Block(BlockType::Air);
+				return Item(ItemType::Air);
 
 			const int x = static_cast<int>(std::fmod(position.x, chunk_size_XZ));
 			const int y = static_cast<int>(std::fmod(position.y, chunk_size_Y));
 			const int z = static_cast<int>(std::fmod(position.z, chunk_size_XZ));
 
-			return chunk->Block[x][y][z];
+			return chunk->Items[x][y][z];
 		}
-		return Block(BlockType::Air);	
+		return Item(ItemType::Air);
 	}
 
 	int World::GetChunkIndex(const glm::vec3& position)

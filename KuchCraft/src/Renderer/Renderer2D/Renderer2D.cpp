@@ -188,6 +188,12 @@ namespace KuchCraft {
 			glm::vec2 currentPosition = textStyle.Position;
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
 
+			glm::vec2 CurrentSize{ 0.0f };
+			glm::vec2 maxSize = {
+				textStyle.Size.y > 0.0f ? textStyle.Size.y : std::numeric_limits<float>::infinity(), /* 300.0f*/
+				textStyle.Size.y > 0.0f ? textStyle.Size.y : std::numeric_limits<float>::infinity()
+			};
+
 			// adjust the height at which the text starts
 			if (!text.empty())
 			{
@@ -199,17 +205,46 @@ namespace KuchCraft {
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);
 
+				if (CurrentSize.y > maxSize.y)
+					break;
+
 				if (*c == '\n')
 				{
 					currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
 					currentPosition.x = textStyle.Position.x;
+
+					CurrentSize.x = 0.0f;
+					CurrentSize.y += (character.Size.y) * textStyle.FontSpacing * scale;
 				}
 				else if (*c == ' ')
 				{
 					currentPosition.x += (character.Advance >> 6) * scale;
+
+					// Chceck size
+					CurrentSize.x += (character.Advance >> 6) * scale;
+					if (CurrentSize.x > maxSize.x)
+					{
+						CurrentSize.x = 0.0f;
+						CurrentSize.y += (character.Size.y) * textStyle.FontSpacing * scale;
+						// new line 
+						currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
+						currentPosition.x = textStyle.Position.x;
+					}
 				}
 				else
 				{
+					// Chceck size
+					CurrentSize.x += (character.Advance >> 6) * scale;
+					if (CurrentSize.x > maxSize.x)
+					{
+						CurrentSize.x = 0.0f;
+						CurrentSize.y += (character.Size.y) * textStyle.FontSpacing * scale;
+						// new line 
+						currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
+						currentPosition.x = textStyle.Position.x;
+					}
+
+					// Drawing
 					float xpos = currentPosition.x + character.Bearing.x * scale;
 					float ypos = currentPosition.y - (textStyle.FontSize - character.Bearing.y) * scale;
 
@@ -635,6 +670,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x, position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -645,6 +681,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x, position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -655,6 +692,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x, position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -665,6 +703,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x, position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -675,6 +714,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			position,
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -685,6 +725,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			position,
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -695,6 +736,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			position,
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -705,6 +747,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			position,
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -717,6 +760,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x * width, position.y * height, 0.0f },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -729,6 +773,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x * width, position.y * height, 0.0f },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -741,6 +786,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x * width, position.y * height, 0.0f },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -753,6 +799,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x * width, position.y * height, 0.0f },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -765,6 +812,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x * width, position.y * height, position.z },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -777,6 +825,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x * width, position.y * height, position.z },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -789,6 +838,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x * width, position.y * height, position.z },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -801,6 +851,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x * width, position.y * height, position.z },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -811,6 +862,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x, Application::Get().GetWindow().GetHeight() -position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -821,6 +873,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -831,6 +884,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -841,6 +895,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -851,6 +906,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -861,6 +917,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			s_TextInfo.DefaultFontColor,
 			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -871,6 +928,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			{ -1.0f, -1.0f },
 			s_TextInfo.DefaultFontSize,
 			s_TextInfo.DefaultFontSpacing
 		});
@@ -881,6 +939,7 @@ namespace KuchCraft {
 		DrawText(text, TextStyle2D{
 			color,
 			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
+			{ -1.0f, -1.0f },
 			fontSize,
 			s_TextInfo.DefaultFontSpacing
 		});

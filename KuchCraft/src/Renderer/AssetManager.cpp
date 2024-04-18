@@ -19,9 +19,9 @@ namespace KuchCraft {
 
 	void AssetManager::PrepareBlocks()
 	{
-		for (uint32_t i = first_index_of_block_types; i <= absolute_number_of_block_types; i++)
+		for (uint32_t i = 1; i < item_types_count; i++)
 		{
-			Block block = Block((BlockType)i);
+			Item block = Item((ItemType)i);
 
 			std::string blockName = block.GetName();
 			std::replace(blockName.begin(), blockName.end(), ' ', '_');

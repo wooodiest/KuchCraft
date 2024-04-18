@@ -449,7 +449,7 @@ namespace KuchCraft {
 		s_WaterData.VertexArray.Bind();
 		s_Data.QuadIndexBuffer .Bind();
 
-		AssetManager::GetBlockTexture(BlockType::Water).Bind(default_texture_slot);
+		AssetManager::GetItemTexture(ItemType::Water).Bind(default_texture_slot);
 
 		for (const auto& chunk : s_ChunkData.ChunksToRender)
 		{
@@ -895,12 +895,12 @@ namespace KuchCraft {
 		s_ChunkData.Chunks.insert(s_ChunkData.Chunks.end(), chunks.begin(), chunks.end());
 	}
 
-	void Renderer3D::DrawBlock(const glm::vec3& position, const Block& block)
+	void Renderer3D::DrawItem(const glm::vec3& position, const Item& block)
 	{
 		constexpr glm::vec3 block_initial_displacement{ 0.5f, 0.5f, 0.5f };
 		glm::vec3 blockPosition = glm::vec3{ (int)position.x, (int)position.y, (int)position.z } + block_initial_displacement;
 
-		DrawCube(blockPosition, { 0.0f, -glm::radians(90.0f * (float)block.Rotation), 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetBlockTexture(block));
+		DrawCube(blockPosition, { 0.0f, -glm::radians(90.0f * (float)block.Rotation), 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetItemTexture(block.Type));
 	}
 
 	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)

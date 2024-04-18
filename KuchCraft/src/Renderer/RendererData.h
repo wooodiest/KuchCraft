@@ -1,6 +1,6 @@
 #pragma once
 
-#include "World/Block.h"
+#include "World/Item.h"
 #include "World/WorldData.h"
 
 #include "Renderer/Data/UniformBuffer.h"

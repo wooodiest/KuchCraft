@@ -133,7 +133,7 @@ namespace KuchCraft {
 			+ "\n   Gamemode: "  + gameMode;
 
 		if (m_TargetedBlock.Targeted)
-			m_DebugText += "\n   Targeted block - " + World::Get().GetBlock(m_TargetedBlock.Position).GetName() + " : " + VecToString(glm::ivec3{m_TargetedBlock.Position});
+			m_DebugText += "\n   Targeted block - " + World::Get().GetItem(m_TargetedBlock.Position).GetName() + " : " + VecToString(glm::ivec3{m_TargetedBlock.Position});
 		else
 			m_DebugText += "\n   Targeted block: none";
 
@@ -163,9 +163,9 @@ namespace KuchCraft {
 						glm::vec3{x + block_size, y + block_size, z + block_size} };
 
 					const glm::vec3& blockPosition = blockAABB.Min;
-					const Block block = World::Get().GetBlock(blockPosition);
+					const Item block = World::Get().GetItem(blockPosition);
 
-					if (!block.IsSolid())
+					if (!block.IsSolidBlock())
 						continue;
 
 					auto targetedBlockInfo = ray.IsColliding(blockAABB);
@@ -237,7 +237,7 @@ namespace KuchCraft {
 			case MouseCode::ButtonRight:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					PlaceBlock(m_TargetedBlock.Position, Block(BlockType(Random::UInt(1, absolute_number_of_block_types))));
+					PlaceItem(m_TargetedBlock.Position, Item(ItemType(Random::UInt(1, item_types_count - 1))));
 				return false;
 			}
 		}
@@ -245,7 +245,7 @@ namespace KuchCraft {
 		return false;
 	}
 
-	void Player::PlaceBlock(const glm::vec3& position, Block& block)
+	void Player::PlaceItem(const glm::vec3& position, Item& block)
 	{
 		if (!m_TargetedBlock.Targeted)
 			return;
@@ -273,15 +273,15 @@ namespace KuchCraft {
 			// Calculate block rotation
 			float rotation = m_Rotation.x;
 			if (      rotation >= glm::radians(90.0f - 45.0f) && rotation < glm::radians(90.0f + 45.0f))	
-				block.Rotation = BlockRotation::Deg180;
+				block.Rotation = ItemRotation::Deg180;
 			else if (rotation >= glm::radians(180.0f - 45.0f) && rotation < glm::radians(180.0f + 45.0f))
-				block.Rotation = BlockRotation::Deg270;
+				block.Rotation = ItemRotation::Deg270;
 			else if (rotation >= glm::radians(270.0f - 45.0f) && rotation < glm::radians(270.0f + 45.0f))
-				block.Rotation = BlockRotation::Deg0;
+				block.Rotation = ItemRotation::Deg0;
 			else
-				block.Rotation = BlockRotation::Deg90;
+				block.Rotation = ItemRotation::Deg90;
 
-			World::Get().SetBlock(newPosition, block);
+			World::Get().SetItem(newPosition, block);
 		}
 	}
 
@@ -290,7 +290,7 @@ namespace KuchCraft {
 		if (!m_TargetedBlock.Targeted)
 			return;
 
-		World::Get().SetBlock(position, Block(BlockType::Air));
+		World::Get().SetItem(position, Item(ItemType::Air));
 	}
 
 	void Player::SetGameMode(GameMode gameMode)

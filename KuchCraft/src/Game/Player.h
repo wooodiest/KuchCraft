@@ -4,7 +4,7 @@
 
 #include "Physics/Ray.h"
 
-#include "World/Block.h"
+#include "World/Item.h"
 
 #include "Physics/PlayerPhysicsBody.h"
 
@@ -58,7 +58,7 @@ namespace KuchCraft {
 		bool OnKeyPressed(KeyPressedEvent& e);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
-		void PlaceBlock(const glm::vec3& position, Block& block);
+		void PlaceItem(const glm::vec3& position, Item& item);
 		void DestroyBlock(const glm::vec3& position);
 
 		TargetedBlockInfo GetTargetBlockInfo();
