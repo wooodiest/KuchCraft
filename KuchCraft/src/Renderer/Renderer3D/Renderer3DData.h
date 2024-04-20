@@ -7,6 +7,7 @@
 #include "Renderer/Data/FrameBuffer.h"
 #include "Renderer/Data/CubeMapTexture.h"
 #include "Renderer/Renderer2D/Renderer2DData.h"
+#include "Renderer/RendererData.h"
 #include "World/Chunk.h"
 
 namespace KuchCraft {
@@ -49,11 +50,12 @@ namespace KuchCraft {
 		VertexBuffer VertexBuffer;
 	};
 
-	struct Renderer3DOutlinedBlockData
+	struct Renderer3DOutlinedCubeData
 	{
 		bool Status = false;
 		glm::vec3 Position{ 0.0f };
-		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec3 Size    { 0.5f, 0.5f, 0.5f };
+		glm::vec4 Color   { 1.0f, 1.0f, 1.0f, 1.0f };
 		float BorderRadius = 0.005f;
 
 		Shader       Shader;
@@ -289,6 +291,34 @@ namespace KuchCraft {
 			glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f), 
 			glm::vec2(0.75f, 1.0f) 
 		},
+
+	};
+
+	constexpr Vertex_P3C2 outlined_cube_vertices[cube_vertex_count] = {
+		Vertex_P3C2{glm::vec3{  1.0f, -1.0f,  1.0f }, glm::vec2{ 1.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f, -1.0f,  1.0f }, glm::vec2{ 0.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f, -1.0f, -1.0f }, glm::vec2{ 0.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f, -1.0f, -1.0f }, glm::vec2{ 1.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f,  1.0f,  1.0f }, glm::vec2{ 1.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f,  1.0f,  1.0f }, glm::vec2{ 0.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f,  1.0f, -1.0f }, glm::vec2{ 0.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f,  1.0f, -1.0f }, glm::vec2{ 1.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f, -1.0f,  1.0f }, glm::vec2{ 1.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f, -1.0f,  1.0f }, glm::vec2{ 0.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f,  1.0f,  1.0f }, glm::vec2{ 0.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f,  1.0f,  1.0f }, glm::vec2{ 1.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f, -1.0f,  1.0f }, glm::vec2{ 1.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f, -1.0f, -1.0f }, glm::vec2{ 0.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f,  1.0f, -1.0f }, glm::vec2{ 0.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f,  1.0f,  1.0f }, glm::vec2{ 1.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f, -1.0f, -1.0f }, glm::vec2{ 1.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f, -1.0f, -1.0f }, glm::vec2{ 0.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f,  1.0f, -1.0f }, glm::vec2{ 0.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{  1.0f,  1.0f, -1.0f }, glm::vec2{ 1.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f, -1.0f, -1.0f }, glm::vec2{ 1.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f, -1.0f,  1.0f }, glm::vec2{ 0.0f, 0.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f,  1.0f,  1.0f }, glm::vec2{ 0.0f, 1.0f }},
+		Vertex_P3C2{glm::vec3{ -1.0f,  1.0f, -1.0f }, glm::vec2{ 1.0f, 1.0f }}
 	};
 
 }

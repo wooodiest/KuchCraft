@@ -1,21 +1,11 @@
 #include "kcpch.h"
 #include "Renderer/Utils/FrustumCulling.h"
 
+#include "Physics/AABB.h"
+
 namespace KuchCraft {
 
 	constexpr uint32_t frustum_planes_count = 6;
-
-	struct AABB 
-	{
-		glm::vec3 min;
-		glm::vec3 max;
-
-		AABB(const glm::vec3& position)
-		{
-			min = position;
-			max = position + glm::vec3(chunk_size_XZ, chunk_size_Y, chunk_size_XZ);
-		}
-	};
 
 	static bool IsAABBVisible(const AABB& aabb, const glm::vec4 frustumPlanes[6])
 	{
@@ -25,9 +15,9 @@ namespace KuchCraft {
 			float d = frustumPlanes[i].w;
 
 			float dist = glm::dot(normal, glm::vec3(
-				(normal.x < 0.0f) ? aabb.min.x : aabb.max.x,
-				(normal.y < 0.0f) ? aabb.min.y : aabb.max.y,
-				(normal.z < 0.0f) ? aabb.min.z : aabb.max.z ))
+				(normal.x < 0.0f) ? aabb.Min.x : aabb.Max.x,
+				(normal.y < 0.0f) ? aabb.Min.y : aabb.Max.y,
+				(normal.z < 0.0f) ? aabb.Min.z : aabb.Max.z ))
 				+ d;
 
 			if (dist < 0.0f)
@@ -55,7 +45,7 @@ namespace KuchCraft {
 
 		for (const auto& chunk : chunks)
 		{
-			AABB chunkAABB{ chunk->GetPosition() };
+			AABB chunkAABB{ chunk->GetPosition(), chunk->GetPosition() + glm::vec3{ chunk_size_XZ, chunk_size_Y, chunk_size_XZ } };
 			if (IsAABBVisible(chunkAABB, frustumPlanes) && !chunk->NeedToRecreate())
 				out_chunks.push_back(chunk);
 		}

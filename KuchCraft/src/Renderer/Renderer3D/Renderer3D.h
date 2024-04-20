@@ -33,7 +33,7 @@ namespace KuchCraft {
 		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color, float fontSize);
 
 		static void DrawWaterTinted();
-		static void DrawOutlinedBlock(const glm::vec3& position);
+		static void DrawOutlinedCube(const glm::vec3& position, const glm::vec3& size);
 
 	private:
 		static void Init();
@@ -51,7 +51,7 @@ namespace KuchCraft {
 		static void PrepareChunks();
 		static void PrepareSkybox();
 		static void PrepareWater();
-		static void PrepareOutlinedBlock();
+		static void PrepareOutlinedCube();
 		static void PrepareTinted();
 		static void PrepareTextRendering();
 		static void PrepareQuads();
@@ -60,7 +60,7 @@ namespace KuchCraft {
 		static void RenderChunks();
 		static void RenderSkybox();
 		static void RenderWater();
-		static void RenderOutlinedBlock();
+		static void RenderOutlinedCube();
 		static void RenderTinted();
 		static void RenderText();
 
@@ -78,17 +78,17 @@ namespace KuchCraft {
 		Renderer3D() = default;
 
 	private:
-		static Renderer3DData              s_Data;
-		static Renderer3DInfo              s_Info;
-		static Renderer3DChunkData         s_ChunkData;
-		static Renderer3DSkyboxData        s_SkyboxData;
-		static Renderer3DWaterData         s_WaterData;
-		static Renderer3DOutlinedBlockData s_OutlinedBlockData;
-		static Renderer3DTintedData        s_TintedData;
-		static Renderer3DQuadData          s_QuadData;
-		static Renderer3DCubeData          s_CubeData;
-		static Renderer3DTextInfo          s_TextInfo;
-		static Renderer3DTextData          s_TextData;
+		static Renderer3DData             s_Data;
+		static Renderer3DInfo             s_Info;
+		static Renderer3DChunkData        s_ChunkData;
+		static Renderer3DSkyboxData       s_SkyboxData;
+		static Renderer3DWaterData        s_WaterData;
+		static Renderer3DOutlinedCubeData s_OutlinedCubeData;
+		static Renderer3DTintedData       s_TintedData;
+		static Renderer3DQuadData         s_QuadData;
+		static Renderer3DCubeData         s_CubeData;
+		static Renderer3DTextInfo         s_TextInfo;
+		static Renderer3DTextData         s_TextData;
 
 	public:
 		friend class Renderer;

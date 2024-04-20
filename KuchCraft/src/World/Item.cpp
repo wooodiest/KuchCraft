@@ -24,6 +24,30 @@ namespace KuchCraft {
     {
     }
 
+    AABB Item::GetAABB(const glm::ivec3& position) const
+    {
+        if (IsSolidBlock())
+        {
+            constexpr float block_size = 1.0f;
+            return AABB(
+                  position, 
+                { position.x + block_size, position.y + block_size, position.z + block_size }
+            );
+        }
+
+        if (IsFoliageQuad())
+        {
+            constexpr float block_size = 1.0f;
+            constexpr float quad_size  = 0.25f;
+            return AABB(
+                { position.x + quad_size,              position.y,                          position.z + quad_size              },
+                { position.x + block_size - quad_size, position.y + block_size - quad_size, position.z + block_size - quad_size }
+            );
+        }
+
+        return AABB();
+    }
+
     // Set up item names
     // ItemType::GoldBlock -> gold block
 	std::map<ItemType, std::string> Item::s_ItemNames = []() {

@@ -15,7 +15,8 @@ namespace KuchCraft
 	{
 		bool Targeted = false;
 		PlaneDirection Plane;
-		glm::vec3 Position{ 0.0f };
+		glm::vec3 Position { 0.0f };
+		glm::vec3 Size     { 0.5f };
 
 		TargetedItemInfo() = default;
 

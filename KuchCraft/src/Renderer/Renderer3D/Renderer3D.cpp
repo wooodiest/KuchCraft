@@ -17,7 +17,7 @@ namespace KuchCraft {
 	Renderer3DChunkData         Renderer3D::s_ChunkData;
 	Renderer3DSkyboxData        Renderer3D::s_SkyboxData;
 	Renderer3DWaterData         Renderer3D::s_WaterData;
-	Renderer3DOutlinedBlockData Renderer3D::s_OutlinedBlockData;
+	Renderer3DOutlinedCubeData  Renderer3D::s_OutlinedCubeData;
 	Renderer3DTintedData        Renderer3D::s_TintedData;
 	Renderer3DQuadData          Renderer3D::s_QuadData;
 	Renderer3DCubeData          Renderer3D::s_CubeData;
@@ -31,7 +31,7 @@ namespace KuchCraft {
 		PrepareChunks();
 		PrepareSkybox();
 		PrepareWater();
-		PrepareOutlinedBlock();
+		PrepareOutlinedCube();
 		PrepareTinted();
 		PrepareTextRendering();
 		PrepareQuads();
@@ -101,8 +101,8 @@ namespace KuchCraft {
 		RenderChunks();
 		RenderSkybox();
 
-		if (s_OutlinedBlockData.Status)
-			RenderOutlinedBlock();
+		if (s_OutlinedCubeData.Status)
+			RenderOutlinedCube();
 
 		RenderCubes();
 
@@ -125,7 +125,7 @@ namespace KuchCraft {
 		s_ChunkData.Chunks.        clear();
 		s_ChunkData.ChunksToRender.clear();
 
-		s_OutlinedBlockData.Status = false;
+		s_OutlinedCubeData.Status = false;
 		s_TintedData.Tinted        = false;
 
 		s_QuadData.Vertices.clear();
@@ -254,63 +254,29 @@ namespace KuchCraft {
 		s_WaterData.Shader      .Unbind();
 	}
 
-	void Renderer3D::PrepareOutlinedBlock()
+	void Renderer3D::PrepareOutlinedCube()
 	{
-		s_OutlinedBlockData.VertexArray.Create();
-		s_OutlinedBlockData.VertexArray.Bind();
+		s_OutlinedCubeData.VertexArray.Create();
+		s_OutlinedCubeData.VertexArray.Bind();
 
-		// Float3::pos, Float2::texCoord
-		constexpr float vertices[] = {
-			// bottom
-			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-			// top
-			0.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-			1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			// front
-			0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-			1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-			// right
-			1.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-			1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-			// behind
-			1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-			// left
-			0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-			0.0f, 1.0f, 0.0f, 1.0f, 1.0f
-		};
-
-		s_OutlinedBlockData.VertexBuffer.Create(sizeof(vertices), vertices, true);
-		s_OutlinedBlockData.VertexBuffer.SetBufferLayout({
+		s_OutlinedCubeData.VertexBuffer.Create(sizeof(outlined_cube_vertices));
+		s_OutlinedCubeData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoord" }
 		});
 
-		s_OutlinedBlockData.VertexArray.SetVertexBuffer(s_OutlinedBlockData.VertexBuffer);
+		s_OutlinedCubeData.VertexArray.SetVertexBuffer(s_OutlinedCubeData.VertexBuffer);
 
 		std::unordered_map<std::string, std::string> outlinedBlockShaderData;
-		outlinedBlockShaderData["#outlined_block_border_radius"] = std::to_string(s_OutlinedBlockData.BorderRadius);
-		outlinedBlockShaderData["#outlined_block_border_color"]  = VecToString(s_OutlinedBlockData.Color);
+		outlinedBlockShaderData["#outlined_block_border_radius"] = std::to_string(s_OutlinedCubeData.BorderRadius);
+		outlinedBlockShaderData["#outlined_block_border_color"]  = VecToString(s_OutlinedCubeData.Color);
 
-		s_OutlinedBlockData.Shader.Create("assets/shaders/outlined_block.vert.glsl", "assets/shaders/outlined_block.frag.glsl", outlinedBlockShaderData);
-		s_OutlinedBlockData.Shader.Bind();
+		s_OutlinedCubeData.Shader.Create("assets/shaders/outlined_cube.vert.glsl", "assets/shaders/outlined_cube.frag.glsl", outlinedBlockShaderData);
+		s_OutlinedCubeData.Shader.Bind();
 
-		s_OutlinedBlockData.VertexArray .Unbind();
-		s_OutlinedBlockData.VertexBuffer.Unbind();
-		s_OutlinedBlockData.Shader      .Unbind();
+		s_OutlinedCubeData.VertexArray .Unbind();
+		s_OutlinedCubeData.VertexBuffer.Unbind();
+		s_OutlinedCubeData.Shader      .Unbind();
 	}
 
 	void Renderer3D::PrepareTinted()
@@ -477,19 +443,27 @@ namespace KuchCraft {
 		Renderer::s_Stats.WaterTimer.Finish();
 	}
 
-	void Renderer3D::RenderOutlinedBlock()
+	void Renderer3D::RenderOutlinedCube()
 	{
 		RendererCommand::DisableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
 
-		s_OutlinedBlockData.Shader.      Bind();
-		s_OutlinedBlockData.VertexArray. Bind();
-		s_OutlinedBlockData.VertexBuffer.Bind();
-		s_Data.QuadIndexBuffer.          Bind();
+		s_OutlinedCubeData.Shader.      Bind();
+		s_OutlinedCubeData.VertexArray. Bind();
+		s_OutlinedCubeData.VertexBuffer.Bind();
+		s_Data.QuadIndexBuffer.         Bind();
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_OutlinedBlockData.Position);
-		s_OutlinedBlockData.Shader.SetMat4("u_Transform", transform);
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_OutlinedCubeData.Position) * glm::scale(glm::mat4(1.0f), s_OutlinedCubeData.Size);;
+
+		Vertex_P3C2 data[cube_vertex_count];
+		for (uint32_t i = 0; i < cube_vertex_count; i++)
+		{
+			data[i].Position = transform * glm::vec4(outlined_cube_vertices[i].Position, 1.0f);
+			data[i].TexCoord = outlined_cube_vertices[i].TexCoord;
+		}
+
+		s_OutlinedCubeData.VertexBuffer.SetData(data, sizeof(data));
 
 		RendererCommand::DrawElements(cube_index_count);
 
@@ -954,10 +928,11 @@ namespace KuchCraft {
 		}
 	}
 
-	void Renderer3D::DrawOutlinedBlock(const glm::vec3& position)
+	void Renderer3D::DrawOutlinedCube(const glm::vec3& position, const glm::vec3& size)
 	{
-		s_OutlinedBlockData.Status   = true;
-		s_OutlinedBlockData.Position = position;
+		s_OutlinedCubeData.Status   = true;
+		s_OutlinedCubeData.Position = position;
+		s_OutlinedCubeData.Size     = size;
 	}
 
 	void Renderer3D::DrawWaterTinted()

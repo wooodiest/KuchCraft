@@ -144,18 +144,12 @@ namespace KuchCraft {
 		// Renderer draw commands
 		Renderer3D::DrawChunks(m_ChunksToUpdate);
 
-		if (GetItem(m_Player.GetEyePosition()).Type == ItemType::Water)
-			Renderer3D::DrawWaterTinted();
-
-		if (m_Player.GetTargetedBlockStatus())
-			Renderer3D::DrawOutlinedBlock(m_Player.GetTargetedItem().Position);
-
 		Renderer2D::DrawTextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), { 5.0f, 5.0f });
 
 		// Tmp, example
 		{
 			// Cubes/ lines
-			Renderer3D::DrawItem({ 2000.0f, 62.0f, 2000.0f }, Item(ItemType::None, ItemRotation::Deg90));
+			Renderer3D::DrawItem({ 2000.0f, 62.0f, 2000.0f }, Item(ItemType::NoneBlock, ItemRotation::Deg90));
 			
 			Renderer3D::DrawCube({ 2000.0f, 70.0f, 2000.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
 			Renderer3D::DrawCube({ 2000.0f, 80.0f, 2000.0f }, { 0.0f ,0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetHeartFullTexture());

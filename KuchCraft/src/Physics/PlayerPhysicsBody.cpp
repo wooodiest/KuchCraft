@@ -211,16 +211,12 @@ namespace KuchCraft {
 			{
 				for (int z = absolutePosition.z - m_CollisionCheckRadius.z; z <= absolutePosition.z + m_CollisionCheckRadius.z; z++)
 				{
-					// todo: check for other items than solid blocks
-
 					const Item item = World::Get().GetItem({ x, y, z });
 
 					if (!item.IsSolidBlock())
 						continue;
 
-					constexpr float block_size = 1.0f;
-					AABB itemAABB = { glm::vec3{ x, y, z },
-						glm::vec3{ x + block_size, y + block_size, z + block_size} };
+					const AABB itemAABB = item.GetAABB({ x, y, z });
 
 					// Check intersection status
 					if (!playerAABB.IsColliding(itemAABB))
@@ -269,27 +265,24 @@ namespace KuchCraft {
 		const glm::ivec3 absolutePosition{ downPosition };
 		AABB playerAABB = m_PlayerAbsoluteAABB.MoveTo(downPosition);
 
-		for (int x = -m_CollisionCheckRadius.x; x <= m_CollisionCheckRadius.x; x++)
+		for (int x = absolutePosition.x - m_CollisionCheckRadius.x; x <= absolutePosition.x + m_CollisionCheckRadius.x; x++)
 		{
-			for (int z = -m_CollisionCheckRadius.z; z <= m_CollisionCheckRadius.z; z++)
+			for (int z = absolutePosition.z - m_CollisionCheckRadius.z; z <= absolutePosition.z + m_CollisionCheckRadius.z; z++)
 			{
-				constexpr float block_size = 1.0f;
-				AABB blockAABB = { glm::vec3{ absolutePosition.x + x, absolutePosition.y, absolutePosition.z + z },
-					glm::vec3{ absolutePosition.x + x + block_size, absolutePosition.y + block_size, absolutePosition.z + z + block_size} };
+				const Item item = World::Get().GetItem({ x, absolutePosition.y, z });
 
-				const glm::vec3& blockPosition = blockAABB.Min;
-				const Item block = World::Get().GetItem(blockPosition);
-
-				if (!block.IsSolidBlock())
+				if (!item.IsSolidBlock())
 					continue;
+
+				const AABB itemAABB = item.GetAABB({ x, absolutePosition.y, z });
 				
-				if (!playerAABB.IsColliding(blockAABB))
+				if (!playerAABB.IsColliding(itemAABB))
 					continue;
 
-				const glm::vec3 overlaping = playerAABB.GetOverlaping(blockAABB);
+				const glm::vec3 overlaping = playerAABB.GetOverlaping(itemAABB);
 				if (overlaping.y < glm::min(overlaping.x, overlaping.z))
 				{
-					if (playerAABB.Max.y - blockAABB.Min.y >= blockAABB.Max.y - playerAABB.Min.y)
+					if (playerAABB.Max.y - itemAABB.Min.y >= itemAABB.Max.y - playerAABB.Min.y)
 						return true;
 				}
 			}

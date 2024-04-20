@@ -1,6 +1,7 @@
 #pragma once
 
 #include "World/ItemInfo.h"
+#include "Physics/AABB.h"
 
 namespace KuchCraft {
 
@@ -17,6 +18,8 @@ namespace KuchCraft {
 		~Item();
 
 		const std::string& GetName() const { return s_ItemNames[Type]; }
+
+		AABB GetAABB(const glm::ivec3& position) const;
 
 	public:
 		inline bool IsSolidBlock()       const { return (uint32_t)Type >= item_type_solid_block_begin       && (uint32_t)Type <= item_type_solid_block_end;       }

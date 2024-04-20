@@ -4,6 +4,7 @@
 #include "World/World.h"
 
 #include "Renderer/Renderer.h"
+#include "Renderer/Renderer3D/Renderer3D.h"
 
 #include "Core/Random.h"
 #include "Core/Core.h"
@@ -105,6 +106,12 @@ namespace KuchCraft {
 			m_TargetedItem = GetTargetItemInfo();
 		else
 			m_TargetedItem.Targeted = false;
+
+		if (World::Get().GetItem(GetEyePosition()).Type == ItemType::Water)
+			Renderer3D::DrawWaterTinted();
+
+		if (m_TargetedItem.Targeted)
+			Renderer3D::DrawOutlinedCube(m_TargetedItem.Position, m_TargetedItem.Size);
 	}
 
 	void Player::OnEvent(Event& event)
@@ -163,21 +170,18 @@ namespace KuchCraft {
 					if (!item.IsSolidBlock() && !item.IsFoliageQuad())
 						continue;
 
-					constexpr float block_size = 1.0f;
-					AABB itemAABB = { glm::vec3{ x, y, z },
-						glm::vec3{x + block_size, y + block_size, z + block_size} };
-
-					const glm::vec3& itemPosition = itemAABB.Min;
+					AABB itemAABB = item.GetAABB({ x, y, z });
 
 					auto targetedItemInfo = ray.IsColliding(itemAABB);
 					if (targetedItemInfo.Targeted)
 					{
-						glm::vec3 itemCenter = itemPosition + glm::vec3(block_size / 2.0f);
-						float distance = glm::length2(ray.Origin - itemCenter);
+						targetedItemInfo.Position = itemAABB.GetPosition();
+						float distance = glm::length2(ray.Origin - targetedItemInfo.Position);
 
 						if (distance < currentDistance)
 						{
-							outputTargetedItemInfo = targetedItemInfo;
+							targetedItemInfo.Size   = itemAABB.GetSize();
+							outputTargetedItemInfo  = targetedItemInfo;
 							currentDistance         = distance;	
 						}
 					}
