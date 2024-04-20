@@ -17,12 +17,21 @@ namespace KuchCraft {
 		uint32_t MaxIndices  = MaxQuads * 6;
 	};
 
-	struct QuadVertex
+	struct Quad2DVertex
 	{
 		glm::vec3 Position { 0.0f, 0.0f, 0.0f       };
 		glm::vec4 Color    { 1.0f, 1.0f, 1.0f, 1.0f };
 		glm::vec2 TexCoord { 0.0f, 0.0f             };
-		float     TexIndex     = 0.0f;
+		float     TexIndex = 0.0f;
+	};
+
+	struct Quad3DVertex
+	{
+		glm::vec3 Position { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Normal   { 0.0f, 0.0f, 1.0f };
+		glm::vec4 Color    { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec2 TexCoord { 0.0f, 0.0f };
+		float     TexIndex = 0.0f;
 	};
 
 	struct Renderer2DQuadData
@@ -34,7 +43,7 @@ namespace KuchCraft {
 
 		Texture2D WhiteTexture;
 
-		std::vector<QuadVertex> Vertices;
+		std::vector<Quad2DVertex> Vertices;
 		uint32_t* TextureSlots;
 		uint32_t  TextureSlotIndex = 1;
 		uint32_t  IndexCount   = 0;

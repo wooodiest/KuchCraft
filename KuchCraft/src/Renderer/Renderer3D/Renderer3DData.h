@@ -80,7 +80,7 @@ namespace KuchCraft {
 
 		Texture2D WhiteTexture;
 
-		std::vector<QuadVertex> Vertices;
+		std::vector<Quad3DVertex> Vertices;
 		uint32_t* TextureSlots;
 		uint32_t  TextureSlotIndex = 1;
 		uint32_t  IndexCount       = 0;

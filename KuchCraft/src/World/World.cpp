@@ -176,10 +176,6 @@ namespace KuchCraft {
 			fontRotation.y += glm::radians(10.0f) * dt;
 			Renderer3D::DrawText("JD2000", { 1940.0f, 70.0f, 1970.0f }, fontRotation, { 1.0f, 0.0f, 1.0f, 1.0 }, 3.0f);
 			
-			// TODO: additional random position and angle dissplacement
-			Renderer3D::DrawQuad({ 2016.5f, 69.5f, 1993.5f }, { 0.0f, glm::radians(45.0f        ), 0.0f }, { 0.5f, 0.5f }, AssetManager::GetItemTexture(ItemType::RedTulipan));
-			Renderer3D::DrawQuad({ 2016.45f, 69.5f, 1993.5f }, { 0.0f, glm::radians(45.0f + 90.0f), 0.0f }, { 0.5f, 0.5f }, AssetManager::GetItemTexture(ItemType::RedTulipan));
-
 			// Rendere2D: some ui
 			auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 

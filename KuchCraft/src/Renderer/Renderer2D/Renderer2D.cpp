@@ -126,7 +126,7 @@ namespace KuchCraft {
 
 		uint32_t vertexCount = s_QuadData.IndexCount / quad_index_count * quad_vertex_count;
 
-		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[s_QuadData.VertexOffset], vertexCount * sizeof(QuadVertex));
+		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[s_QuadData.VertexOffset], vertexCount * sizeof(Quad2DVertex));
 		s_QuadData.VertexOffset = vertexCount;
 
 		for (uint32_t i = 0; i < s_QuadData.TextureSlotIndex; i++)
@@ -288,7 +288,7 @@ namespace KuchCraft {
 		s_QuadData.VertexArray.Create();
 		s_QuadData.VertexArray.Bind();
 
-		s_QuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(QuadVertex));
+		s_QuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(Quad2DVertex));
 		s_QuadData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Color"    },
@@ -449,7 +449,7 @@ namespace KuchCraft {
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
-			QuadVertex vertex;
+			Quad2DVertex vertex;
 			vertex.Position = transform * quad_vertex_positions[i];
 			vertex.Color    = color;
 			vertex.TexCoord = quad_vertex_tex_coords[i];
@@ -478,14 +478,15 @@ namespace KuchCraft {
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		
+		float textureID     = texture.GetRendererID();
+
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
-			QuadVertex vertex;
+			Quad2DVertex vertex;
 			vertex.Position     = transform * quad_vertex_positions[i];
 			vertex.Color        = tintColor;
 			vertex.TexCoord     = quad_vertex_tex_coords[i] * tilingFactor;
-			vertex.TexIndex     = (float)texture.GetRendererID(); // TexIndex temporarily holds the texture rendererID
+			vertex.TexIndex     = textureID; // TexIndex temporarily holds the texture rendererID
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
@@ -560,7 +561,7 @@ namespace KuchCraft {
 		
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
-			QuadVertex vertex;
+			Quad2DVertex vertex;
 			vertex.Position = transform * quad_vertex_positions[i];
 			vertex.Color    = color;
 			vertex.TexCoord = quad_vertex_tex_coords[i];
@@ -635,14 +636,15 @@ namespace KuchCraft {
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::toMat4(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		
+		float textureID     = texture.GetRendererID();
+
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
-			QuadVertex vertex;
+			Quad2DVertex vertex;
 			vertex.Position     = transform * quad_vertex_positions[i];
 			vertex.Color        = tintColor;
 			vertex.TexCoord     = quad_vertex_tex_coords[i] * tilingFactor;
-			vertex.TexIndex     = (float)texture.GetRendererID(); // TexIndex temporarily holds the texture rendererID
+			vertex.TexIndex     = textureID; // TexIndex temporarily holds the texture rendererID
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}

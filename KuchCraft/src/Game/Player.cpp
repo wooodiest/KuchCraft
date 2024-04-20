@@ -158,15 +158,16 @@ namespace KuchCraft {
 			{
 				for (int z = absolutePosition.z - absolute_range; z <= absolutePosition.z + absolute_range; z++)
 				{
+					const Item item = World::Get().GetItem({ x, y, z });
+
+					if (!item.IsSolidBlock() && !item.IsFoliageQuad())
+						continue;
+
 					constexpr float block_size = 1.0f;
 					AABB itemAABB = { glm::vec3{ x, y, z },
 						glm::vec3{x + block_size, y + block_size, z + block_size} };
 
 					const glm::vec3& itemPosition = itemAABB.Min;
-					const Item item = World::Get().GetItem(itemPosition);
-
-					if (!item.IsSolidBlock())
-						continue;
 
 					auto targetedItemInfo = ray.IsColliding(itemAABB);
 					if (targetedItemInfo.Targeted)
@@ -237,7 +238,7 @@ namespace KuchCraft {
 			case MouseCode::ButtonRight:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					PlaceItem(m_TargetedItem.Position, Item(ItemType(Random::UInt(1, item_types_count - 1))));
+					PlaceItem(m_TargetedItem.Position, Item(ItemType::RedTulipan));
 				return false;
 			}
 		}
@@ -266,23 +267,21 @@ namespace KuchCraft {
 		const AABB blockAABB  = { blockAbsolutePosition, blockAbsolutePosition + glm::ivec3(block_size)};
 		const AABB playerAABB = m_PhysicsBody.GetPlayerAbsoluteAABB().MoveTo(m_Position);
 
-		if (playerAABB.IsColliding(blockAABB))
+		if (playerAABB.IsColliding(blockAABB) && !block.IsFoliageQuad())
 			return;
-		else
-		{
-			// Calculate block rotation
-			float rotation = m_Rotation.x;
-			if (      rotation >= glm::radians(90.0f - 45.0f) && rotation < glm::radians(90.0f + 45.0f))	
-				block.Rotation = ItemRotation::Deg180;
-			else if (rotation >= glm::radians(180.0f - 45.0f) && rotation < glm::radians(180.0f + 45.0f))
-				block.Rotation = ItemRotation::Deg270;
-			else if (rotation >= glm::radians(270.0f - 45.0f) && rotation < glm::radians(270.0f + 45.0f))
-				block.Rotation = ItemRotation::Deg0;
-			else
-				block.Rotation = ItemRotation::Deg90;
 
-			World::Get().SetItem(newPosition, block);
-		}
+		// Calculate block rotation
+		float rotation = m_Rotation.x;
+		if (      rotation >= glm::radians(90.0f - 45.0f) && rotation < glm::radians(90.0f + 45.0f))	
+			block.Rotation = ItemRotation::Deg180;
+		else if (rotation >= glm::radians(180.0f - 45.0f) && rotation < glm::radians(180.0f + 45.0f))
+			block.Rotation = ItemRotation::Deg270;
+		else if (rotation >= glm::radians(270.0f - 45.0f) && rotation < glm::radians(270.0f + 45.0f))
+			block.Rotation = ItemRotation::Deg0;
+		else
+			block.Rotation = ItemRotation::Deg90;
+
+		World::Get().SetItem(newPosition, block);
 	}
 
 	void Player::DestroyItem(const glm::vec3& position)

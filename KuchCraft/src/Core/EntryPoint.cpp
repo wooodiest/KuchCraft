@@ -4,5 +4,5 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    KuchCraft::Application application = KuchCraft::Application();
+	auto application = KuchCraft::Application();
 }

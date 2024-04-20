@@ -88,10 +88,15 @@ namespace KuchCraft {
 	{
 		Renderer::s_Stats.Renderer3DTimer.Start();
 
-		s_Data.RenderFrameBuffer.BindAndClear();
-
 		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_Data.CurrentCamera, s_ChunkData.ChunksToRender);
 		Renderer::s_Stats.ChunksToRender = s_ChunkData.ChunksToRender.size();
+		for (const auto& chunk : s_ChunkData.ChunksToRender)
+		{
+			const auto& foliageVertices = chunk->GetDrawList().GetFoliageQuadVertices();
+			s_QuadData.Vertices.insert(s_QuadData.Vertices.end(), foliageVertices.begin(), foliageVertices.end());
+		}
+
+		s_Data.RenderFrameBuffer.BindAndClear();
 
 		RenderChunks();
 		RenderSkybox();
@@ -100,6 +105,7 @@ namespace KuchCraft {
 			RenderOutlinedBlock();
 
 		RenderCubes();
+
 		RenderQuads();
 
 		RenderWater();
@@ -668,7 +674,7 @@ namespace KuchCraft {
 
 		uint32_t vertexCount = s_QuadData.IndexCount / quad_index_count * quad_vertex_count;
 
-		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[s_QuadData.VertexOffset], vertexCount * sizeof(QuadVertex));
+		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[s_QuadData.VertexOffset], vertexCount * sizeof(Quad3DVertex));
 		s_QuadData.VertexOffset = vertexCount;
 
 		for (uint32_t i = 0; i < s_QuadData.TextureSlotIndex; i++)
@@ -793,9 +799,10 @@ namespace KuchCraft {
 		s_QuadData.VertexArray.Create();
 		s_QuadData.VertexArray.Bind();
 
-		s_QuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(QuadVertex));
+		s_QuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(Quad3DVertex));
 		s_QuadData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float3, "a_Normal"   },
 			{ ShaderDataType::Float4, "a_Color"    },
 			{ ShaderDataType::Float2, "a_TexCoor"  },
 			{ ShaderDataType::Float,  "a_TexIndex" }
@@ -841,7 +848,7 @@ namespace KuchCraft {
 		s_CubeData.VertexArray.Create();
 		s_CubeData.VertexArray.Bind();
 
-		s_CubeData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(QuadVertex));
+		s_CubeData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(CubeVertex));
 		s_CubeData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float3, "a_Normal"   },
@@ -932,6 +939,7 @@ namespace KuchCraft {
 	{
 		glm::mat4 rotationMatrix = glm::toMat4(glm::quat(rotation));
 		glm::mat4 transform      = glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), size);
+		float textureID          = texture.GetRendererID();
 
 		for (uint32_t i = 0; i < cube_vertex_count; i++)
 		{
@@ -940,7 +948,7 @@ namespace KuchCraft {
 			vertex.Normal   = rotationMatrix * cube_vertices[i].Normal;
 			vertex.Color    = tintColor;
 			vertex.TexCoord = cube_vertices[i].UV;
-			vertex.TexIndex = (float)texture.GetRendererID();
+			vertex.TexIndex = textureID;
 
 			s_CubeData.Vertices.emplace_back(vertex);
 		}
@@ -959,12 +967,16 @@ namespace KuchCraft {
 
 	void Renderer3D::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const glm::vec4& color)
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::toMat4(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+		glm::mat4 rotationMatrix = glm::toMat4(glm::quat(rotation));
+		glm::mat4 transform      = glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		glm::vec4 normal = rotationMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
-			QuadVertex vertex;
+			Quad3DVertex vertex;
 			vertex.Position = transform * quad_vertex_positions[i];
+			vertex.Normal   = normal;
 			vertex.Color    = color;
 			vertex.TexCoord = quad_vertex_tex_coords[i];
 
@@ -974,15 +986,20 @@ namespace KuchCraft {
 
 	void Renderer3D::DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::toMat4(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		
+		glm::mat4 rotationMatrix = glm::toMat4(glm::quat(rotation));
+		glm::mat4 transform      = glm::translate(glm::mat4(1.0f), position) * rotationMatrix * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+		glm::vec4 normal         = rotationMatrix * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+		float textureID = texture.GetRendererID();
+
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
-			QuadVertex vertex;
+			Quad3DVertex vertex;
 			vertex.Position = transform * quad_vertex_positions[i];
+			vertex.Normal   = normal;
 			vertex.Color    = tintColor;
 			vertex.TexCoord = quad_vertex_tex_coords[i] * tilingFactor;
-			vertex.TexIndex = (float)texture.GetRendererID(); // TexIndex temporarily holds the texture rendererID
+			vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}

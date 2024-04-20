@@ -4,6 +4,7 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/AssetManager.h"
 #include "Renderer/Renderer.h"
+
 namespace KuchCraft {
 
 	ChunkDrawList::ChunkDrawList()
@@ -17,6 +18,8 @@ namespace KuchCraft {
 		m_VertexData.clear();
 
 		m_WaterVertices.clear();
+
+		m_FoliageQuadVertices.clear();
 	}
 
 	void ChunkDrawList::StartRecreating()
@@ -36,6 +39,9 @@ namespace KuchCraft {
 
 		m_WaterVertices.clear();
 		m_WaterVertices.reserve(chunk_size_XZ * chunk_size_XZ);
+
+		m_FoliageQuadVertices.clear();
+		m_FoliageQuadVertices.reserve(chunk_size_XZ * chunk_size_XZ);
 	}
 
 	void ChunkDrawList::EndRecreating()
@@ -126,6 +132,52 @@ namespace KuchCraft {
 			m_VertexData.push_back(data);
 		}
 		UpdateIndexCount();
+	}
+
+	void ChunkDrawList::AddFoliageQuad(const glm::vec3& position, const Item& item)
+	{
+		// todo: add radom position and rotation displacement based on position
+		
+		float texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
+
+		// quad -> 1
+		glm::mat4 rotation1 = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f), 0.0f })));
+		glm::mat4 quadTransform1 = glm::translate(glm::mat4(1.0f), glm::vec3(position + glm::vec3{ 0.5f, 0.5f, 0.5f })) *
+			rotation1 *
+			glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 1.0f });
+
+		glm::vec3 normal1 = rotation1 * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+		for (uint32_t i = 0; i < quad_vertex_count; i++)
+		{
+			Quad3DVertex vertex;
+			vertex.Position = quadTransform1 * quad_vertex_positions[i];
+			vertex.Normal   = normal1;
+			vertex.TexCoord = quad_vertex_tex_coords[i];
+			vertex.TexIndex = texture;
+
+			m_FoliageQuadVertices.emplace_back(vertex);
+		}
+
+
+		// quad -> 2
+		glm::mat4 rotation2 = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f + 90.0f), 0.0f })));
+		glm::mat4 quadTransform2 = glm::translate(glm::mat4(1.0f), glm::vec3(position + glm::vec3{ 0.46f, 0.5f, 0.5f })) *
+			rotation2 *
+			glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 1.0f });
+
+		glm::vec3 normal2 = rotation2 * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+		for (uint32_t i = 0; i < quad_vertex_count; i++)
+		{
+			Quad3DVertex vertex;
+			vertex.Position = quadTransform2 * quad_vertex_positions[i];
+			vertex.Normal   = normal2;
+			vertex.TexCoord = quad_vertex_tex_coords[i];
+			vertex.TexIndex = texture;
+
+			m_FoliageQuadVertices.emplace_back(vertex);
+		}
 	}
 
 	void ChunkDrawList::AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count])

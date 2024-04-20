@@ -35,7 +35,7 @@ namespace KuchCraft {
 
 					if (Items[x][y][z].IsFoliageQuad())
 					{
-
+						m_DrawList.AddFoliageQuad({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, Items[x][y][z]);
 						continue;
 					}
 
@@ -48,6 +48,7 @@ namespace KuchCraft {
 						continue;
 					}
 
+					// Solid blocks
 					// We don't always have to, or even it's dangerous, to check all surrounding blocks
 					bool checkBottom = true, checkTop    = true;
 					bool checkFront  = true, checkBehind = true;

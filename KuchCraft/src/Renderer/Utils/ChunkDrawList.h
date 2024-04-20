@@ -4,6 +4,8 @@
 
 #include "World/Item.h"
 
+#include "Renderer/Renderer2D/Renderer2DData.h"
+
 namespace KuchCraft {
 
 	class TextureSlotHelper
@@ -45,23 +47,29 @@ namespace KuchCraft {
 		const std::vector<uint32_t>& GetVertices()    const { return m_VertexData;         }
 		const void* GetVerticesPtr(uint32_t offset)   const { return &m_VertexData[offset];}
 
-		const std::vector<Vertex_P3C2>& GetWaterVertices() const { return m_WaterVertices;     }
-		const void* GetWaterVerticesPtr()                  const { return &m_WaterVertices[0]; }
+		const std::vector<Vertex_P3C2>& GetWaterVertices()        const { return m_WaterVertices;       }
+		const void* GetWaterVerticesPtr()                         const { return &m_WaterVertices[0];   }
+		const std::vector<Quad3DVertex>& GetFoliageQuadVertices() const { return m_FoliageQuadVertices; }
 
 		void NewDrawCall();
 		void AddTexture(uint32_t texture);
 		void UpdateIndexCount();
 
 		void AddSolid(const glm::ivec3& position, uint32_t verticesIndex, const Item& item);
+		void AddFoliageQuad(const glm::vec3& position, const Item& item);
 		void AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count]);
 
 	private:
 		TextureSlotHelper* m_TextureSlotHelper = nullptr;
-		// -> Normal blocks
+
+		// Solid blocks
 		uint32_t m_DrawCalls = 1;
 		std::vector<uint32_t> m_IndexCount;
 		std::vector<uint32_t> m_Textures;
 		std::vector<uint32_t> m_VertexData;
+
+		// FoliageQuads
+		std::vector<Quad3DVertex> m_FoliageQuadVertices;
 
 		// Water
 		std::vector<Vertex_P3C2> m_WaterVertices;
