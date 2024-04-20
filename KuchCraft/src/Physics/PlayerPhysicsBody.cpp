@@ -211,35 +211,36 @@ namespace KuchCraft {
 			{
 				for (int z = absolutePosition.z - m_CollisionCheckRadius.z; z <= absolutePosition.z + m_CollisionCheckRadius.z; z++)
 				{
-					constexpr float block_size = 1.0f;
-					AABB blockAABB = { glm::vec3{ x, y, z },
-						glm::vec3{ x + block_size, y + block_size, z + block_size} };
+					// todo: check for other items than solid blocks
 
-					const glm::vec3& blockPosition = blockAABB.Min;
-					const Item block = World::Get().GetItem(blockPosition);
+					const Item item = World::Get().GetItem({ x, y, z });
 
-					if (!block.IsSolidBlock())
+					if (!item.IsSolidBlock())
 						continue;
 
+					constexpr float block_size = 1.0f;
+					AABB itemAABB = { glm::vec3{ x, y, z },
+						glm::vec3{ x + block_size, y + block_size, z + block_size} };
+
 					// Check intersection status
-					if (!playerAABB.IsColliding(blockAABB))
+					if (!playerAABB.IsColliding(itemAABB))
 						continue;
 
 					colided = true;
 
 					// Find overlaping plane
-					const glm::vec3 overlaping   = playerAABB.GetOverlaping(blockAABB);
+					const glm::vec3 overlaping   = playerAABB.GetOverlaping(itemAABB);
 					constexpr float plane_normal = 1.0f;
 
 					if (overlaping.x < glm::min(overlaping.y, overlaping.z))
-						out_CollisionVector.x = (playerAABB.Max.x - blockAABB.Min.x < blockAABB.Max.x - playerAABB.Min.x) ? plane_normal : -plane_normal;
+						out_CollisionVector.x = (playerAABB.Max.x - itemAABB.Min.x < itemAABB.Max.x - playerAABB.Min.x) ? plane_normal : -plane_normal;
 					
 					else if (overlaping.z < glm::min(overlaping.x, overlaping.y))
-						out_CollisionVector.z = (playerAABB.Max.z - blockAABB.Min.z < blockAABB.Max.z - playerAABB.Min.z) ? plane_normal : -plane_normal;
+						out_CollisionVector.z = (playerAABB.Max.z - itemAABB.Min.z < itemAABB.Max.z - playerAABB.Min.z) ? plane_normal : -plane_normal;
 					
 					else
 					{
-						if (playerAABB.Max.y - blockAABB.Min.y < blockAABB.Max.y - playerAABB.Min.y)
+						if (playerAABB.Max.y - itemAABB.Min.y < itemAABB.Max.y - playerAABB.Min.y)
 						{
 							out_CollisionVector.y =  plane_normal;
 							m_VerticalSpeed       =  0.0f;

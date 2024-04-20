@@ -52,7 +52,7 @@ namespace KuchCraft {
 		void AddTexture(uint32_t texture);
 		void UpdateIndexCount();
 
-		void Add(const glm::ivec3& position, uint32_t verticesIndex, const Item& block);
+		void AddSolid(const glm::ivec3& position, uint32_t verticesIndex, const Item& item);
 		void AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count]);
 
 	private:

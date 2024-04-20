@@ -895,12 +895,20 @@ namespace KuchCraft {
 		s_ChunkData.Chunks.insert(s_ChunkData.Chunks.end(), chunks.begin(), chunks.end());
 	}
 
-	void Renderer3D::DrawItem(const glm::vec3& position, const Item& block)
+	void Renderer3D::DrawItem(const glm::vec3& position, const Item& item)
 	{
-		constexpr glm::vec3 block_initial_displacement{ 0.5f, 0.5f, 0.5f };
-		glm::vec3 blockPosition = glm::vec3{ (int)position.x, (int)position.y, (int)position.z } + block_initial_displacement;
+		if (item.IsSolidBlock())
+		{
+			constexpr glm::vec3 block_initial_displacement{ 0.5f, 0.5f, 0.5f };
+			glm::vec3 blockPosition = glm::vec3{ (int)position.x, (int)position.y, (int)position.z } + block_initial_displacement;
 
-		DrawCube(blockPosition, { 0.0f, -glm::radians(90.0f * (float)block.Rotation), 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetItemTexture(block.Type));
+			DrawCube(blockPosition, { 0.0f, -glm::radians(90.0f * (float)item.Rotation), 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetItemTexture(item.Type));
+		}
+		else
+		{
+			// todo:
+			KC_ERROR("DrawItem other than solid is not supported");
+		}
 	}
 
 	void Renderer3D::DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color)

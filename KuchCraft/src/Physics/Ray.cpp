@@ -8,7 +8,7 @@ namespace KuchCraft {
 	{
 	}
 
-    TargetedBlockInfo Ray::IsColliding(const AABB& aabb) const
+    TargetedItemInfo Ray::IsColliding(const AABB& aabb) const
 	{
         float tMin = 0.0f;
         float tMax = Distance;
@@ -34,7 +34,7 @@ namespace KuchCraft {
                 tMax = tFar;
 
             if (tMin > tMax)
-                return TargetedBlockInfo();
+                return TargetedItemInfo();
         }
 
         if (intersectedAxis != -1) 
@@ -43,10 +43,10 @@ namespace KuchCraft {
             if (Direction[intersectedAxis] < 0) 
                 plane = static_cast<PlaneDirection>(aabb.Min, (int)plane + 1);
             
-            return TargetedBlockInfo(aabb.Min, plane);
+            return TargetedItemInfo(aabb.Min, plane);
         }
 
-        return TargetedBlockInfo();
+        return TargetedItemInfo();
 	}
 
 }

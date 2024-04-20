@@ -102,9 +102,9 @@ namespace KuchCraft {
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
 
 		if (m_GameMode != GameMode::Spectator)
-			m_TargetedBlock = GetTargetBlockInfo();
+			m_TargetedItem = GetTargetItemInfo();
 		else
-			m_TargetedBlock.Targeted = false;
+			m_TargetedItem.Targeted = false;
 	}
 
 	void Player::OnEvent(Event& event)
@@ -132,21 +132,21 @@ namespace KuchCraft {
 			+ "\n   Rotation: "  + VecToString(glm::vec2{ glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y) }, 2)
 			+ "\n   Gamemode: "  + gameMode;
 
-		if (m_TargetedBlock.Targeted)
-			m_DebugText += "\n   Targeted block - " + World::Get().GetItem(m_TargetedBlock.Position).GetName() + " : " + VecToString(glm::ivec3{m_TargetedBlock.Position});
+		if (m_TargetedItem.Targeted)
+			m_DebugText += "\n   Targeted item - " + World::Get().GetItem(m_TargetedItem.Position).GetName() + " : " + VecToString(glm::ivec3{m_TargetedItem.Position});
 		else
-			m_DebugText += "\n   Targeted block: none";
+			m_DebugText += "\n   Targeted item: none";
 
 		return m_DebugText;
 	}
 
-	TargetedBlockInfo Player::GetTargetBlockInfo()
+	TargetedItemInfo Player::GetTargetItemInfo()
 	{
-		TargetedBlockInfo outputTargetedBlockInfo;
+		TargetedItemInfo outputTargetedItemInfo;
 
 		const glm::ivec3 absolutePosition{ m_Position };
-		constexpr float range          = 3.5f;
-		constexpr int   absolute_range = 4;
+		constexpr float  range          = 3.5f;
+		constexpr int    absolute_range = 4;
 
 		float currentDistance = std::numeric_limits<float>::infinity();
 		const Ray ray = { GetEyePosition(), m_Camera.GetFront(), range };
@@ -159,31 +159,31 @@ namespace KuchCraft {
 				for (int z = absolutePosition.z - absolute_range; z <= absolutePosition.z + absolute_range; z++)
 				{
 					constexpr float block_size = 1.0f;
-					AABB blockAABB = { glm::vec3{ x, y, z },
+					AABB itemAABB = { glm::vec3{ x, y, z },
 						glm::vec3{x + block_size, y + block_size, z + block_size} };
 
-					const glm::vec3& blockPosition = blockAABB.Min;
-					const Item block = World::Get().GetItem(blockPosition);
+					const glm::vec3& itemPosition = itemAABB.Min;
+					const Item item = World::Get().GetItem(itemPosition);
 
-					if (!block.IsSolidBlock())
+					if (!item.IsSolidBlock())
 						continue;
 
-					auto targetedBlockInfo = ray.IsColliding(blockAABB);
-					if (targetedBlockInfo.Targeted)
+					auto targetedItemInfo = ray.IsColliding(itemAABB);
+					if (targetedItemInfo.Targeted)
 					{
-						glm::vec3 blockCenter = blockPosition + glm::vec3(block_size / 2.0f);
-						float distance = glm::length2(ray.Origin - blockCenter);
+						glm::vec3 itemCenter = itemPosition + glm::vec3(block_size / 2.0f);
+						float distance = glm::length2(ray.Origin - itemCenter);
 
 						if (distance < currentDistance)
 						{
-							outputTargetedBlockInfo = targetedBlockInfo;
+							outputTargetedItemInfo = targetedItemInfo;
 							currentDistance         = distance;	
 						}
 					}
 				}
 			}
 		}
-		return outputTargetedBlockInfo;
+		return outputTargetedItemInfo;
 	}
 
 	bool Player::OnKeyPressed(KeyPressedEvent& e)
@@ -231,13 +231,13 @@ namespace KuchCraft {
 			case MouseCode::ButtonLeft:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					DestroyBlock(m_TargetedBlock.Position);
+					DestroyItem(m_TargetedItem.Position);
 				return false;
 			}
 			case MouseCode::ButtonRight:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					PlaceItem(m_TargetedBlock.Position, Item(ItemType(Random::UInt(1, item_types_count - 1))));
+					PlaceItem(m_TargetedItem.Position, Item(ItemType(Random::UInt(1, item_types_count - 1))));
 				return false;
 			}
 		}
@@ -247,11 +247,11 @@ namespace KuchCraft {
 
 	void Player::PlaceItem(const glm::vec3& position, Item& block)
 	{
-		if (!m_TargetedBlock.Targeted)
+		if (!m_TargetedItem.Targeted)
 			return;
 
 		glm::vec3 newPosition = position;
-		switch (m_TargetedBlock.Plane)
+		switch (m_TargetedItem.Plane)
 		{
 			case PlaneDirection::Left:   newPosition.x -= 1.0f; break;
 			case PlaneDirection::Right:  newPosition.x += 1.0f; break;
@@ -285,9 +285,9 @@ namespace KuchCraft {
 		}
 	}
 
-	void Player::DestroyBlock(const glm::vec3& position)
+	void Player::DestroyItem(const glm::vec3& position)
 	{
-		if (!m_TargetedBlock.Targeted)
+		if (!m_TargetedItem.Targeted)
 			return;
 
 		World::Get().SetItem(position, Item(ItemType::Air));

@@ -77,7 +77,7 @@ namespace KuchCraft {
 		m_IndexCount[GetCurrentDrawCallIndex()] += quad_index_count;
 	}
 
-	void ChunkDrawList::Add(const glm::ivec3& position, uint32_t verticesIndex, const Item& item)
+	void ChunkDrawList::AddSolid(const glm::ivec3& position, uint32_t verticesIndex, const Item& item)
 	{
 		uint32_t texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
 		float    texSlot = -1.0f;

@@ -5,6 +5,25 @@
 
 namespace KuchCraft {
 
+    Item::Item()
+        : Type(ItemType::Air), Rotation(ItemRotation::Deg0)
+    {
+    }
+
+    Item::Item(ItemType type)
+        : Type(type), Rotation(ItemRotation::Deg0)
+    {
+    }
+
+    Item::Item(ItemType type, ItemRotation rotation)
+        : Type(type), Rotation(rotation)
+    {
+    }
+
+    Item::~Item()
+    {
+    }
+
     // Set up item names
     // ItemType::GoldBlock -> gold block
 	std::map<ItemType, std::string> Item::s_ItemNames = []() {
@@ -31,24 +50,4 @@ namespace KuchCraft {
         }
         return map;
     }();
-
-    Item::Item()
-        : Type(ItemType::Air), Rotation(ItemRotation::Deg0)
-    {
-    }
-
-    Item::Item(ItemType type)
-        : Type(type), Rotation(ItemRotation::Deg0)
-    {
-    }
-
-    Item::Item(ItemType type, ItemRotation rotation)
-        : Type(type), Rotation(rotation)
-    {
-    }
-
-    Item::~Item()
-    {
-    }
-
 }

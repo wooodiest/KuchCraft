@@ -24,28 +24,27 @@ namespace KuchCraft {
 		Chunk* frontChunk  = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z + chunk_size_XZ });
 		Chunk* behindChunk = World::Get().GetChunk({ m_Position.x                , m_Position.y, m_Position.z - chunk_size_XZ });
 
-		// Go through all the blocks and corresponding blocks of chunk next to it
-		// If a block is not air, check if the blocks surrounding it are transparant
-		// If they do add to draw list correct quad
 		for (int x = 0; x < chunk_size_XZ; x++)
 		{
 			for (int y = 0; y < chunk_size_Y; y++)
 			{
 				for (int z = 0; z < chunk_size_XZ; z++)
 				{
-					// Skip
 					if (Items[x][y][z].Type == ItemType::Air)
 						continue;
 
-					// Calculate model matrix
-					// TODO: Rotation
-					glm::mat4 transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z));
-
-					// Water has separate draw list
-					if (Items[x][y][z].Type == ItemType::Water && y != chunk_size_Y - 1)
+					if (Items[x][y][z].IsFoliageQuad())
 					{
-						 if (Items[x][y + 1][z].Type == ItemType::Air)
-							 m_DrawList.AddWater(transform, vertices_top);
+
+						continue;
+					}
+
+					if (Items[x][y][z].IsTransparentBlock())
+					{
+						// tmp
+						if (Items[x][y][z].Type == ItemType::Water && y != chunk_size_Y - 1 && Items[x][y + 1][z].Type == ItemType::Air)
+							m_DrawList.AddWater(glm::translate(glm::mat4(1.0f), glm::vec3(m_Position.x + x, m_Position.y + y, m_Position.z + z)), vertices_top);
+
 						continue;
 					}
 
@@ -54,65 +53,59 @@ namespace KuchCraft {
 					bool checkFront  = true, checkBehind = true;
 					bool checkRight  = true, checkLeft   = true;
 
-					// Bedrock only visible from up
+					// check edge cases
 					if (y == 0)
-					{
 						checkBottom = false;
-						checkFront  = false; checkBehind = false;
-						checkRight  = false; checkLeft   = false;
-					}
-					// Maximum y block
 					else if (y == chunk_size_Y - 1)
 						checkTop = false;
 
-					// Chunk border bloks
 					if (x == 0)
 					{
 						checkLeft = false;
-						if (leftChunk && (leftChunk->Items[chunk_size_XZ - 1][y][z].Type == ItemType::Air || leftChunk->Items[chunk_size_XZ - 1][y][z].IsTransparentBlock()))
-							m_DrawList.Add(glm::ivec3(x, y, z), vertices_left_index, Items[x][y][z]);
+						if (leftChunk && leftChunk->Items[chunk_size_XZ - 1][y][z].IsTranslucent())
+							m_DrawList.AddSolid({ x, y, z }, vertices_left_index, Items[x][y][z]);
 					}
 					else if (x == chunk_size_XZ - 1)
 					{
 						checkRight = false;
-						if (rightChunk && (rightChunk->Items[0][y][z].Type == ItemType::Air || rightChunk->Items[0][y][z].IsTransparentBlock()))
-							m_DrawList.Add(glm::ivec3(x, y, z), vertices_right_index, Items[x][y][z]);
+						if (rightChunk && rightChunk->Items[0][y][z].IsTranslucent())
+							m_DrawList.AddSolid({ x, y, z }, vertices_right_index, Items[x][y][z]);
 					}
+
 					if (z == 0)
 					{
 						checkBehind = false;
-						if (behindChunk && (behindChunk->Items[x][y][chunk_size_XZ - 1].Type == ItemType::Air || behindChunk->Items[x][y][chunk_size_XZ - 1].IsTransparentBlock()))
-							m_DrawList.Add(glm::ivec3(x, y, z), vertices_behind_index, Items[x][y][z]);
+						if (behindChunk && behindChunk->Items[x][y][chunk_size_XZ - 1].IsTranslucent())
+							m_DrawList.AddSolid({ x, y, z }, vertices_behind_index, Items[x][y][z]);
 					}
 					else if (z == chunk_size_XZ - 1)
 					{
 						checkFront = false;
-						if (frontChunk && (frontChunk->Items[x][y][0].Type == ItemType::Air || frontChunk->Items[x][y][0].IsTransparentBlock()))
-							m_DrawList.Add(glm::ivec3(x, y, z), vertices_front_index, Items[x][y][z]);
+						if (frontChunk && frontChunk->Items[x][y][0].IsTranslucent())
+							m_DrawList.AddSolid({ x, y, z }, vertices_front_index, Items[x][y][z]);
 					}
 
-					// Rest of bloks
-					if (checkBottom && (Items[x][y - 1][z].Type == ItemType::Air || Items[x][y - 1][z].IsTransparentBlock()))
-						m_DrawList.Add(glm::ivec3(x, y, z), vertices_bottom_index, Items[x][y][z]);
+					if (checkBottom && Items[x][y - 1][z].IsTranslucent())
+						m_DrawList.AddSolid({ x, y, z }, vertices_bottom_index, Items[x][y][z]);
 
-					if (checkTop    && (Items[x][y + 1][z].Type == ItemType::Air || Items[x][y + 1][z].IsTransparentBlock()))
-						m_DrawList.Add(glm::ivec3(x, y, z), vertices_top_index, Items[x][y][z]);
+					if (checkTop    && Items[x][y + 1][z].IsTranslucent())
+						m_DrawList.AddSolid({ x, y, z }, vertices_top_index,    Items[x][y][z]);
 
-					if (checkFront  && (Items[x][y][z + 1].Type == ItemType::Air || Items[x][y][z + 1].IsTransparentBlock()))
-						m_DrawList.Add(glm::ivec3(x, y, z), vertices_front_index, Items[x][y][z]);
+					if (checkFront  && Items[x][y][z + 1].IsTranslucent())
+						m_DrawList.AddSolid({ x, y, z }, vertices_front_index,  Items[x][y][z]);
 
-					if (checkRight  && (Items[x + 1][y][z].Type == ItemType::Air || Items[x + 1][y][z].IsTransparentBlock()))
-						m_DrawList.Add(glm::ivec3(x, y, z), vertices_right_index, Items[x][y][z]);
+					if (checkRight  && Items[x + 1][y][z].IsTranslucent())
+						m_DrawList.AddSolid({ x, y, z }, vertices_right_index,  Items[x][y][z]);
 
-					if (checkBehind && (Items[x][y][z - 1].Type == ItemType::Air || Items[x][y][z - 1].IsTransparentBlock()))
-						m_DrawList.Add(glm::ivec3(x, y, z), vertices_behind_index, Items[x][y][z]);
+					if (checkBehind && Items[x][y][z - 1].IsTranslucent())
+						m_DrawList.AddSolid({ x, y, z }, vertices_behind_index, Items[x][y][z]);
 
-					if (checkLeft   && (Items[x - 1][y][z].Type == ItemType::Air || Items[x - 1][y][z].IsTransparentBlock()))
-						m_DrawList.Add(glm::ivec3(x, y, z), vertices_left_index, Items[x][y][z]);
-
+					if (checkLeft   && Items[x - 1][y][z].IsTranslucent())
+						m_DrawList.AddSolid({ x, y, z }, vertices_left_index,   Items[x][y][z]);
 				}
 			}
-		}				              
+		}			
+
 		m_NeedToRecreate = false;
 		m_DrawList.EndRecreating();
 	}

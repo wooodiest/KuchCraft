@@ -42,8 +42,8 @@ namespace KuchCraft {
 
 		std::string& GetDebugText();
 
-		bool GetTargetedBlockStatus()               const { return m_TargetedBlock.Targeted; }
-		const TargetedBlockInfo& GetTargetedBlock() const { return m_TargetedBlock;          }
+		bool GetTargetedBlockStatus()             const { return m_TargetedItem.Targeted; }
+		const TargetedItemInfo& GetTargetedItem() const { return m_TargetedItem;          }
 
 		void SetPosition(const glm::vec3& position) { m_Position = position; }
 		void SetRotation(const glm::vec2& rotation) { m_Rotation = rotation; }
@@ -59,9 +59,9 @@ namespace KuchCraft {
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
 
 		void PlaceItem(const glm::vec3& position, Item& item);
-		void DestroyBlock(const glm::vec3& position);
+		void DestroyItem(const glm::vec3& position);
 
-		TargetedBlockInfo GetTargetBlockInfo();
+		TargetedItemInfo GetTargetItemInfo();
 
 	private:
 		glm::vec3 m_Position{ 0.0f };
@@ -71,7 +71,7 @@ namespace KuchCraft {
 		Camera			  m_Camera;
 		GameMode		  m_GameMode;
 		PlayerPhysicsBody m_PhysicsBody;
-		TargetedBlockInfo m_TargetedBlock;
+		TargetedItemInfo  m_TargetedItem;
 
 		std::string m_DebugText;
 

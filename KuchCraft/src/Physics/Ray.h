@@ -11,15 +11,15 @@ namespace KuchCraft
 		Behind = 4, Front = 5
 	};
 
-	struct TargetedBlockInfo
+	struct TargetedItemInfo
 	{
 		bool Targeted = false;
 		PlaneDirection Plane;
 		glm::vec3 Position{ 0.0f };
 
-		TargetedBlockInfo() = default;
+		TargetedItemInfo() = default;
 
-		TargetedBlockInfo(const glm::vec3& position, PlaneDirection plane)
+		TargetedItemInfo(const glm::vec3& position, PlaneDirection plane)
 			: Targeted(true), Plane(plane), Position(position){}
 	};
 
@@ -31,7 +31,7 @@ namespace KuchCraft
 
 		Ray(const glm::vec3& origin, const glm::vec3& direction, float distance = std::numeric_limits<float>::infinity());
 
-		TargetedBlockInfo IsColliding(const AABB& aabb) const;
+		TargetedItemInfo IsColliding(const AABB& aabb) const;
 	};
 
 }
