@@ -32,9 +32,9 @@ namespace KuchCraft {
 		bool    m_Running       = true;
 		bool    m_Minimized     = false;
 		bool    m_WindowResized = false;
-		Window* m_Window;
 
-		KuchCraft* m_Game;
+		std::unique_ptr<Window>    m_Window;
+		std::unique_ptr<KuchCraft> m_Game;
 
 	private:
 		static Application* s_Instance;

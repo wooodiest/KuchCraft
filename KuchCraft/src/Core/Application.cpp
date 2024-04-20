@@ -10,18 +10,21 @@ namespace KuchCraft {
 
 	Application::Application()
 	{
+		Log::Init();
 		Random::Init();
 		s_Instance = this;
 
-		m_Window = new Window("KuchCraft", 1920, 1080, false);
+		m_Window = std::make_unique<Window>("KuchCraft", 1920, 1080, false);
 		m_Window->SetEventCallback(KC_BIND_EVENT_FN(Application::OnEvent));
-		m_Game   = new KuchCraft();
+
+		m_Game = std::make_unique<KuchCraft>();
+
+		Run();
 	}
 
 	Application::~Application()
 	{
-		delete m_Game;
-		delete m_Window;
+
 	}
 
 	void Application::Run()
