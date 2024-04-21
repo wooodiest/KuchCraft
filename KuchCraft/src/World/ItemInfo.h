@@ -200,6 +200,7 @@ namespace KuchCraft {
 		CarrotsCrops,
 		PotatoesCrops,
 		WheatCrops,
+		SugarCane,
 
 		/* - flowers */
 		AzureBluet,
@@ -226,20 +227,10 @@ namespace KuchCraft {
 		BrainCoral,
 		Cobweb,
 		CrimsonRoots,
-		FireCoral,
-		SugarCane,
+		FireCoral,	
 		SweetBerryBush,
 		TubeCoral,
 		Grass,
-
-		/* FOLIAGE cube */
-
-
-		/* FOOD */
-
-
-		/* TOOLS */
-
 
 		None
 	};

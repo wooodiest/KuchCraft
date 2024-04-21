@@ -136,13 +136,12 @@ namespace KuchCraft {
 
 	void ChunkDrawList::AddFoliageQuad(const glm::vec3& position, const Item& item)
 	{
-		// todo: add radom position and rotation displacement based on position
-		
-		float texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
+		float texture     = AssetManager::GetItemTexture(item.Type).GetRendererID();
+		glm::vec3 offsets = item.GetPositionAndRotationOffset(position);
 
 		// quad -> 1
-		glm::mat4 rotation1      = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f), 0.0f })));
-		glm::mat4 quadTransform1 = glm::translate(glm::mat4(1.0f), glm::vec3(position + glm::vec3{ 0.5f, 0.5f, 0.5f })) *
+		glm::mat4 rotation1      = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f) + offsets.y, 0.0f})));
+		glm::mat4 quadTransform1 = glm::translate(glm::mat4(1.0f), position + glm::vec3{ 0.5f + offsets.x, 0.5f, 0.5f + offsets.z }) *
 			rotation1 *
 			glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 1.0f });
 
@@ -161,8 +160,8 @@ namespace KuchCraft {
 
 
 		// quad -> 2
-		glm::mat4 rotation2      = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f + 90.0f), 0.0f })));
-		glm::mat4 quadTransform2 = glm::translate(glm::mat4(1.0f), glm::vec3(position + glm::vec3{ 0.5f, 0.5f, 0.5f })) *
+		glm::mat4 rotation2      = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f + 90.0f) + offsets.y, 0.0f })));
+		glm::mat4 quadTransform2 = glm::translate(glm::mat4(1.0f), position + glm::vec3{ 0.5f + offsets.x, 0.5f, 0.5f + offsets.z }) *
 			rotation2 *
 			glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 1.0f });
 

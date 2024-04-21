@@ -21,6 +21,9 @@ namespace KuchCraft {
 
 		AABB GetAABB(const glm::ivec3& position) const;
 
+		// x,z - position; y - rotation
+		glm::vec3 GetPositionAndRotationOffset(const glm::ivec3& position) const;
+
 	public:
 		inline bool IsSolidBlock()       const { return (uint32_t)Type >= item_type_solid_block_begin       && (uint32_t)Type <= item_type_solid_block_end;       }
 		inline bool IsTransparentBlock() const { return (uint32_t)Type >= item_type_transparent_block_begin && (uint32_t)Type <= item_type_transparent_block_end; }
