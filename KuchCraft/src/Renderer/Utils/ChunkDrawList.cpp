@@ -141,7 +141,7 @@ namespace KuchCraft {
 		float texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
 
 		// quad -> 1
-		glm::mat4 rotation1 = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f), 0.0f })));
+		glm::mat4 rotation1      = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f), 0.0f })));
 		glm::mat4 quadTransform1 = glm::translate(glm::mat4(1.0f), glm::vec3(position + glm::vec3{ 0.5f, 0.5f, 0.5f })) *
 			rotation1 *
 			glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 1.0f });
@@ -161,8 +161,8 @@ namespace KuchCraft {
 
 
 		// quad -> 2
-		glm::mat4 rotation2 = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f + 90.0f), 0.0f })));
-		glm::mat4 quadTransform2 = glm::translate(glm::mat4(1.0f), glm::vec3(position + glm::vec3{ 0.46f, 0.5f, 0.5f })) *
+		glm::mat4 rotation2      = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f + 90.0f), 0.0f })));
+		glm::mat4 quadTransform2 = glm::translate(glm::mat4(1.0f), glm::vec3(position + glm::vec3{ 0.5f, 0.5f, 0.5f })) *
 			rotation2 *
 			glm::scale(glm::mat4(1.0f), { 0.5f, 0.5f, 1.0f });
 

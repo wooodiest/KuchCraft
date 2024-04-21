@@ -213,7 +213,7 @@ namespace KuchCraft {
 				{
 					const Item item = World::Get().GetItem({ x, y, z });
 
-					if (!item.IsSolidBlock())
+					if (!item.IsPhysical())
 						continue;
 
 					const AABB itemAABB = item.GetAABB({ x, y, z });
@@ -271,7 +271,7 @@ namespace KuchCraft {
 			{
 				const Item item = World::Get().GetItem({ x, absolutePosition.y, z });
 
-				if (!item.IsSolidBlock())
+				if (!item.IsPhysical())
 					continue;
 
 				const AABB itemAABB = item.GetAABB({ x, absolutePosition.y, z });

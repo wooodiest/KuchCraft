@@ -242,7 +242,7 @@ namespace KuchCraft {
 			case MouseCode::ButtonRight:
 			{
 				if (m_GameMode != GameMode::Spectator)
-					PlaceItem(m_TargetedItem.Position, Item(ItemType::RedTulipan));
+					PlaceItem(m_TargetedItem.Position, Item((ItemType)Random::UInt(1, item_types_count - 1)));
 				return false;
 			}
 		}

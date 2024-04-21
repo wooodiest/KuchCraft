@@ -36,7 +36,7 @@ namespace KuchCraft {
 		BlueWool,
 		BoneBlock,
 		BookShelf,
-		BrainCoral,
+		BrainCoralBlock,
 		BrownConcrete,
 		BrownConcretePowder,
 		CoalOre, 
@@ -99,7 +99,7 @@ namespace KuchCraft {
 		EndStoneBrick,
 		Furnace,
 		Farmland, 
-		FireCoral,
+		FireCoralBlock,
 		Granite,
 		GrassBlock,
 		Gravel, 
@@ -171,7 +171,7 @@ namespace KuchCraft {
 		SpruceLog, 
 		SprucePlanks,
 		Tnt,
-		TubeCoral,
+		TubeCoralBlock,
 		WhiteConcrete,
 		WhiteConcretePowder,
 		WhiteWool, 
@@ -185,8 +185,52 @@ namespace KuchCraft {
 		Water,
 
 		/* FOLIAGE QUADS */
+		/* - saplings */
+		AcaciaSapling,
+		BirchSapling,
+		CherrySapling,
+		DeadBush,
+		DarkOakSapling,
+		JungleSapling,
+		OakSapling,
+		SpruceSapling,
+
+		/* - crops */
+		BeetrootsCrops,
+		CarrotsCrops,
+		PotatoesCrops,
+		WheatCrops,
+
+		/* - flowers */
+		AzureBluet,
+		Allium,
+		BlueOrchid,
+		Cornflower,
+		Dandelion,
+		LilyOfTheValley,
+		OrangeTulip,
+		OxeyeDaisy,
+		PinkTulip,
+		Poppy,
+		RedTulip,
+		Torchflower,
+		WhiteTulip,
+		WitherRose,
+
+		/* - mushrooms */
+		BrownMushroom,
+		CrimsonFungus,
+		RedMushroom,
+
+		/* - other */
+		BrainCoral,
+		Cobweb,
+		CrimsonRoots,
+		FireCoral,
+		SugarCane,
+		SweetBerryBush,
+		TubeCoral,
 		Grass,
-		RedTulipan,
 
 		/* FOLIAGE cube */
 
@@ -216,8 +260,16 @@ namespace KuchCraft {
 	inline constexpr uint32_t item_type_transparent_block_begin = (uint32_t)ItemType::Glass;
 	inline constexpr uint32_t item_type_transparent_block_end   = (uint32_t)ItemType::Water;
 
-	inline constexpr uint32_t item_foliage_quad_begin = (uint32_t)ItemType::Grass;
-	inline constexpr uint32_t item_foliage_quad_end   = (uint32_t)ItemType::RedTulipan;
+	inline constexpr uint32_t item_foliage_quad_begin           = (uint32_t)ItemType::AcaciaSapling;
+	inline constexpr uint32_t item_foliage_quad_saplings_begin  = (uint32_t)ItemType::AcaciaSapling;
+	inline constexpr uint32_t item_foliage_quad_saplings_end    = (uint32_t)ItemType::SpruceSapling;
+	inline constexpr uint32_t item_foliage_quad_crops_begin     = (uint32_t)ItemType::BeetrootsCrops;
+	inline constexpr uint32_t item_foliage_quad_crops_end       = (uint32_t)ItemType::WheatCrops;
+	inline constexpr uint32_t item_foliage_quad_flowers_begin   = (uint32_t)ItemType::AzureBluet;
+	inline constexpr uint32_t item_foliage_quad_flowers_end     = (uint32_t)ItemType::WitherRose;
+	inline constexpr uint32_t item_foliage_quad_mushrooms_begin = (uint32_t)ItemType::BrownMushroom;
+	inline constexpr uint32_t item_foliage_quad_mushrooms_end   = (uint32_t)ItemType::RedMushroom;
+	inline constexpr uint32_t item_foliage_quad_end             = (uint32_t)ItemType::Grass;
 
 }
 

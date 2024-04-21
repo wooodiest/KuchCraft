@@ -27,21 +27,40 @@ namespace KuchCraft {
     AABB Item::GetAABB(const glm::ivec3& position) const
     {
         if (IsSolidBlock())
-        {
-            constexpr float block_size = 1.0f;
             return AABB(
-                  position, 
-                { position.x + block_size, position.y + block_size, position.z + block_size }
+                { position.x,        position.y,        position.z        },
+                { position.x + 1.0f, position.y + 1.0f, position.z + 1.0f }
             );
-        }
-
+        
         if (IsFoliageQuad())
         {
-            constexpr float block_size = 1.0f;
-            constexpr float quad_size  = 0.25f;
+            if (IsSapling())
+                return AABB(
+                    { position.x + 0.3f, position.y,          position.z + 0.3f },
+                    { position.x + 0.7f, position.y + 0.75f,  position.z + 0.7f }
+            );
+
+            if (IsCrop())
+                return AABB(
+                    { position.x + 0.1f, position.y,         position.z + 0.1f },
+                    { position.x + 0.9f, position.y + 0.6f,  position.z + 0.9f }
+                );
+            
+            if (IsFlower())
+                return AABB(
+                    { position.x + 0.25f, position.y,         position.z + 0.25f },
+                    { position.x + 0.75f, position.y + 0.75f, position.z + 0.75f }
+                );
+
+            if (IsMushroom())
+                return AABB(
+                    { position.x + 0.25f, position.y,        position.z + 0.25f },
+                    { position.x + 0.75f, position.y + 0.5f, position.z + 0.75f }
+                );
+
             return AABB(
-                { position.x + quad_size,              position.y,                          position.z + quad_size              },
-                { position.x + block_size - quad_size, position.y + block_size - quad_size, position.z + block_size - quad_size }
+                { position.x + 0.1f, position.y,         position.z + 0.1f },
+                { position.x + 0.9f, position.y + 0.9f,  position.z + 0.9f }
             );
         }
 
