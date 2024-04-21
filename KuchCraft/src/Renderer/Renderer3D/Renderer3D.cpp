@@ -649,7 +649,7 @@ namespace KuchCraft {
 		uint32_t vertexCount = s_QuadData.IndexCount / quad_index_count * quad_vertex_count;
 
 		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[s_QuadData.VertexOffset], vertexCount * sizeof(Quad3DVertex));
-		s_QuadData.VertexOffset = vertexCount;
+		s_QuadData.VertexOffset += vertexCount;
 
 		for (uint32_t i = 0; i < s_QuadData.TextureSlotIndex; i++)
 			Texture2D::Bind(s_QuadData.TextureSlots[i], i);
@@ -745,7 +745,7 @@ namespace KuchCraft {
 		uint32_t vertexCount = s_CubeData.IndexCount / quad_index_count * quad_vertex_count;
 
 		s_CubeData.VertexBuffer.SetData(&s_CubeData.Vertices[s_CubeData.VertexOffset], vertexCount * sizeof(CubeVertex));
-		s_CubeData.VertexOffset = vertexCount;
+		s_CubeData.VertexOffset += vertexCount;
 
 		for (uint32_t i = 0; i < s_CubeData.TextureSlotIndex; i++)
 			Texture2D::Bind(s_CubeData.TextureSlots[i], i);
