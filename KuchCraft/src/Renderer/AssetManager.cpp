@@ -1,6 +1,8 @@
 #include "kcpch.h"
 #include "Renderer/AssetManager.h"
 
+#include "Core/Utils.h"
+
 namespace KuchCraft {
 
 	AssetManagerBlockData AssetManager::s_BlockData;
@@ -19,6 +21,8 @@ namespace KuchCraft {
 
 	void AssetManager::PrepareBlocks()
 	{
+		TextureSpecification textureSpec = { 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true };
+
 		for (uint32_t i = 1; i < item_types_count; i++)
 		{
 			Item block = Item((ItemType)i);
@@ -27,57 +31,25 @@ namespace KuchCraft {
 			std::replace(blockName.begin(), blockName.end(), ' ', '_');
 
 			const std::string path = s_BlockData.Path + blockName + s_BlockData.Extension;
-			s_BlockData.Textures[block.Type].Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
+			s_BlockData.Textures[block.Type].Create(path, textureSpec);
 		}
 	}
 
 	void AssetManager::PrepareUI()
 	{
-		{
-			const std::string path = s_UIData.Path + "hotbar" + s_UIData.Extension;
-			s_UIData.HotbarTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
+		TextureSpecification textureSpec = { 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true };
 
-		{
-			const std::string path = s_UIData.Path + "hotbar_selection" + s_UIData.Extension;
-			s_UIData.HotbarSelectionTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
+		auto uiElements = Utils::CreateEnumStringMap<UIElement>();
+		uiElements.erase(uiElements.find(UIElement::None));
 
+		for (auto& [type, name] : uiElements)
 		{
-			const std::string path = s_UIData.Path + "crosshair" + s_UIData.Extension;
-			s_UIData.CrosshairTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
+			std::string uiElementName = name;
+			std::replace(uiElementName.begin(), uiElementName.end(), ' ', '_');
 
-		{
-			const std::string path = s_UIData.Path + "heart_empty" + s_UIData.Extension;
-			s_UIData.HeartEmptyTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
+			const std::string path = s_UIData.Path + uiElementName + s_UIData.Extension;
+			s_UIData.Textures[type].Create(path, textureSpec);
 		}
-
-		{
-			const std::string path = s_UIData.Path + "heart_full" + s_UIData.Extension;
-			s_UIData.HeartFullTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
-
-		{
-			const std::string path = s_UIData.Path + "food_empty" + s_UIData.Extension;
-			s_UIData.FoodEmptyTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
-
-		{
-			const std::string path = s_UIData.Path + "food_full" + s_UIData.Extension;
-			s_UIData.FoodFullTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
-
-		{
-			const std::string path = s_UIData.Path + "armor_empty" + s_UIData.Extension;
-			s_UIData.ArmorEmptyTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
-
-		{
-			const std::string path = s_UIData.Path + "armor_full" + s_UIData.Extension;
-			s_UIData.ArmorFullTexture.Create(path, TextureSpecification{ 0, 0, ImageFormat::RGBA8, TextureFilter::NEAREST, true });
-		}
-
 	}
 
 }

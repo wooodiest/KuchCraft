@@ -270,7 +270,7 @@ namespace KuchCraft {
 
 		std::unordered_map<std::string, std::string> outlinedBlockShaderData;
 		outlinedBlockShaderData["#outlined_block_border_radius"] = std::to_string(s_OutlinedCubeData.BorderRadius);
-		outlinedBlockShaderData["#outlined_block_border_color"]  = VecToString(s_OutlinedCubeData.Color);
+		outlinedBlockShaderData["#outlined_block_border_color"]  = Utils::VecToString(s_OutlinedCubeData.Color);
 
 		s_OutlinedCubeData.Shader.Create("assets/shaders/outlined_cube.vert.glsl", "assets/shaders/outlined_cube.frag.glsl", outlinedBlockShaderData);
 		s_OutlinedCubeData.Shader.Bind();

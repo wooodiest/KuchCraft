@@ -1,7 +1,7 @@
 #include "kcpch.h"
 #include "Core/Utils.h"
 
-namespace KuchCraft {
+namespace Utils {
 
 	std::string VecToString(const glm::vec2& vec, uint8_t precision)
 	{

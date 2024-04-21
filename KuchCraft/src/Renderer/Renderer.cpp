@@ -76,13 +76,13 @@ namespace KuchCraft {
 			"\nRenderer:"
 			"\n    Draw cals: " + std::to_string(s_Stats.DrawCalls) +
 			"\n    Quads: "     + std::to_string(s_Stats.Quads) +
-			"\n    Render time: "          + FloatToString(s_Stats.RenderTimer.    GetElapsedMillis(), 3) + "ms" +
-			"\n      - 2D:              "  + FloatToString(s_Stats.Renderer2DTimer.GetElapsedMillis(), 3) + "ms" +
-			"\n      - 3D:              "  + FloatToString(s_Stats.Renderer3DTimer.GetElapsedMillis(), 3) + "ms" +
-			"\n      -> chunks:     "      + FloatToString(s_Stats.Renderer3DChunkTimer.     GetElapsedMillis(), 3) + "ms" + 
-			"\n      -> skybox:     "      + FloatToString(s_Stats.Renderer3DSkyboxTimer.    GetElapsedMillis(), 3) + "ms" +
-			"\n      -> water:        "    + FloatToString(s_Stats.Renderer3DWaterTimer.     GetElapsedMillis(), 3) + "ms"
-			"\n      -> quads:       "     + FloatToString(s_Stats.Renderer3DQuadsTimer.     GetElapsedMillis(), 3) + "ms";
+			"\n    Render time: "          + Utils::FloatToString(s_Stats.RenderTimer.    GetElapsedMillis(), 3) + "ms" +
+			"\n      - 2D:              "  + Utils::FloatToString(s_Stats.Renderer2DTimer.GetElapsedMillis(), 3) + "ms" +
+			"\n      - 3D:              "  + Utils::FloatToString(s_Stats.Renderer3DTimer.GetElapsedMillis(), 3) + "ms" +
+			"\n      -> chunks:     "      + Utils::FloatToString(s_Stats.Renderer3DChunkTimer.     GetElapsedMillis(), 3) + "ms" + 
+			"\n      -> skybox:     "      + Utils::FloatToString(s_Stats.Renderer3DSkyboxTimer.    GetElapsedMillis(), 3) + "ms" +
+			"\n      -> water:        "    + Utils::FloatToString(s_Stats.Renderer3DWaterTimer.     GetElapsedMillis(), 3) + "ms"
+			"\n      -> quads:       "     + Utils::FloatToString(s_Stats.Renderer3DQuadsTimer.     GetElapsedMillis(), 3) + "ms";
 
 		return s_Stats.DebugText;
 	}

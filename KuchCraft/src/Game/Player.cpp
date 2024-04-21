@@ -140,12 +140,12 @@ namespace KuchCraft {
 
 		m_DebugText =
 			  "\nPlayer:"
-			  "\n   Position: "  + VecToString(m_Position, 2)
-			+ "\n   Rotation: "  + VecToString(glm::vec2{ glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y) }, 2)
+			  "\n   Position: "  + Utils::VecToString(m_Position, 2)
+			+ "\n   Rotation: "  + Utils::VecToString(glm::vec2{ glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y) }, 2)
 			+ "\n   Gamemode: "  + gameMode;
 
 		if (m_TargetedItem.Targeted)
-			m_DebugText += "\n   Targeted item - " + World::Get().GetItem(m_TargetedItem.Position).GetName() + " : " + VecToString(glm::ivec3{m_TargetedItem.Position});
+			m_DebugText += "\n   Targeted item - " + World::Get().GetItem(m_TargetedItem.Position).GetName() + " : " + Utils::VecToString(glm::ivec3{m_TargetedItem.Position});
 		else
 			m_DebugText += "\n   Targeted item: none";
 
@@ -214,30 +214,30 @@ namespace KuchCraft {
 			hotbarQuadInfo.Position = { 0.5f, 33.0f, 0.0f };
 			hotbarQuadInfo.Size     = { 273.0f, 33.0f };
 			hotbarQuadInfo.NormalizedPosition_X = true;
-			Renderer2D::DrawQuad(hotbarQuadInfo, AssetManager::GetHotbarTexture());
+			Renderer2D::DrawQuad(hotbarQuadInfo, AssetManager::GetUIElementTexture(UIElement::Hotbar));
 
 			Renderer2DQuadInfo hotbarSelectionQuadInfo;
 			hotbarSelectionQuadInfo.Position = { 0.5f * width - 3 * 60.0f, 34.0f, 1.0f };
 			hotbarSelectionQuadInfo.Size     = { 33.0f, 33.0f };
-			Renderer2D::DrawQuad(hotbarSelectionQuadInfo, AssetManager::GetHotbarSelectionTexture());
+			Renderer2D::DrawQuad(hotbarSelectionQuadInfo, AssetManager::GetUIElementTexture(UIElement::HotbarSelected));
 
 			Renderer2DQuadInfo crosshairQuadInfo;
 			crosshairQuadInfo.Position = { 0.5f, 0.5f, 1.0f };
 			crosshairQuadInfo.Size     = { 15.0f, 15.0f };
 			crosshairQuadInfo.NormalizedPosition_X = true;
 			crosshairQuadInfo.NormalizedPosition_Y = true;
-			Renderer2D::DrawQuad(crosshairQuadInfo, AssetManager::GetCrosshairTexture());
+			Renderer2D::DrawQuad(crosshairQuadInfo, AssetManager::GetUIElementTexture(UIElement::Crosshair));
 		}
 
 		if (m_GameMode == GameMode::Survival)
 		{
 			Renderer2DQuadInfo fullHeartQuadInfo;
 			fullHeartQuadInfo.Size = { 13.0f, 13.0f };
-			Texture2D& fullHeartTexture = AssetManager::GetHeartFullTexture();
+			Texture2D& fullHeartTexture = AssetManager::GetUIElementTexture(UIElement::HeartFull);
 
 			Renderer2DQuadInfo emptyHeartQuadInfo;
 			emptyHeartQuadInfo.Size = { 10.0f, 10.0f };
-			Texture2D& emptyHeartTexture = AssetManager::GetHeartEmptyTexture();
+			Texture2D& emptyHeartTexture = AssetManager::GetUIElementTexture(UIElement::HeartEmpty);
 
 			glm::vec3 initialHeartPosition = { 0.5f * width - 273.0f, 80.0f, 1.0f };
 
@@ -260,11 +260,11 @@ namespace KuchCraft {
 		
 			Renderer2DQuadInfo fullArmorQuadInfo;
 			fullArmorQuadInfo.Size = { 10.0f, 10.0f };
-			Texture2D& fullArmorTexture = AssetManager::GetArmorFullTexture();
+			Texture2D& fullArmorTexture = AssetManager::GetUIElementTexture(UIElement::ArmorFull);
 
 			Renderer2DQuadInfo emptyArmorQuadInfo;
 			emptyArmorQuadInfo.Size = { 10.0f, 10.0f };
-			Texture2D& emptyArmorTexture = AssetManager::GetArmorEmptyTexture();
+			Texture2D& emptyArmorTexture = AssetManager::GetUIElementTexture(UIElement::ArmorEmpty);
 
 			glm::vec3 initialArmorPosition = { 0.5f * width - 273.0f, 105.0f, 1.0f };
 
@@ -287,11 +287,11 @@ namespace KuchCraft {
 		
 			Renderer2DQuadInfo fullFoodQuadInfo;
 			fullFoodQuadInfo.Size = { 13.0f, 13.0f };
-			Texture2D& fullFoodTexture = AssetManager::GetFoodFullTexture();
+			Texture2D& fullFoodTexture = AssetManager::GetUIElementTexture(UIElement::FoodFull);
 
 			Renderer2DQuadInfo emptyFoodQuadInfo;
 			emptyFoodQuadInfo.Size = { 10.0f, 10.0f };
-			Texture2D& emptyFoodTexture = AssetManager::GetFoodEmptyTexture();
+			Texture2D& emptyFoodTexture = AssetManager::GetUIElementTexture(UIElement::FoodEmpty);
 
 			glm::vec3 initialFoodPosition = { 0.5f * width + 273.0f, 80.0f, 1.0f };
 
