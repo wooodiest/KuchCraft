@@ -71,11 +71,13 @@ namespace KuchCraft {
 
 	struct TextStyle2D
 	{
-		glm::vec4 Color       { 1.0f, 0.0f, 0.0f, 1.0f };
 		glm::vec3 Position    { 0.0f, 0.0f, 0.0f       };
-		glm::vec2 Size        { -1.0f, -1.0f           };
-		float     FontSize    {  24.0f                 };
-		float     FontSpacing {  1.3f                  };
+		glm::vec4 Color       { 1.0f, 1.0f, 1.0f, 1.0f };
+		float     FontSize    = 24.0f;
+		float     FontSpacing = 1.3f;
+		bool      NormalizedPosition_X = false;
+		bool      NormalizedPosition_Y = false;
+		bool      PositionFromTopLeft  = false;
 	};
 
 	struct Renderer2DUniformText
@@ -100,8 +102,6 @@ namespace KuchCraft {
 	{
 		std::string FontPath           = "assets/fonts/Roboto-Regular.ttf";
 		glm::vec4   DefaultFontColor   = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float       DefaultFontSize    = 24.0f;
-		float       DefaultFontSpacing = 1.3f;
 
 		uint32_t MaxCharacterUniformArrayLimit = 400;
 		uint32_t FontTextureSize               = 256;

@@ -171,30 +171,32 @@ namespace KuchCraft {
 	{
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
-		//RendererCommand::DisableDepthTesting();
 		RendererCommand::EnableLessEqualDepthTesting();
 
-		s_TextData.Shader.Bind();
-		s_TextData.Texture.Bind();
-
-		s_TextData.VertexArray.Bind();
+		s_TextData.Shader      .Bind();
+		s_TextData.Texture     .Bind();
+		s_TextData.VertexArray .Bind();
 		s_TextData.VertexBuffer.Bind();
 
 		Renderer2DUniformText* textBuffer = new Renderer2DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
-
 		uint32_t currentIndex = 0;
+
+		auto [width, height] = Application::Get().GetWindow().GetWindowSize(); 
+
 		for (const auto& [text, textStyle] : s_TextData.Data)
 		{
 			glm::vec2 currentPosition = textStyle.Position;
+
+			if (textStyle.NormalizedPosition_X)
+				currentPosition.x *= width;
+			if (textStyle.NormalizedPosition_Y)
+				currentPosition.y *= height;
+
+			if (textStyle.PositionFromTopLeft)
+				currentPosition.y = height - currentPosition.y;
+
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
 
-			glm::vec2 CurrentSize{ 0.0f };
-			glm::vec2 maxSize = {
-				textStyle.Size.y > 0.0f ? textStyle.Size.y : std::numeric_limits<float>::infinity(), /* 300.0f*/
-				textStyle.Size.y > 0.0f ? textStyle.Size.y : std::numeric_limits<float>::infinity()
-			};
-
-			// adjust the height at which the text starts
 			if (!text.empty())
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(text[0]);
@@ -205,45 +207,17 @@ namespace KuchCraft {
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);
 
-				if (CurrentSize.y > maxSize.y)
-					break;
-
 				if (*c == '\n')
 				{
 					currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
 					currentPosition.x = textStyle.Position.x;
-
-					CurrentSize.x = 0.0f;
-					CurrentSize.y += (character.Size.y) * textStyle.FontSpacing * scale;
 				}
 				else if (*c == ' ')
 				{
 					currentPosition.x += (character.Advance >> 6) * scale;
-
-					// Chceck size
-					CurrentSize.x += (character.Advance >> 6) * scale;
-					if (CurrentSize.x > maxSize.x)
-					{
-						CurrentSize.x = 0.0f;
-						CurrentSize.y += (character.Size.y) * textStyle.FontSpacing * scale;
-						// new line 
-						currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
-						currentPosition.x = textStyle.Position.x;
-					}
 				}
 				else
 				{
-					// Chceck size
-					CurrentSize.x += (character.Advance >> 6) * scale;
-					if (CurrentSize.x > maxSize.x)
-					{
-						CurrentSize.x = 0.0f;
-						CurrentSize.y += (character.Size.y) * textStyle.FontSpacing * scale;
-						// new line 
-						currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
-						currentPosition.x = textStyle.Position.x;
-					}
-
 					// Drawing
 					float xpos = currentPosition.x + character.Bearing.x * scale;
 					float ypos = currentPosition.y - (textStyle.FontSize - character.Bearing.y) * scale;
@@ -416,7 +390,7 @@ namespace KuchCraft {
 
 	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color)
 	{
-		const auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 
 		glm::mat4 transform = 
 			glm::translate(glm::mat4(1.0f), { info.NormalizedPosition_X ? info.Position.x * width : info.Position.x, info.NormalizedPosition_Y ? info.Position.y * height : info.Position.y, info.Position.z, }) *
@@ -436,7 +410,7 @@ namespace KuchCraft {
 
 	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		const auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		float textureID = texture.GetRendererID();
 
 		glm::mat4 transform =
@@ -459,286 +433,6 @@ namespace KuchCraft {
 	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle)
 	{
 		s_TextData.Data.emplace_back(text, textStyle);
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x, position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x, position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position, const glm::vec4& color)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x, position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x, position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			position,
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			position,
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec4& color)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			position,
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec4& color, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			position,
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x * width, position.y * height, 0.0f },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position, float fontSize)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x * width, position.y * height, 0.0f },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x * width, position.y * height, 0.0f },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x * width, position.y * height, 0.0f },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x * width, position.y * height, position.z },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position, float fontSize)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x * width, position.y * height, position.z },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x * width, position.y * height, position.z },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextN(const std::string& text, const glm::vec3& position, const glm::vec4& color, float fontSize)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x * width, position.y * height, position.z },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x, Application::Get().GetWindow().GetHeight() -position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position, const glm::vec4& color)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec2& position, const glm::vec4& color, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.x, Application::Get().GetWindow().GetHeight() - position.y, 0.0f },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			s_TextInfo.DefaultFontColor,
-			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position, const glm::vec4& color)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
-			{ -1.0f, -1.0f },
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer2D::DrawTextTopLeft(const std::string& text, const glm::vec3& position, const glm::vec4& color, float fontSize)
-	{
-		DrawText(text, TextStyle2D{
-			color,
-			{ position.z, Application::Get().GetWindow().GetHeight() - position.y, position.z },
-			{ -1.0f, -1.0f },
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
 	}
 
 }
