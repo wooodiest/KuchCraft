@@ -74,9 +74,10 @@ namespace KuchCraft {
 		uint32_t ChunksToRender = 0;
 
 		Timer RenderTimer;
-		Timer ChunkTimer;
-		Timer WaterTimer;
-		Timer SkyboxTimer;
+		Timer Renderer3DChunkTimer;
+		Timer Renderer3DWaterTimer;
+		Timer Renderer3DQuadsTimer;
+		Timer Renderer3DSkyboxTimer;
 		Timer Renderer2DTimer;
 		Timer Renderer3DTimer;
 

@@ -104,9 +104,10 @@ namespace KuchCraft {
 		if (s_OutlinedCubeData.Status)
 			RenderOutlinedCube();
 
+		Renderer::s_Stats.Renderer3DQuadsTimer.Start();
 		RenderCubes();
-
 		RenderQuads();
+		Renderer::s_Stats.Renderer3DQuadsTimer.Finish();
 
 		RenderWater();
 
@@ -347,7 +348,7 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderChunks()
 	{
-		Renderer::s_Stats.ChunkTimer.Start();
+		Renderer::s_Stats.Renderer3DChunkTimer.Start();
 
 		RendererCommand::DisableBlending();
 		RendererCommand::EnableFaceCulling();
@@ -384,12 +385,12 @@ namespace KuchCraft {
 			}
 		}
 
-		Renderer::s_Stats.ChunkTimer.Finish();
+		Renderer::s_Stats.Renderer3DChunkTimer.Finish();
 	}
 
 	void Renderer3D::RenderSkybox()
 	{
-		Renderer::s_Stats.SkyboxTimer.Start();
+		Renderer::s_Stats.Renderer3DSkyboxTimer.Start();
 
 		RendererCommand::DisableBlending();
 		RendererCommand::EnableFrontFaceCulling();
@@ -406,12 +407,12 @@ namespace KuchCraft {
 		Renderer::s_Stats.DrawCalls++;
 		Renderer::s_Stats.Quads += cube_face_cout;
 
-		Renderer::s_Stats.SkyboxTimer.Finish();
+		Renderer::s_Stats.Renderer3DSkyboxTimer.Finish();
 	}
 
 	void Renderer3D::RenderWater()
 	{
-		Renderer::s_Stats.WaterTimer.Start();
+		Renderer::s_Stats.Renderer3DWaterTimer.Start();
 
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
@@ -440,7 +441,7 @@ namespace KuchCraft {
 			}
 		}
 
-		Renderer::s_Stats.WaterTimer.Finish();
+		Renderer::s_Stats.Renderer3DWaterTimer.Finish();
 	}
 
 	void Renderer3D::RenderOutlinedCube()
