@@ -27,10 +27,6 @@ namespace KuchCraft {
 		static void DrawQuad(const glm::vec3& position, const glm::vec3& rotation, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 
 		static void DrawText(const std::string& text, const TextStyle3D& textStyle);
-		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation);
-		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color);
-		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, float fontSize);
-		static void DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color, float fontSize);
 
 		static void DrawWaterTinted();
 		static void DrawOutlinedCube(const glm::vec3& position, const glm::vec3& size);

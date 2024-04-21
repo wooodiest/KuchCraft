@@ -993,48 +993,4 @@ namespace KuchCraft {
 		s_TextData.Data.emplace_back(text, textStyle);
 	}
 
-	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation)
-	{
-		DrawText(text, TextStyle3D{
-			s_TextInfo.DefaultFontColor,
-			position,
-			rotation,
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color)
-	{
-		DrawText(text, TextStyle3D{
-			color,
-			position,
-			rotation,
-			s_TextInfo.DefaultFontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, float fontSize)
-	{
-		DrawText(text, TextStyle3D{
-			s_TextInfo.DefaultFontColor,
-			position,
-			rotation,
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
-	void Renderer3D::DrawText(const std::string& text, const glm::vec3& position, const glm::vec3& rotation, const glm::vec4& color, float fontSize)
-	{
-		DrawText(text, TextStyle3D{
-			color,
-			position,
-			rotation,
-			fontSize,
-			s_TextInfo.DefaultFontSpacing
-		});
-	}
-
 }

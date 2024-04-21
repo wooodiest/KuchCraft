@@ -115,11 +115,11 @@ namespace KuchCraft {
 
 	struct TextStyle3D
 	{
-		glm::vec4 Color;
-		glm::vec3 Position;
-		glm::vec3 Rotation;
-		float     FontSize;
-		float     FontSpacing;
+		glm::vec4 Color    = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+		float     FontSize    = 1.0f;
+		float     FontSpacing = 1.3f;
 	};
 
 	struct Renderer3DUniformText
