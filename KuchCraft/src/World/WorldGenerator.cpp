@@ -48,7 +48,7 @@ namespace KuchCraft {
 							if (y == s_SeeLevel - 1 || y == s_SeeLevel)
 							{
 								if (peresistance > 1.0)
-									chunk->Items[x][y][z] = Item(ItemType::GrassBlock);
+									chunk->Items[x][y][z] = Item(ItemType::GrassBlock);								
 								else
 									chunk->Items[x][y][z] = Item(ItemType::Sand);
 							}
@@ -70,7 +70,16 @@ namespace KuchCraft {
 						else
 						{
 							if (y == height - 1)
+							{
 								chunk->Items[x][y][z] = Item(ItemType::GrassBlock);
+								if (y < chunk_size_Y - 1 && Random::Float(0.0f, 100.0f) < 2.0f)
+								{
+									if (Random::Float(0.0f, 100.0f) < 90.0f)
+										chunk->Items[x][y + 1][z] = Item(ItemType::Grass);
+									else
+										chunk->Items[x][y + 1][z] = Item((ItemType)Random::UInt(item_foliage_quad_flowers_begin, item_foliage_quad_mushrooms_end));
+								}
+							}
 							else if (y == height - 2)
 								chunk->Items[x][y][z] = Item(ItemType::Dirt);
 							else if (y == height - 3)
