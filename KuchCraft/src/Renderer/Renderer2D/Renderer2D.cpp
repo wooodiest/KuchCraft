@@ -414,38 +414,14 @@ namespace KuchCraft {
 		s_TextData.Shader.Unbind();
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, color);
-	}
+		const auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
 
-	void Renderer2D::DrawQuadN(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height, 0.0f }, size, color);
-	}
-
-	void Renderer2D::DrawQuadNN(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, color);
-	}
-
-	void Renderer2D::DrawQuadN(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height, position.z }, size, color);
-	}
-
-	void Renderer2D::DrawQuadNN(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, color);
-	}
-
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+		glm::mat4 transform = 
+			glm::translate(glm::mat4(1.0f), { info.NormalizedPosition_X ? info.Position.x * width : info.Position.x, info.NormalizedPosition_Y ? info.Position.y * height : info.Position.y, info.Position.z, }) *
+			glm::toMat4(glm::quat(info.Rotation)) * 
+			glm::scale(glm::mat4(1.0f), { info.NormalizedSize_X ? info.Size.x * width : info.Size.x , info.NormalizedSize_Y ? info.Size.y * width : info.Size.y, 1.0f });
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
@@ -458,208 +434,26 @@ namespace KuchCraft {
 		}
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor);
-	}
+		const auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		float textureID = texture.GetRendererID();
 
-	void Renderer2D::DrawQuadN(const glm::vec2& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height,  0.0f }, size, texture, tilingFactor, tintColor);
-	}
+		glm::mat4 transform =
+			glm::translate(glm::mat4(1.0f), { info.NormalizedPosition_X ? info.Position.x * width : info.Position.x, info.NormalizedPosition_Y ? info.Position.y * height : info.Position.y, info.Position.z, }) *
+			glm::toMat4(glm::quat(info.Rotation)) *
+			glm::scale(glm::mat4(1.0f), { info.NormalizedSize_X ? info.Size.x * width : info.Size.x , info.NormalizedSize_Y ? info.Size.y * width : info.Size.y, 1.0f });
 
-	void Renderer2D::DrawQuadNN(const glm::vec2& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height,  0.0f }, { size.x * width, size.y * height }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		float textureID     = texture.GetRendererID();
-
-		for (uint32_t i = 0; i < quad_vertex_count; i++)
-		{
-			Quad2DVertex vertex;
-			vertex.Position     = transform * quad_vertex_positions[i];
-			vertex.Color        = tintColor;
-			vertex.TexCoord     = quad_vertex_tex_coords[i] * tilingFactor;
-			vertex.TexIndex     = textureID; // TexIndex temporarily holds the texture rendererID
-
-			s_QuadData.Vertices.emplace_back(vertex);
-		}
-	}
-
-	void Renderer2D::DrawQuadN(const glm::vec3& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height, position.z }, size, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawQuadNN(const glm::vec3& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
-	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, { 0.0f, 0.0f, rotation }, color);
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, size, { 0.0f, 0.0f, rotation }, color);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, color);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
-	{
-		DrawRotatedQuad(position, size, { 0.0f, 0.0f, rotation }, color);
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, size, { 0.0f, 0.0f, rotation }, color);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, color);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
-	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, size, rotation, color);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, rotation, color);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::toMat4(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
 			Quad2DVertex vertex;
 			vertex.Position = transform * quad_vertex_positions[i];
-			vertex.Color    = color;
-			vertex.TexCoord = quad_vertex_tex_coords[i];
+			vertex.Color    = tintColor;
+			vertex.TexCoord = quad_vertex_tex_coords[i] * tilingFactor;
+			vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, size, rotation, color);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, rotation, color);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec2& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, size, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		DrawRotatedQuad(position, size, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec3& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, size, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, float rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, { 0.0f, 0.0f, rotation }, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, 0.0f }, { size.x * width, size.y * height }, rotation, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::toMat4(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-		float textureID     = texture.GetRendererID();
-
-		for (uint32_t i = 0; i < quad_vertex_count; i++)
-		{
-			Quad2DVertex vertex;
-			vertex.Position     = transform * quad_vertex_positions[i];
-			vertex.Color        = tintColor;
-			vertex.TexCoord     = quad_vertex_tex_coords[i] * tilingFactor;
-			vertex.TexIndex     = textureID; // TexIndex temporarily holds the texture rendererID
-
-			s_QuadData.Vertices.emplace_back(vertex);
-		}
-	}
-
-	void Renderer2D::DrawRotatedQuadN(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, size, rotation, texture, tilingFactor, tintColor);
-	}
-
-	void Renderer2D::DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
-	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-		DrawRotatedQuad({ position.x * width, position.y * height, position.z }, { size.x * width, size.y * height }, rotation, texture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle)

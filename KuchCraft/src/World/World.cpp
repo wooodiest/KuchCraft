@@ -143,77 +143,7 @@ namespace KuchCraft {
 
 		// Renderer draw commands
 		Renderer3D::DrawChunks(m_ChunksToUpdate);
-
 		Renderer2D::DrawTextTopLeft(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), { 5.0f, 5.0f });
-
-		// Tmp, example
-		{
-			// Cubes/ lines
-			Renderer3D::DrawItem({ 2000.0f, 62.0f, 2000.0f }, Item(ItemType::NoneBlock, ItemRotation::Deg90));
-			
-			Renderer3D::DrawCube({ 2000.0f, 70.0f, 2000.0f }, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
-			Renderer3D::DrawCube({ 2000.0f, 80.0f, 2000.0f }, { 0.0f ,0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetHeartFullTexture());
-				
-			Renderer3D::DrawLine({ 2000.0f, 65.0f, 2000.0f }, { 1940.0f, 70.0f, 1970.0f }, { 1.0f, 0.0f, 0.0f, 1.0f });
-			
-			// 3D quads
-			static glm::vec3 quadRotation{ 0.0f, 0.0f, 0.0f };
-			quadRotation.y += glm::radians(45.0f) * dt;
-			Renderer3D::DrawQuad({ 2000.0f, 65.0f, 2000.0f }, quadRotation, { 2.0f, 0.5f }, { 1.0f, 0.0f, 0.0f, 1.0f });
-			
-			static glm::vec3 texturedQuadRotation{ 0.0f, 0.0f, 0.0f };
-			texturedQuadRotation.y -= glm::radians(45.0f) * dt;
-			texturedQuadRotation.x += glm::radians(30.0f) * dt;
-			Renderer3D::DrawQuad({ 1995.0f, 65.0f, 1990.0f }, texturedQuadRotation, { 2.0f, 1.0f }, AssetManager::GetItemTexture(ItemType::DiamondOre));
-			
-			static glm::vec3 fontRotation{ 0.0f, glm::radians(90.0f), 0.0f};
-			fontRotation.y += glm::radians(10.0f) * dt;
-			Renderer3D::DrawText("JD2000", { 1940.0f, 70.0f, 1970.0f }, fontRotation, { 1.0f, 0.0f, 1.0f, 1.0 }, 3.0f);
-			
-			// Rendere2D: some ui
-			auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
-
-			Renderer2D::DrawQuad({ 150.0f, height - 150.0f, 0.0f }, { 150.0f, 150.0f }, { 1.0f, 1.0f, 1.0f, 0.5f });
-
-			glm::vec3 hotbarPosition{ 0.5f * width, 33.0f, 1.0f };
-			Renderer2D::DrawQuad(hotbarPosition, { 273.0f, 33.0f }, AssetManager::GetHotbarTexture());
-
-			glm::vec3 hotbarSelectionPosition{ 0.5f * width - 3 * 60.0f, 34.0f, 1.0f };
-			Renderer2D::DrawQuad(hotbarSelectionPosition, { 33.0f, 33.0f }, AssetManager::GetHotbarSelectionTexture());
-
-			Renderer2D::DrawQuadN({ 0.5f, 0.5f, 1.0f }, { 15.0f, 15.0f }, AssetManager::GetCrosshairTexture());
-
-			// Hearts
-			glm::vec3 heartInitialPosition{ 0.5f * width - 273.0f, 80.0f, 1.0f };
-
-			for (float i = 0; i < 10; i++)
-			{
-				if (i < 6)
-					Renderer2D::DrawQuad({ heartInitialPosition.x + i * 2 * 11.0f + 13.0f, heartInitialPosition.y , 1.0f }, { 13.0f, 13.0f }, AssetManager::GetHeartFullTexture());
-				else
-					Renderer2D::DrawQuad({ heartInitialPosition.x + i * 2 * 11.0f + 13.0f, heartInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetHeartEmptyTexture());
-			}
-
-			// Armor
-			glm::vec3 armorInitialPosition{ 0.5f * width - 273.0f, 105.0f, 1.0f };
-			for (float i = 0; i < 10; i++)
-			{
-				if (i < 3)
-					Renderer2D::DrawQuad({ armorInitialPosition.x + i * 2 * 11.0f + 13.0f, armorInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetArmorFullTexture());
-				else
-					Renderer2D::DrawQuad({ armorInitialPosition.x + i * 2 * 11.0f + 13.0f, armorInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetArmorEmptyTexture());
-			}
-
-			// Food
-			glm::vec3 foodInitialPosition{ 0.5f * width + 273.0f, 80.0f, 1.0f };
-			for (float i = 0; i < 10; i++)
-			{
-				if (i < 6)
-					Renderer2D::DrawQuad({ foodInitialPosition.x - i * 2 * 11.0f - 13.0f, foodInitialPosition.y , 1.0f }, { 10.0f, 10.0f }, AssetManager::GetFoodEmptyTexture());
-				else
-					Renderer2D::DrawQuad({ foodInitialPosition.x - i * 2 * 11.0f - 13.0f, foodInitialPosition.y , 1.0f }, { 13.0f, 13.0f }, AssetManager::GetFoodFullTexture());
-			}
-		}
 	}
 
 	void World::SetItem(const glm::vec3& position, const Item& block)

@@ -5,7 +5,10 @@
 
 #include "Renderer/Renderer.h"
 #include "Renderer/Renderer3D/Renderer3D.h"
+#include "Renderer/Renderer2D/Renderer2D.h"
+#include "Renderer/AssetManager.h"
 
+#include "Core/Application.h"
 #include "Core/Random.h"
 #include "Core/Core.h"
 #include "Core/Log.h"
@@ -112,6 +115,8 @@ namespace KuchCraft {
 
 		if (m_TargetedItem.Targeted)
 			Renderer3D::DrawOutlinedCube(m_TargetedItem.Position, m_TargetedItem.Size);
+
+		ShowExampleUI();
 	}
 
 	void Player::OnEvent(Event& event)
@@ -128,9 +133,9 @@ namespace KuchCraft {
 		std::string gameMode;
 		switch (m_GameMode)
 		{
-			case KuchCraft::GameMode::Survival:  gameMode = "Survival";  break;
-			case KuchCraft::GameMode::Creative:  gameMode = "Creative";  break;
-			case KuchCraft::GameMode::Spectator: gameMode = "Spectator"; break;
+			case GameMode::Survival:  gameMode = "Survival";  break;
+			case GameMode::Creative:  gameMode = "Creative";  break;
+			case GameMode::Spectator: gameMode = "Spectator"; break;
 		}
 
 		m_DebugText =
@@ -189,6 +194,124 @@ namespace KuchCraft {
 			}
 		}
 		return outputTargetedItemInfo;
+	}
+
+	void Player::ShowExampleUI()
+	{
+		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+
+#if 0
+		{
+			Renderer2DQuadInfo textDebugQuadInfo;
+			textDebugQuadInfo.Position = { 150.0f, height - 150.0f, 0.0f };
+			textDebugQuadInfo.Size     = { 150.0f, 150.0f };
+			Renderer2D::DrawQuad(textDebugQuadInfo, { 1.0f, 1.0f, 1.0f, 0.5f });
+		}
+#endif
+		if (m_GameMode != GameMode::Spectator)
+		{
+			Renderer2DQuadInfo hotbarQuadInfo;
+			hotbarQuadInfo.Position = { 0.5f, 33.0f, 0.0f };
+			hotbarQuadInfo.Size     = { 273.0f, 33.0f };
+			hotbarQuadInfo.NormalizedPosition_X = true;
+			Renderer2D::DrawQuad(hotbarQuadInfo, AssetManager::GetHotbarTexture());
+
+			Renderer2DQuadInfo hotbarSelectionQuadInfo;
+			hotbarSelectionQuadInfo.Position = { 0.5f * width - 3 * 60.0f, 34.0f, 1.0f };
+			hotbarSelectionQuadInfo.Size     = { 33.0f, 33.0f };
+			Renderer2D::DrawQuad(hotbarSelectionQuadInfo, AssetManager::GetHotbarSelectionTexture());
+
+			Renderer2DQuadInfo crosshairQuadInfo;
+			crosshairQuadInfo.Position = { 0.5f, 0.5f, 1.0f };
+			crosshairQuadInfo.Size     = { 15.0f, 15.0f };
+			crosshairQuadInfo.NormalizedPosition_X = true;
+			crosshairQuadInfo.NormalizedPosition_Y = true;
+			Renderer2D::DrawQuad(crosshairQuadInfo, AssetManager::GetCrosshairTexture());
+		}
+
+		if (m_GameMode == GameMode::Survival)
+		{
+			Renderer2DQuadInfo fullHeartQuadInfo;
+			fullHeartQuadInfo.Size = { 13.0f, 13.0f };
+			Texture2D& fullHeartTexture = AssetManager::GetHeartFullTexture();
+
+			Renderer2DQuadInfo emptyHeartQuadInfo;
+			emptyHeartQuadInfo.Size = { 10.0f, 10.0f };
+			Texture2D& emptyHeartTexture = AssetManager::GetHeartEmptyTexture();
+
+			glm::vec3 initialHeartPosition = { 0.5f * width - 273.0f, 80.0f, 1.0f };
+
+			constexpr uint32_t heart_count      = 10;
+			constexpr uint32_t full_heart_count = 6;
+
+			for (uint32_t i = 0; i < heart_count; i++)
+			{
+				if (i < full_heart_count)
+				{
+					fullHeartQuadInfo.Position = { initialHeartPosition.x + i * 2 * 11.0f + 13.0f, initialHeartPosition.y , 1.0f };
+					Renderer2D::DrawQuad(fullHeartQuadInfo, fullHeartTexture);
+				}
+				else
+				{
+					emptyHeartQuadInfo.Position = { initialHeartPosition.x + i * 2 * 11.0f + 13.0f, initialHeartPosition.y , 1.0f };
+					Renderer2D::DrawQuad(emptyHeartQuadInfo, emptyHeartTexture);
+				}
+			}
+		
+			Renderer2DQuadInfo fullArmorQuadInfo;
+			fullArmorQuadInfo.Size = { 10.0f, 10.0f };
+			Texture2D& fullArmorTexture = AssetManager::GetArmorFullTexture();
+
+			Renderer2DQuadInfo emptyArmorQuadInfo;
+			emptyArmorQuadInfo.Size = { 10.0f, 10.0f };
+			Texture2D& emptyArmorTexture = AssetManager::GetArmorEmptyTexture();
+
+			glm::vec3 initialArmorPosition = { 0.5f * width - 273.0f, 105.0f, 1.0f };
+
+			constexpr uint32_t armor_count      = 10;
+			constexpr uint32_t full_armor_count = 3;
+
+			for (uint32_t i = 0; i < armor_count; i++)
+			{
+				if (i < full_armor_count)
+				{
+					fullArmorQuadInfo.Position = { initialArmorPosition.x + i * 2 * 11.0f + 13.0f, initialArmorPosition.y , 1.0f };
+					Renderer2D::DrawQuad(fullArmorQuadInfo, fullArmorTexture);
+				}
+				else
+				{
+					emptyArmorQuadInfo.Position = { initialArmorPosition.x + i * 2 * 11.0f + 13.0f, initialArmorPosition.y , 1.0f };
+					Renderer2D::DrawQuad(emptyArmorQuadInfo, emptyArmorTexture);
+				}
+			}
+		
+			Renderer2DQuadInfo fullFoodQuadInfo;
+			fullFoodQuadInfo.Size = { 13.0f, 13.0f };
+			Texture2D& fullFoodTexture = AssetManager::GetFoodFullTexture();
+
+			Renderer2DQuadInfo emptyFoodQuadInfo;
+			emptyFoodQuadInfo.Size = { 10.0f, 10.0f };
+			Texture2D& emptyFoodTexture = AssetManager::GetFoodEmptyTexture();
+
+			glm::vec3 initialFoodPosition = { 0.5f * width + 273.0f, 80.0f, 1.0f };
+
+			constexpr uint32_t food_count      = 10;
+			constexpr uint32_t full_food_count = 6;
+
+			for (uint32_t i = 0; i < food_count; i++)
+			{
+				if (i < full_food_count)
+				{
+					fullFoodQuadInfo.Position = { initialFoodPosition.x - i * 2 * 11.0f - 13.0f, initialFoodPosition.y , 1.0f };
+					Renderer2D::DrawQuad(fullFoodQuadInfo, fullFoodTexture);
+				}
+				else
+				{
+					emptyFoodQuadInfo.Position = { initialFoodPosition.x - i * 2 * 11.0f - 13.0f, initialFoodPosition.y , 1.0f };
+					Renderer2D::DrawQuad(emptyFoodQuadInfo, emptyFoodTexture);
+				}
+			}
+		}
 	}
 
 	bool Player::OnKeyPressed(KeyPressedEvent& e)
@@ -301,18 +424,18 @@ namespace KuchCraft {
 		m_GameMode = gameMode;
 		switch (m_GameMode)
 		{
-			case KuchCraft::GameMode::Survival:
+			case GameMode::Survival:
 			{
 				m_PhysicsBody.SetFlyingStatus(false);
 				m_PhysicsBody.SetCollidingStatus(true);
 				break;
 			}
-			case KuchCraft::GameMode::Creative:
+			case GameMode::Creative:
 			{
 				m_PhysicsBody.SetCollidingStatus(true);
 				break;
 			}
-			case KuchCraft::GameMode::Spectator:
+			case GameMode::Spectator:
 			{
 				m_PhysicsBody.SetFlyingStatus(true);
 				m_PhysicsBody.SetCollidingStatus(false);

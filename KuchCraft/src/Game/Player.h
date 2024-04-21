@@ -63,6 +63,8 @@ namespace KuchCraft {
 
 		TargetedItemInfo GetTargetItemInfo();
 
+		void ShowExampleUI();
+
 	private:
 		glm::vec3 m_Position{ 0.0f };
 		glm::vec2 m_Rotation{ 0.0f }; // yaw, pitch

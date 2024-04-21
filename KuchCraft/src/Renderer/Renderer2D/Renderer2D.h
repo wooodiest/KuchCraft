@@ -16,56 +16,8 @@ namespace KuchCraft {
 	class Renderer2D
 	{
 	public:
-		// Quads
-		// N  - normalized position
-		// NN - normalized position and size
-		static void DrawQuad  (const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
-		static void DrawQuadN (const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
-		static void DrawQuadNN(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
-
-		static void DrawQuad  (const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
-		static void DrawQuadN (const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
-		static void DrawQuadNN(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
-
-		static void DrawQuad  (const glm::vec2& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawQuadN (const glm::vec2& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawQuadNN(const glm::vec2& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-
-		static void DrawQuad  (const glm::vec3& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawQuadN (const glm::vec3& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawQuadNN(const glm::vec3& position, const glm::vec2& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-
-		static void DrawRotatedQuad  (const glm::vec2& position, const glm::vec2& size,            float rotation, const glm::vec4& color);
-		static void DrawRotatedQuadN (const glm::vec2& position, const glm::vec2& size,            float rotation, const glm::vec4& color);
-		static void DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size,            float rotation, const glm::vec4& color);
-																					               
-		static void DrawRotatedQuad  (const glm::vec3& position, const glm::vec2& size,            float rotation, const glm::vec4& color);
-		static void DrawRotatedQuadN (const glm::vec3& position, const glm::vec2& size,            float rotation, const glm::vec4& color);
-		static void DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size,            float rotation, const glm::vec4& color);
-
-		static void DrawRotatedQuad  (const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color);
-		static void DrawRotatedQuadN (const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color);
-		static void DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color);
-
-		static void DrawRotatedQuad  (const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color);
-		static void DrawRotatedQuadN (const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color);
-		static void DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const glm::vec4& color);
-
-		static void DrawRotatedQuad  (const glm::vec2& position, const glm::vec2& size,            float rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadN (const glm::vec2& position, const glm::vec2& size,            float rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size,            float rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-
-		static void DrawRotatedQuad  (const glm::vec3& position, const glm::vec2& size,            float rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadN (const glm::vec3& position, const glm::vec2& size,            float rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size,            float rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-
-		static void DrawRotatedQuad  (const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadN (const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadNN(const glm::vec2& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-
-		static void DrawRotatedQuad  (const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadN (const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
-		static void DrawRotatedQuadNN(const glm::vec3& position, const glm::vec2& size, const glm::vec3& rotation, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
+		static void DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color);
+		static void DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 
 		// Text
 		// (0, 0) is bottom left corner
