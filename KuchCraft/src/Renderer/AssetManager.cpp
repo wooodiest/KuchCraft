@@ -1,8 +1,6 @@
 #include "kcpch.h"
 #include "Renderer/AssetManager.h"
 
-#include "Core/Utils.h"
-
 namespace KuchCraft {
 
 	AssetManagerBlockData AssetManager::s_BlockData;

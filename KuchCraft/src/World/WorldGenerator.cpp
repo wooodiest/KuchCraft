@@ -1,8 +1,6 @@
 #include "kcpch.h"
 #include "World/WorldGenerator.h"
 
-#include "Core/Random.h"
-
 namespace KuchCraft {
 
 	siv::PerlinNoise::seed_type WorldGenerator::s_Seed;

@@ -9,7 +9,6 @@
 #include "Renderer/Data/Shader.h"
 
 #include "Core/Application.h"
-#include "Core/Utils.h"
 
 #include "World/World.h"
 

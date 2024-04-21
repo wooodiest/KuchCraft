@@ -2,7 +2,6 @@
 #include "Renderer/Renderer3D/Renderer3D.h"
 
 #include "Core/Application.h"
-#include "Core/Utils.h"
 
 #include "Renderer/Renderer.h"
 #include "Renderer/AssetManager.h"
