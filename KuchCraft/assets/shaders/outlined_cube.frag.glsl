@@ -1,6 +1,6 @@
 #version 450 core
 
-layout (location = 0) out vec4 color;
+layout (location = 0) out vec4 Color;
 
 in vec2 v_TexCoord;
 
@@ -14,5 +14,5 @@ void main()
 		discard;
 	}
 		
-	color = vec4(#outlined_block_border_color);
+	Color = vec4(#outlined_block_border_color);
 }
