@@ -144,8 +144,6 @@ namespace KuchCraft {
 	{
 		std::string FontPath           = "assets/fonts/Roboto-Regular.ttf";
 		glm::vec4   DefaultFontColor   = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float       DefaultFontSize    = 1.0f;
-		float       DefaultFontSpacing = 1.3f;
 
 		uint32_t MaxCharacterUniformArrayLimit = 400;
 		uint32_t FontTextureSize               = 512;
