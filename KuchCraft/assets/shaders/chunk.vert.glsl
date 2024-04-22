@@ -1,7 +1,7 @@
 #version 450 core
 
-#include "assets/shaders/chunk_info.glsl"
-#include "assets/shaders/utils/matrix_transformations.glsl"
+#include "chunk_info.glsl"
+#include "utils/matrix_transformations.glsl"
 
 layout (location = 0) in uint a_PackedData;
 

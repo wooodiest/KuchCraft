@@ -174,7 +174,7 @@ namespace KuchCraft {
 				return;
 			}
 
-			std::string includePath = file.substr(pos + includeDirective.length(), endPos - (pos + includeDirective.length()));
+			std::string includePath = "assets/shaders/" + file.substr(pos + includeDirective.length(), endPos - (pos + includeDirective.length()));
 			std::string includeContent = ReadFile(includePath);
 
 			file.replace(pos, endPos + 1 - pos, includeContent);
