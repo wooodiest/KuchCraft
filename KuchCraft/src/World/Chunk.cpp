@@ -47,189 +47,37 @@ namespace KuchCraft {
 					}
 
 					// We don't always have to, or even it's dangerous, to check all surrounding blocks
-					bool checkBottom = true, checkTop    = true;
-					bool checkFront  = true, checkBehind = true;
-					bool checkRight  = true, checkLeft   = true;
+					bool checkBottom = (y > 0);
+					bool checkTop    = (y < chunk_size_Y - 1);
+					bool checkFront  = (z < chunk_size_XZ - 1);
+					bool checkBehind = (z > 0);
+					bool checkRight  = (x < chunk_size_XZ - 1);
+					bool checkLeft   = (x > 0);
 
-					// check edge cases
-					if (y == 0)
-						checkBottom = false;
-					else if (y == chunk_size_Y - 1)
-						checkTop = false;
+					if (!checkLeft  && leftChunk)
+						AddToDrawList({ x, y, z }, leftChunk->Items[chunk_size_XZ - 1][y][z],   vertices_left_index,   isWater);
+					if (!checkRight && rightChunk)											    					   
+						AddToDrawList({ x, y, z }, rightChunk->Items[0][y][z],                  vertices_right_index,  isWater);
 
-					if (x == 0)
-					{
-						checkLeft = false;
-						if (leftChunk)
-						{
-							Item leftItem      = leftChunk->Items[chunk_size_XZ - 1][y][z];
-							bool isTranslucent = leftItem.IsTranslucent();
-							if (isTranslucent)
-							{
-								if (isWater)
-								{
-									if (leftItem.Type != ItemType::Water)
-										m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_left_index);
-								}
-								else
-									m_DrawList.AddSolid({ x, y, z }, vertices_left_index, Items[x][y][z]);
-							}
-						}
-					}
-					else if (x == chunk_size_XZ - 1)
-					{
-						checkRight = false;
-						if (rightChunk)
-						{
-							Item rightItem     = rightChunk->Items[0][y][z];
-							bool isTranslucent = rightItem.IsTranslucent();
-							if (isTranslucent)
-							{
-								if (isWater)
-								{
-									if (rightItem.Type != ItemType::Water)
-										m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_right_index);
-								}
-								else
-									m_DrawList.AddSolid({ x, y, z }, vertices_right_index, Items[x][y][z]);
-							}
-						}
-					}
-
-					if (z == 0)
-					{
-						checkBehind = false;
-						if (behindChunk)
-						{
-							Item behindItem    = behindChunk->Items[x][y][chunk_size_XZ - 1];
-							bool isTranslucent = behindItem.IsTranslucent();
-							if (isTranslucent)
-							{
-								if (isWater)
-								{
-									if (behindItem.Type != ItemType::Water)
-										m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_behind_index);
-								}
-								else
-									m_DrawList.AddSolid({ x, y, z }, vertices_behind_index, Items[x][y][z]);
-							}
-						}
-					}
-					else if (z == chunk_size_XZ - 1)
-					{
-						checkFront = false;
-						if (frontChunk)
-						{
-							Item frontItem     = frontChunk->Items[x][y][0];
-							bool isTranslucent = frontItem.IsTranslucent();
-							if (isTranslucent)
-							{
-								if (isWater)
-								{
-									if (frontItem.Type != ItemType::Water)
-										m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_front_index);
-								}
-								else
-									m_DrawList.AddSolid({ x, y, z }, vertices_front_index, Items[x][y][z]);
-							}
-						}
-					}
+					if (!checkBehind && behindChunk)
+						AddToDrawList({ x, y, z }, behindChunk->Items[x][y][chunk_size_XZ - 1], vertices_behind_index, isWater);
+					if (!checkFront  && frontChunk)
+						AddToDrawList({ x, y, z }, frontChunk->Items[x][y][0],                  vertices_front_index,  isWater);
 
 					if (checkBottom)
-					{
-						Item bottomItem    = Items[x][y - 1][z];
-						bool isTranslucent = bottomItem.IsTranslucent();
-						if (isTranslucent)
-						{
-							if (isWater)
-							{
-								if (bottomItem.Type != ItemType::Water)
-									m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_bottom_index);
-							}
-							else
-								m_DrawList.AddSolid({ x, y, z }, vertices_bottom_index, Items[x][y][z]);
-						}
-					}
-					
+						AddToDrawList({ x, y, z }, Items[x][y - 1][z], vertices_bottom_index, isWater);				
 					if (checkTop)
-					{
-						Item topItem       = Items[x][y + 1][z];
-						bool isTranslucent = topItem.IsTranslucent();
-						if (isTranslucent)
-						{
-							if (isWater)
-							{
-								if (topItem.Type != ItemType::Water)
-									m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_top_index);
-							}
-							else
-								m_DrawList.AddSolid({ x, y, z }, vertices_top_index, Items[x][y][z]);
-						}
-					}
+						AddToDrawList({ x, y, z }, Items[x][y + 1][z], vertices_top_index,    isWater);
 				
 					if (checkBehind)
-					{
-						Item behindItem    = Items[x][y][z - 1];
-						bool isTranslucent = behindItem.IsTranslucent();
-						if (isTranslucent)
-						{
-							if (isWater)
-							{
-								if (behindItem.Type != ItemType::Water)
-									m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_behind_index);
-							}
-							else
-								m_DrawList.AddSolid({ x, y, z }, vertices_behind_index, Items[x][y][z]);
-						}
-					}
-
+						AddToDrawList({ x, y, z }, Items[x][y][z - 1], vertices_behind_index, isWater);			
 					if (checkFront)
-					{
-						Item frontItem     = Items[x][y][z + 1];
-						bool isTranslucent = frontItem.IsTranslucent();
-						if (isTranslucent)
-						{
-							if (isWater)
-							{
-								if (frontItem.Type != ItemType::Water)
-									m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_front_index);
-							}
-							else
-								m_DrawList.AddSolid({ x, y, z }, vertices_front_index, Items[x][y][z]);
-						}
-					}
+						AddToDrawList({ x, y, z }, Items[x][y][z + 1], vertices_front_index,  isWater);
 
 					if (checkLeft)
-					{
-						Item leftItem      = Items[x - 1][y][z];
-						bool isTranslucent = leftItem.IsTranslucent();
-						if (isTranslucent)
-						{
-							if (isWater)
-							{
-								if (leftItem.Type != ItemType::Water)
-									m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_left_index);
-							}
-							else
-								m_DrawList.AddSolid({ x, y, z }, vertices_left_index, Items[x][y][z]);
-						}
-					}
-
+						AddToDrawList({ x, y, z }, Items[x - 1][y][z], vertices_left_index,   isWater);
 					if (checkRight)
-					{
-						Item rightItem     = Items[x + 1][y][z];
-						bool isTranslucent = rightItem.IsTranslucent();
-						if (isTranslucent)
-						{
-							if (isWater)
-							{
-								if (rightItem.Type != ItemType::Water)
-									m_DrawList.AddWater({ m_Position.x + x, m_Position.y + y, m_Position.z + z }, vertices_right_index);
-							}
-							else
-								m_DrawList.AddSolid({ x, y, z }, vertices_right_index, Items[x][y][z]);
-						}
-					}			
+						AddToDrawList({ x, y, z }, Items[x + 1][y][z], vertices_right_index,  isWater);			
 				}
 			}
 		}			
@@ -258,6 +106,20 @@ namespace KuchCraft {
 	Chunk* Chunk::Create(const glm::vec3& position)
 	{
 		return new Chunk(CalculatePosition(position));
+	}
+
+	void Chunk::AddToDrawList(const glm::ivec3& position, Item neighbourItem, uint32_t verticesIndex, bool isWater)
+	{
+		if (neighbourItem.IsTranslucent())
+		{
+			if (isWater)
+			{
+				if (neighbourItem.Type != ItemType::Water)
+					m_DrawList.AddWater(m_Position + glm::vec3{ position }, verticesIndex);
+			}
+			else
+				m_DrawList.AddSolid(position, verticesIndex, Items[position.x][position.y][position.z]);
+		}
 	}
 
 }
