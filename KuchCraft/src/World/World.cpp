@@ -154,6 +154,9 @@ namespace KuchCraft {
 		Chunk* chunk = GetChunk(position);
 		if (chunk)
 		{
+			if (position.y >= chunk_size_Y || position.y < 0)
+				return;
+
 			const int x = static_cast<int>(std::fmod(position.x, chunk_size_XZ ));
 			const int y = static_cast<int>(std::fmod(position.y, chunk_size_Y  ));
 			const int z = static_cast<int>(std::fmod(position.z, chunk_size_XZ ));

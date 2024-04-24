@@ -64,6 +64,9 @@ namespace KuchCraft {
 					if (!checkFront  && frontChunk)
 						AddToDrawList({ x, y, z }, frontChunk->Items[x][y][0],                  vertices_front_index,  isWater);
 
+					if (!checkTop)
+						AddToDrawList({ x, y, z }, Item(ItemType::Air), vertices_top_index, isWater);
+
 					if (checkBottom)
 						AddToDrawList({ x, y, z }, Items[x][y - 1][z], vertices_bottom_index, isWater);				
 					if (checkTop)
