@@ -4,6 +4,7 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/AssetManager.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Renderer3D/Renderer3DData.h"
 
 namespace KuchCraft {
 
@@ -17,9 +18,9 @@ namespace KuchCraft {
 		m_Textures.  clear();
 		m_VertexData.clear();
 
-		m_WaterVertices.clear();
-
 		m_FoliageQuadVertices.clear();
+
+		m_TransparentQuadVertices .clear();
 	}
 
 	void ChunkDrawList::StartRecreating()
@@ -34,14 +35,14 @@ namespace KuchCraft {
 		m_Textures.reserve(Renderer::GetInfo().MaxTextureSlots);
 
 		m_IndexCount.clear();
-		m_IndexCount.reserve(chunk_size_XZ * chunk_size_XZ * chunk_size_Y * cube_index_count);
+		m_IndexCount.reserve(3);
 		m_IndexCount.push_back(0);
 
-		m_WaterVertices.clear();
-		m_WaterVertices.reserve(chunk_size_XZ * chunk_size_XZ);
-
 		m_FoliageQuadVertices.clear();
-		m_FoliageQuadVertices.reserve(chunk_size_XZ * chunk_size_XZ);
+		m_FoliageQuadVertices.reserve(chunk_size_XZ * chunk_size_XZ * quad_vertex_count);
+
+		m_TransparentQuadVertices.clear();
+		m_TransparentQuadVertices.reserve(chunk_size_XZ * chunk_size_XZ * quad_vertex_count);
 	}
 
 	void ChunkDrawList::EndRecreating()
@@ -52,7 +53,6 @@ namespace KuchCraft {
 		m_VertexData.   shrink_to_fit();
 		m_IndexCount.   shrink_to_fit();
 		m_Textures.     shrink_to_fit();
-		m_WaterVertices.shrink_to_fit();
 	}
 
 	uint32_t ChunkDrawList::GetTextureCount(uint32_t drawCallIndex) const
@@ -134,6 +134,40 @@ namespace KuchCraft {
 		UpdateIndexCount();
 	}
 
+	void ChunkDrawList::AddTransparent(const glm::vec3& position, const Item& item)
+	{
+		float texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position + glm::vec3{0.5f, 0.5f, 0.5f}) * 
+			glm::toMat4(glm::quat(glm::vec3{0.0f, -glm::radians(90.0f * (float)item.Rotation), 0.0f}));
+
+		for (uint32_t i = 0; i < cube_vertex_count; i++)
+		{
+			TransparentQuad3DVertex vertex;
+			vertex.Position = transform * cube_vertices[i].Position;
+			vertex.TexCoord = cube_vertices[i].UV;
+			vertex.TexIndex = texture;
+
+			m_TransparentQuadVertices.emplace_back(vertex);
+		}
+	}
+
+	void ChunkDrawList::AddWater(const glm::vec3& position, uint32_t verticesIndex)
+	{
+		float texture = AssetManager::GetItemTexture(ItemType::Water).GetRendererID();
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
+
+		for (uint32_t i = 0; i < quad_vertex_count; i++)
+		{
+			TransparentQuad3DVertex vertex;
+			vertex.Position = transform * glm::vec4(block_vertices[verticesIndex * quad_vertex_count + i].Position, 1.0f);
+			vertex.TexCoord = block_vertices[verticesIndex * quad_vertex_count + i].TexCoord;
+			vertex.TexIndex = texture;
+
+			m_TransparentQuadVertices.emplace_back(vertex);
+		}
+	}
+
 	void ChunkDrawList::AddFoliageQuad(const glm::vec3& position, const Item& item)
 	{
 		float texture     = AssetManager::GetItemTexture(item.Type).GetRendererID();
@@ -158,7 +192,6 @@ namespace KuchCraft {
 			m_FoliageQuadVertices.emplace_back(vertex);
 		}
 
-
 		// quad -> 2
 		glm::mat4 rotation2      = glm::toMat4(glm::quat(glm::vec3({ 0.0f, glm::radians(45.0f + 90.0f) + offsets.y, 0.0f })));
 		glm::mat4 quadTransform2 = glm::translate(glm::mat4(1.0f), position + glm::vec3{ 0.5f + offsets.x, 0.5f, 0.5f + offsets.z }) *
@@ -176,17 +209,6 @@ namespace KuchCraft {
 			vertex.TexIndex = texture;
 
 			m_FoliageQuadVertices.emplace_back(vertex);
-		}
-	}
-
-	void ChunkDrawList::AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count])
-	{
-		for (int i = 0; i < quad_vertex_count; i++)
-		{
-			m_WaterVertices.emplace_back(Vertex_P3C2{
-					glm::vec3(model * glm::vec4(vertices[i].Position.x, vertices[i].Position.y, vertices[i].Position.z, 1.0f)),
-					glm::vec2(vertices[i].TexCoord.x, vertices[i].TexCoord.y)
-				});
 		}
 	}
 

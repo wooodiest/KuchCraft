@@ -11,17 +11,17 @@
 
 namespace KuchCraft {
 
-	Renderer3DData              Renderer3D::s_Data;
-	Renderer3DInfo              Renderer3D::s_Info;
-	Renderer3DChunkData         Renderer3D::s_ChunkData;
-	Renderer3DSkyboxData        Renderer3D::s_SkyboxData;
-	Renderer3DWaterData         Renderer3D::s_WaterData;
-	Renderer3DOutlinedCubeData  Renderer3D::s_OutlinedCubeData;
-	Renderer3DTintedData        Renderer3D::s_TintedData;
-	Renderer3DQuadData          Renderer3D::s_QuadData;
-	Renderer3DCubeData          Renderer3D::s_CubeData;
-	Renderer3DTextInfo          Renderer3D::s_TextInfo;
-	Renderer3DTextData          Renderer3D::s_TextData;
+	Renderer3DData                Renderer3D::s_Data;
+	Renderer3DInfo                Renderer3D::s_Info;
+	Renderer3DChunkData           Renderer3D::s_ChunkData;
+	Renderer3DSkyboxData          Renderer3D::s_SkyboxData;
+	Renderer3DOutlinedCubeData    Renderer3D::s_OutlinedCubeData;
+	Renderer3DTintedData          Renderer3D::s_TintedData;
+	Renderer3DQuadData            Renderer3D::s_QuadData;
+	Renderer3DCubeData            Renderer3D::s_CubeData;
+	Renderer3DTextInfo            Renderer3D::s_TextInfo;
+	Renderer3DTextData            Renderer3D::s_TextData;
+	Renderer3DTransparentQuadData Renderer3D::s_TransparentQuadData;
 
 	void Renderer3D::Init()
 	{
@@ -29,12 +29,12 @@ namespace KuchCraft {
 
 		PrepareChunks();
 		PrepareSkybox();
-		PrepareWater();
 		PrepareOutlinedCube();
 		PrepareTinted();
 		PrepareTextRendering();
 		PrepareQuads();
 		PrepareCubes();
+		PrepareTransparentQuads();
 
 		// QuadIndexBuffer
 		uint32_t  indexBufferElementCount = s_Info.MaxIndices > max_indices_in_chunk ? s_Info.MaxIndices : max_indices_in_chunk;
@@ -73,8 +73,10 @@ namespace KuchCraft {
 
 	void Renderer3D::ShutDown()
 	{
+		// TODO: Get rid of this
 		delete s_QuadData.TextureSlots;
 		delete s_CubeData.TextureSlots;
+		delete s_TransparentQuadData.TextureSlots;
 	}
 
 	void Renderer3D::LoadRenderer3DInfo()
@@ -93,6 +95,9 @@ namespace KuchCraft {
 		{
 			const auto& foliageVertices = chunk->GetDrawList().GetFoliageQuadVertices();
 			s_QuadData.Vertices.insert(s_QuadData.Vertices.end(), foliageVertices.begin(), foliageVertices.end());
+
+			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
+			s_TransparentQuadData.Vertices.insert(s_TransparentQuadData.Vertices.end(), transparentVertices.begin(), transparentVertices.end());
 		}
 
 		s_Data.RenderFrameBuffer.BindAndClear();
@@ -108,7 +113,7 @@ namespace KuchCraft {
 		RenderQuads();
 		Renderer::s_Stats.Renderer3DQuadsTimer.Finish();
 
-		RenderWater();
+		RenderTransparentQuads();
 
 		RenderText(); // TODO: think of place to put this and fix depth testing issues
 
@@ -130,6 +135,8 @@ namespace KuchCraft {
 
 		s_QuadData.Vertices.clear();
 		s_CubeData.Vertices.clear();
+
+		s_TransparentQuadData.Vertices .clear();
 
 		s_TextData.Data.clear();
 	}
@@ -230,28 +237,6 @@ namespace KuchCraft {
 		s_SkyboxData.VertexArray .Unbind();
 		s_SkyboxData.VertexBuffer.Unbind();
 		s_SkyboxData.Shader      .Unbind();
-	}
-
-	void Renderer3D::PrepareWater()
-	{
-		s_WaterData.VertexArray.Create();
-		s_WaterData.VertexArray.Bind();
-
-		s_WaterData.VertexBuffer.Create(max_vertices_in_chunk * sizeof(Vertex_P3C2));
-		s_WaterData.VertexBuffer.SetBufferLayout({
-			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float2, "a_TexCoord" }
-		});
-
-		s_WaterData.VertexArray.SetVertexBuffer(s_WaterData.VertexBuffer);
-
-		s_WaterData.Shader.Create("assets/shaders/water.vert.glsl", "assets/shaders/water.frag.glsl");
-		s_WaterData.Shader.Bind();
-		s_WaterData.Shader.SetInt("u_Texture", default_texture_slot);
-
-		s_WaterData.VertexArray .Unbind();
-		s_WaterData.VertexBuffer.Unbind();
-		s_WaterData.Shader      .Unbind();
 	}
 
 	void Renderer3D::PrepareOutlinedCube()
@@ -409,40 +394,6 @@ namespace KuchCraft {
 		Renderer::s_Stats.Renderer3DSkyboxTimer.Finish();
 	}
 
-	void Renderer3D::RenderWater()
-	{
-		Renderer::s_Stats.Renderer3DWaterTimer.Start();
-
-		RendererCommand::EnableBlending();
-		RendererCommand::DisableFaceCulling();
-		RendererCommand::EnableDepthTesting();
-
-		s_WaterData.Shader     .Bind();
-		s_WaterData.VertexArray.Bind();
-		s_Data.QuadIndexBuffer .Bind();
-
-		AssetManager::GetItemTexture(ItemType::Water).Bind(default_texture_slot);
-
-		for (const auto& chunk : s_ChunkData.ChunksToRender)
-		{
-			const auto& drawList = chunk->GetDrawList();
-			uint32_t indexCount  = drawList.GetWaterVertices().size() / quad_vertex_count * quad_index_count;
-
-			if (indexCount != 0)
-			{
-				uint32_t vertexCount = indexCount / quad_index_count * quad_vertex_count;
-				s_WaterData.VertexBuffer.SetData(drawList.GetWaterVerticesPtr(), vertexCount * sizeof(Vertex_P3C2));
-	
-				RendererCommand::DrawElements(indexCount);
-
-				Renderer::s_Stats.DrawCalls++;
-				Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
-			}
-		}
-
-		Renderer::s_Stats.Renderer3DWaterTimer.Finish();
-	}
-
 	void Renderer3D::RenderOutlinedCube()
 	{
 		RendererCommand::DisableBlending();
@@ -578,7 +529,7 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderQuads()
 	{
-		RendererCommand::EnableBlending();
+		RendererCommand::DisableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
 
@@ -768,6 +719,104 @@ namespace KuchCraft {
 		StartCubesBatch();
 	}
 
+	void Renderer3D::RenderTransparentQuads()
+	{
+		RendererCommand::EnableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::EnableLessEqualDepthTesting();
+
+		s_TransparentQuadData.Shader      .Bind();
+		s_TransparentQuadData.VertexArray .Bind();
+		s_TransparentQuadData.VertexBuffer.Bind();
+		s_TransparentQuadData.IndexBuffer .Bind();
+
+		s_TransparentQuadData.VertexOffset = 0;
+		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
+		
+		StartTransparentQuadsBatch();
+
+		for (uint32_t i = 0; i < s_TransparentQuadData.Vertices.size(); i += quad_vertex_count)
+		{
+			if (s_TransparentQuadData.IndexCount == s_Info.MaxIndices)
+				NextTransparentQuadsBatch();
+
+			if (s_TransparentQuadData.Vertices[i].TexIndex == 0.0f) // just color, TexIndex temporarily holds the texture rendererID
+			{
+				s_TransparentQuadData.Vertices[i + 0].TexIndex = 0.0f;
+				s_TransparentQuadData.Vertices[i + 1].TexIndex = 0.0f;
+				s_TransparentQuadData.Vertices[i + 2].TexIndex = 0.0f;
+				s_TransparentQuadData.Vertices[i + 3].TexIndex = 0.0f;
+
+				s_TransparentQuadData.IndexCount += quad_index_count;
+			}
+			else // textures
+			{
+				float textureIndex = 0.0f;
+				for (uint32_t j = 1; j < s_TransparentQuadData.TextureSlotIndex; j++)
+				{
+					if (s_TransparentQuadData.TextureSlots[j] == s_TransparentQuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
+					{
+						textureIndex = (float)j;
+						break;
+					}
+				}
+
+				if (textureIndex == 0.0f)
+				{
+					if (s_TransparentQuadData.TextureSlotIndex >= maxTextureSlots)
+						NextTransparentQuadsBatch();
+
+					textureIndex = (float)s_TransparentQuadData.TextureSlotIndex;
+					s_TransparentQuadData.TextureSlots[s_TransparentQuadData.TextureSlotIndex] = s_TransparentQuadData.Vertices[i].TexIndex;
+
+					s_TransparentQuadData.TextureSlotIndex++;
+				}
+
+				s_TransparentQuadData.Vertices[i + 0].TexIndex = textureIndex;
+				s_TransparentQuadData.Vertices[i + 1].TexIndex = textureIndex;
+				s_TransparentQuadData.Vertices[i + 2].TexIndex = textureIndex;
+				s_TransparentQuadData.Vertices[i + 3].TexIndex = textureIndex;
+
+				s_TransparentQuadData.IndexCount += quad_index_count;
+			}
+		}
+
+		FlushTransparentQuads();
+	}
+
+	void Renderer3D::FlushTransparentQuads()
+	{
+		if (s_TransparentQuadData.IndexCount == 0)
+			return;
+
+		uint32_t vertexCount = s_TransparentQuadData.IndexCount / quad_index_count * quad_vertex_count;
+
+		s_TransparentQuadData.VertexBuffer.SetData(&s_TransparentQuadData.Vertices[s_TransparentQuadData.VertexOffset], vertexCount * sizeof(TransparentQuad3DVertex));
+		s_TransparentQuadData.VertexOffset += vertexCount;
+
+		// TODO: Set index buffer, offset??
+
+		for (uint32_t i = 0; i < s_TransparentQuadData.TextureSlotIndex; i++)
+			Texture2D::Bind(s_TransparentQuadData.TextureSlots[i], i);
+
+		RendererCommand::DrawElements(s_TransparentQuadData.IndexCount);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
+	}
+
+	void Renderer3D::StartTransparentQuadsBatch()
+	{
+		s_TransparentQuadData.IndexCount       = 0;
+		s_TransparentQuadData.TextureSlotIndex = 1;
+	}
+
+	void Renderer3D::NextTransparentQuadsBatch()
+	{
+		FlushTransparentQuads();
+		StartTransparentQuadsBatch();
+	}
+
 	void Renderer3D::PrepareQuads()
 	{
 		s_QuadData.VertexArray.Create();
@@ -864,6 +913,71 @@ namespace KuchCraft {
 		s_CubeData.VertexArray. Unbind();
 		s_CubeData.VertexBuffer.Unbind();
 		s_CubeData.Shader.      Unbind();
+	}
+
+	void Renderer3D::PrepareTransparentQuads()
+	{
+		s_TransparentQuadData.VertexArray.Create();
+		s_TransparentQuadData.VertexArray.Bind();
+
+		s_TransparentQuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(TransparentQuad3DVertex));
+		s_TransparentQuadData.VertexBuffer.SetBufferLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color"    },
+			{ ShaderDataType::Float2, "a_TexCoor"  },
+			{ ShaderDataType::Float,  "a_TexIndex" }
+		});
+
+		s_TransparentQuadData.VertexArray.SetVertexBuffer(s_TransparentQuadData.VertexBuffer);
+
+		uint32_t  indexBufferElementCount = s_Info.MaxIndices > max_indices_in_chunk ? s_Info.MaxIndices : max_indices_in_chunk;
+		uint32_t* indices = new uint32_t[indexBufferElementCount];
+		uint32_t  offset = 0;
+		for (uint32_t i = 0; i < indexBufferElementCount; i += quad_index_count)
+		{
+			indices[i + 0] = offset + 0;
+			indices[i + 1] = offset + 1;
+			indices[i + 2] = offset + 2;
+			indices[i + 3] = offset + 2;
+			indices[i + 4] = offset + 3;
+			indices[i + 5] = offset + 0;
+
+			offset += 4;
+		}
+		s_TransparentQuadData.IndexBuffer.Create(indices, indexBufferElementCount);
+		delete[] indices;
+
+		{
+			TextureSpecification spec;
+			spec.Width  = 1;
+			spec.Height = 1;
+			s_TransparentQuadData.WhiteTexture.Create(spec);
+
+			uint32_t white = 0xffffffff;
+			s_TransparentQuadData.WhiteTexture.Setdata(&white, sizeof(uint32_t));
+		}
+
+		std::unordered_map<std::string, std::string> transparentQuadShaderData;
+		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
+		transparentQuadShaderData["#max_texture_slots"] = std::to_string(maxTextureSlots);
+
+		s_TransparentQuadData.Shader.Create("assets/shaders/quad3DTransparent.vert.glsl", "assets/shaders/quad3DTransparent.frag.glsl", transparentQuadShaderData);
+		s_TransparentQuadData.Shader.Bind();
+
+		int* samplers = new int[maxTextureSlots];
+		for (int i = 0; i < maxTextureSlots; i++)
+			samplers[i] = i;
+		s_TransparentQuadData.Shader.SetIntArray("u_Textures", samplers, maxTextureSlots);
+		delete[] samplers;
+
+		s_TransparentQuadData.TextureSlots = new uint32_t[maxTextureSlots];
+		s_TransparentQuadData.TextureSlots[0] = s_TransparentQuadData.WhiteTexture.GetRendererID();
+
+		s_TransparentQuadData.Vertices .reserve(s_Info.MaxVertices);
+
+		s_TransparentQuadData.VertexArray .Unbind();
+		s_TransparentQuadData.VertexBuffer.Unbind();
+		s_TransparentQuadData.Shader      .Unbind();
 	}
 
 	void Renderer3D::DrawChunk(Chunk* chunk)

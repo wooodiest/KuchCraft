@@ -33,7 +33,7 @@ namespace KuchCraft {
         glm::vec3 offsets = GetPositionAndRotationOffset(position);
         glm::vec3 pos = glm::vec3(position) + glm::vec3{ offsets.x, 0.0f, offsets.z };
 
-        if (IsSolidBlock())
+        if (IsSolidBlock() || (IsTransparentBlock() && Type != ItemType::Water))
             return AABB(
                 { pos.x,        pos.y,        pos.z        },
                 { pos.x + 1.0f, pos.y + 1.0f, pos.z + 1.0f }

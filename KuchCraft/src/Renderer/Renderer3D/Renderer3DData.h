@@ -43,13 +43,6 @@ namespace KuchCraft {
 		CubeMapTexture Texture;
 	};
 
-	struct Renderer3DWaterData
-	{
-		Shader       Shader;
-		VertexArray  VertexArray;
-		VertexBuffer VertexBuffer;
-	};
-
 	struct Renderer3DOutlinedCubeData
 	{
 		bool Status = false;
@@ -83,6 +76,23 @@ namespace KuchCraft {
 		Texture2D WhiteTexture;
 
 		std::vector<Quad3DVertex> Vertices;
+		uint32_t* TextureSlots;
+		uint32_t  TextureSlotIndex = 1;
+		uint32_t  IndexCount       = 0;
+		uint32_t  VertexOffset     = 0;
+	};
+
+	struct Renderer3DTransparentQuadData
+	{
+		Shader		 Shader;
+		VertexArray  VertexArray;
+		VertexBuffer VertexBuffer;
+		IndexBuffer  IndexBuffer;
+
+		Texture2D WhiteTexture;
+
+		std::vector<TransparentQuad3DVertex> Vertices;
+
 		uint32_t* TextureSlots;
 		uint32_t  TextureSlotIndex = 1;
 		uint32_t  IndexCount       = 0;

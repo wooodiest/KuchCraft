@@ -47,17 +47,17 @@ namespace KuchCraft {
 		const std::vector<uint32_t>& GetVertices()    const { return m_VertexData;         }
 		const void* GetVerticesPtr(uint32_t offset)   const { return &m_VertexData[offset];}
 
-		const std::vector<Vertex_P3C2>& GetWaterVertices()        const { return m_WaterVertices;       }
-		const void* GetWaterVerticesPtr()                         const { return &m_WaterVertices[0];   }
-		const std::vector<Quad3DVertex>& GetFoliageQuadVertices() const { return m_FoliageQuadVertices; }
+		const std::vector<Quad3DVertex>&            GetFoliageQuadVertices()     const { return m_FoliageQuadVertices;     }
+		const std::vector<TransparentQuad3DVertex>& GetTransparentQuadVertices() const { return m_TransparentQuadVertices; }
 
 		void NewDrawCall();
 		void AddTexture(uint32_t texture);
 		void UpdateIndexCount();
 
 		void AddSolid(const glm::ivec3& position, uint32_t verticesIndex, const Item& item);
+		void AddTransparent(const glm::vec3& position, const Item& item);
+		void AddWater(const glm::vec3& position, uint32_t verticesIndex);
 		void AddFoliageQuad(const glm::vec3& position, const Item& item);
-		void AddWater(const glm::mat4& model, const Vertex vertices[quad_vertex_count]);
 
 	private:
 		TextureSlotHelper* m_TextureSlotHelper = nullptr;
@@ -70,10 +70,9 @@ namespace KuchCraft {
 
 		// FoliageQuads
 		std::vector<Quad3DVertex> m_FoliageQuadVertices;
-
-		// Water
-		std::vector<Vertex_P3C2> m_WaterVertices;
 		
+		// Transparent stuff
+		std::vector<TransparentQuad3DVertex> m_TransparentQuadVertices;
 	};
 
 }

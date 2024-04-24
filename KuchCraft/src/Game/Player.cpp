@@ -166,10 +166,6 @@ namespace KuchCraft {
 				for (int z = absolutePosition.z - absolute_range; z <= absolutePosition.z + absolute_range; z++)
 				{
 					const Item item = World::Get().GetItem({ x, y, z });
-
-					if (!item.IsSolidBlock() && !item.IsFoliageQuad())
-						continue;
-
 					AABB itemAABB = item.GetAABB({ x, y, z });
 
 					auto targetedItemInfo = ray.IsColliding(itemAABB);

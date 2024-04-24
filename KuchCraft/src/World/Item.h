@@ -35,7 +35,7 @@ namespace KuchCraft {
 		inline bool IsMushroom() const { return (uint32_t)Type >= item_foliage_quad_mushrooms_begin && (uint32_t)Type <= item_foliage_quad_mushrooms_end; }
 
 		inline bool IsTranslucent() const { return Type == ItemType::Air || IsTransparentBlock() || IsFoliageQuad(); }
-		inline bool IsPhysical()    const { return IsSolidBlock(); }
+		inline bool IsPhysical()    const { return IsSolidBlock() || (IsTransparentBlock() && Type != ItemType::Water); }
 
 	public:
 		static std::map<ItemType, std::string> s_ItemNames;
