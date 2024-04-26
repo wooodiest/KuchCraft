@@ -102,18 +102,24 @@ namespace KuchCraft {
 
 		s_Data.RenderFrameBuffer.BindAndClear();
 
+		Renderer::s_Stats.Renderer3DChunkTimer.Start();
 		RenderChunks();
-		RenderSkybox();
+		Renderer::s_Stats.Renderer3DChunkTimer.Finish();
 
-		if (s_OutlinedCubeData.Status)
-			RenderOutlinedCube();
+		Renderer::s_Stats.Renderer3DSkyboxTimer.Start();
+		RenderSkybox();
+		Renderer::s_Stats.Renderer3DSkyboxTimer.Finish();
+
+		RenderOutlinedCube();
 
 		Renderer::s_Stats.Renderer3DQuadsTimer.Start();
 		RenderCubes();
 		RenderQuads();
 		Renderer::s_Stats.Renderer3DQuadsTimer.Finish();
 
+		Renderer::s_Stats.Renderer3DTransparentQuadsTimer.Start();
 		RenderTransparentQuads();
+		Renderer::s_Stats.Renderer3DTransparentQuadsTimer.Finish();
 
 		RenderText(); // TODO: think of place to put this and fix depth testing issues
 
@@ -332,7 +338,8 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderChunks()
 	{
-		Renderer::s_Stats.Renderer3DChunkTimer.Start();
+		if (!s_ChunkData.ChunksToRender.size())
+			return;
 
 		RendererCommand::DisableBlending();
 		RendererCommand::EnableFaceCulling();
@@ -368,14 +375,10 @@ namespace KuchCraft {
 				}
 			}
 		}
-
-		Renderer::s_Stats.Renderer3DChunkTimer.Finish();
 	}
 
 	void Renderer3D::RenderSkybox()
 	{
-		Renderer::s_Stats.Renderer3DSkyboxTimer.Start();
-
 		RendererCommand::DisableBlending();
 		RendererCommand::EnableFrontFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
@@ -390,12 +393,13 @@ namespace KuchCraft {
 
 		Renderer::s_Stats.DrawCalls++;
 		Renderer::s_Stats.Quads += cube_face_cout;
-
-		Renderer::s_Stats.Renderer3DSkyboxTimer.Finish();
 	}
 
 	void Renderer3D::RenderOutlinedCube()
 	{
+		if (!s_OutlinedCubeData.Status)
+			return;
+
 		RendererCommand::DisableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
@@ -444,6 +448,9 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderText()
 	{
+		if (!s_TextData.Data.size())
+			return;
+
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::DisableDepthTesting();
@@ -529,6 +536,9 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderQuads()
 	{
+		if (!s_QuadData.Vertices.size())
+			return;
+
 		RendererCommand::DisableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
@@ -625,6 +635,9 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderCubes()
 	{
+		if (!s_CubeData.Vertices.size())
+			return;
+
 		RendererCommand::DisableBlending();
 		RendererCommand::EnableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
@@ -721,6 +734,9 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderTransparentQuads()
 	{
+		if (!s_TransparentQuadData.Vertices.size())
+			return;
+
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();

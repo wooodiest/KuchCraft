@@ -56,6 +56,9 @@ namespace KuchCraft {
 
 	void Renderer2D::RenderQuads()
 	{
+		if (!s_QuadData.Vertices.size())
+			return;
+
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
@@ -169,6 +172,9 @@ namespace KuchCraft {
 
 	void Renderer2D::RenderText()
 	{
+		if (!s_TextData.Data.size())
+			return;
+
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();

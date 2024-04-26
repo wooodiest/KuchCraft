@@ -75,7 +75,7 @@ namespace KuchCraft {
 
 		Timer RenderTimer;
 		Timer Renderer3DChunkTimer;
-		Timer Renderer3DWaterTimer;
+		Timer Renderer3DTransparentQuadsTimer;
 		Timer Renderer3DQuadsTimer;
 		Timer Renderer3DSkyboxTimer;
 		Timer Renderer2DTimer;
