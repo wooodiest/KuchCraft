@@ -19,6 +19,8 @@ namespace KuchCraft {
 
 	void Camera::OnUpdate(const glm::vec3& position, const glm::vec2& rotation)
 	{
+		m_Position = position;
+
 		UpdateFront(rotation);
 		UpdateView(position);
 	}

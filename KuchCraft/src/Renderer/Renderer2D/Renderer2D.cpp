@@ -291,7 +291,7 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		s_QuadData.IndexBuffer.Create(indices, s_Info.MaxIndices);
+		s_QuadData.IndexBuffer.Create(s_Info.MaxIndices, indices, true);
 		delete[] indices;
 
 		{

@@ -364,7 +364,7 @@ namespace KuchCraft {
 		return false;
 	}
 
-	void Player::PlaceItem(const glm::vec3& position, Item& block)
+	void Player::PlaceItem(const glm::vec3& position, Item& item)
 	{
 		if (!m_TargetedItem.Targeted)
 			return;
@@ -380,26 +380,22 @@ namespace KuchCraft {
 			case PlaneDirection::Front:  newPosition.z += 1.0f; break;
 		}
 
-		const glm::ivec3 blockAbsolutePosition{ newPosition };
-		constexpr uint32_t block_size = 1;
-		const AABB blockAABB  = { blockAbsolutePosition, blockAbsolutePosition + glm::ivec3(block_size)};
 		const AABB playerAABB = m_PhysicsBody.GetPlayerAbsoluteAABB().MoveTo(m_Position);
-
-		if (playerAABB.IsColliding(blockAABB) && !block.IsFoliageQuad())
+		if (item.IsPhysical() && playerAABB.IsColliding(item.GetAABB(newPosition)))
 			return;
 
 		// Calculate block rotation
 		float rotation = m_Rotation.x;
 		if (      rotation >= glm::radians(90.0f - 45.0f) && rotation < glm::radians(90.0f + 45.0f))	
-			block.Rotation = ItemRotation::Deg180;
+			item.Rotation = ItemRotation::Deg180;
 		else if (rotation >= glm::radians(180.0f - 45.0f) && rotation < glm::radians(180.0f + 45.0f))
-			block.Rotation = ItemRotation::Deg270;
+			item.Rotation = ItemRotation::Deg270;
 		else if (rotation >= glm::radians(270.0f - 45.0f) && rotation < glm::radians(270.0f + 45.0f))
-			block.Rotation = ItemRotation::Deg0;
+			item.Rotation = ItemRotation::Deg0;
 		else
-			block.Rotation = ItemRotation::Deg90;
+			item.Rotation = ItemRotation::Deg90;
 
-		World::Get().SetItem(newPosition, block);
+		World::Get().SetItem(newPosition, item);
 	}
 
 	void Player::DestroyItem(const glm::vec3& position)

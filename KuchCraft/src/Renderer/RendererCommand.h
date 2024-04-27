@@ -23,6 +23,9 @@ namespace KuchCraft
 		static void EnableLessEqualDepthTesting();
 		static void DisableDepthTesting();
 
+		static void EnableDepthMask();
+		static void DisableDepthMask();
+
 		static void EnableLogMessages();
 
 	public:

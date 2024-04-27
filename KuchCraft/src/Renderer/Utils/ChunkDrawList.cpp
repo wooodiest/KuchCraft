@@ -20,7 +20,8 @@ namespace KuchCraft {
 
 		m_FoliageQuadVertices.clear();
 
-		m_TransparentQuadVertices .clear();
+		m_TransparentQuadVertices  .clear();
+		m_TransparentQuadsPositions.clear();
 	}
 
 	void ChunkDrawList::StartRecreating()
@@ -43,6 +44,8 @@ namespace KuchCraft {
 
 		m_TransparentQuadVertices.clear();
 		m_TransparentQuadVertices.reserve(chunk_size_XZ * chunk_size_XZ * quad_vertex_count);
+		m_TransparentQuadsPositions.clear();
+		m_TransparentQuadsPositions.reserve(chunk_size_XZ * chunk_size_XZ * quad_vertex_count);
 	}
 
 	void ChunkDrawList::EndRecreating()
@@ -53,6 +56,9 @@ namespace KuchCraft {
 		m_VertexData.   shrink_to_fit();
 		m_IndexCount.   shrink_to_fit();
 		m_Textures.     shrink_to_fit();
+		m_FoliageQuadVertices      .shrink_to_fit();
+		m_TransparentQuadsPositions.shrink_to_fit();
+		m_TransparentQuadsPositions.shrink_to_fit();
 	}
 
 	uint32_t ChunkDrawList::GetTextureCount(uint32_t drawCallIndex) const
@@ -138,18 +144,20 @@ namespace KuchCraft {
 	{
 		float texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position + glm::vec3{0.5f, 0.5f, 0.5f}) * 
-			glm::toMat4(glm::quat(glm::vec3{0.0f, -glm::radians(90.0f * (float)item.Rotation), 0.0f}));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 
 		for (uint32_t i = 0; i < cube_vertex_count; i++)
 		{
 			TransparentQuad3DVertex vertex;
-			vertex.Position = transform * cube_vertices[i].Position;
-			vertex.TexCoord = cube_vertices[i].UV;
+			vertex.Position = transform * glm::vec4(block_vertices[i].Position, 1.0f);
+			vertex.TexCoord = block_vertices[i].TexCoord;
 			vertex.TexIndex = texture;
 
 			m_TransparentQuadVertices.emplace_back(vertex);
 		}
+
+		for (uint32_t i = 0; i < cube_vertex_count / quad_vertex_count; i++)
+			m_TransparentQuadsPositions.emplace_back(position + block_quad_centers[i]);
 	}
 
 	void ChunkDrawList::AddWater(const glm::vec3& position, uint32_t verticesIndex)
@@ -166,6 +174,8 @@ namespace KuchCraft {
 
 			m_TransparentQuadVertices.emplace_back(vertex);
 		}
+
+		m_TransparentQuadsPositions.emplace_back(position + block_quad_centers[verticesIndex]);
 	}
 
 	void ChunkDrawList::AddFoliageQuad(const glm::vec3& position, const Item& item)

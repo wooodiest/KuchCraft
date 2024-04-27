@@ -47,8 +47,9 @@ namespace KuchCraft {
 		const std::vector<uint32_t>& GetVertices()    const { return m_VertexData;         }
 		const void* GetVerticesPtr(uint32_t offset)   const { return &m_VertexData[offset];}
 
-		const std::vector<Quad3DVertex>&            GetFoliageQuadVertices()     const { return m_FoliageQuadVertices;     }
-		const std::vector<TransparentQuad3DVertex>& GetTransparentQuadVertices() const { return m_TransparentQuadVertices; }
+		const std::vector<Quad3DVertex>&            GetFoliageQuadVertices()      const { return m_FoliageQuadVertices;       }
+		const std::vector<TransparentQuad3DVertex>& GetTransparentQuadVertices()  const { return m_TransparentQuadVertices;   }
+		const std::vector<glm::vec3>&               GetTransparentQuadPositions() const { return m_TransparentQuadsPositions; }
 
 		void NewDrawCall();
 		void AddTexture(uint32_t texture);
@@ -73,6 +74,7 @@ namespace KuchCraft {
 		
 		// Transparent stuff
 		std::vector<TransparentQuad3DVertex> m_TransparentQuadVertices;
+		std::vector<glm::vec3>               m_TransparentQuadsPositions;
 	};
 
 }

@@ -8,7 +8,8 @@ namespace KuchCraft {
 		IndexBuffer();
 		~IndexBuffer();
 
-		void Create(uint32_t* data, uint32_t count);
+		void Create(uint32_t count, uint32_t* data = nullptr, bool staticDraw = false);
+		void SetData(uint32_t* data, uint32_t count);
 
 		void Bind()   const;
 		void Unbind() const;

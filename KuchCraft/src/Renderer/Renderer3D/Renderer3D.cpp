@@ -51,7 +51,7 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		s_Data.QuadIndexBuffer.Create(indices, indexBufferElementCount);
+		s_Data.QuadIndexBuffer.Create(indexBufferElementCount, indices, true);
 		delete[] indices;
 
 		{
@@ -88,17 +88,6 @@ namespace KuchCraft {
 	void Renderer3D::Render()
 	{
 		Renderer::s_Stats.Renderer3DTimer.Start();
-
-		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_Data.CurrentCamera, s_ChunkData.ChunksToRender);
-		Renderer::s_Stats.ChunksToRender = s_ChunkData.ChunksToRender.size();
-		for (const auto& chunk : s_ChunkData.ChunksToRender)
-		{
-			const auto& foliageVertices = chunk->GetDrawList().GetFoliageQuadVertices();
-			s_QuadData.Vertices.insert(s_QuadData.Vertices.end(), foliageVertices.begin(), foliageVertices.end());
-
-			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
-			s_TransparentQuadData.Vertices.insert(s_TransparentQuadData.Vertices.end(), transparentVertices.begin(), transparentVertices.end());
-		}
 
 		s_Data.RenderFrameBuffer.BindAndClear();
 
@@ -143,6 +132,8 @@ namespace KuchCraft {
 		s_CubeData.Vertices.clear();
 
 		s_TransparentQuadData.Vertices .clear();
+		s_TransparentQuadData.Distances.clear();
+		s_TransparentQuadData.Indices  .clear();
 
 		s_TextData.Data.clear();
 	}
@@ -338,6 +329,9 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderChunks()
 	{
+		FrustumCulling::Chunks(s_ChunkData.Chunks, *Renderer::s_Data.CurrentCamera, s_ChunkData.ChunksToRender);
+		Renderer::s_Stats.ChunksToRender = s_ChunkData.ChunksToRender.size();
+
 		if (!s_ChunkData.ChunksToRender.size())
 			return;
 
@@ -536,6 +530,12 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderQuads()
 	{
+		for (const auto& chunk : s_ChunkData.ChunksToRender)
+		{
+			const auto& foliageVertices = chunk->GetDrawList().GetFoliageQuadVertices();
+			s_QuadData.Vertices.insert(s_QuadData.Vertices.end(), foliageVertices.begin(), foliageVertices.end());
+		}
+
 		if (!s_QuadData.Vertices.size())
 			return;
 
@@ -734,17 +734,51 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderTransparentQuads()
 	{
+		// Only one batch supported right now, more = troubles
+
+		glm::vec3 cameraPosition = Renderer::s_Data.CurrentCamera->GetPosition();
+		uint32_t quadIndex = 0;
+		for (const auto& chunk : s_ChunkData.ChunksToRender)
+		{
+			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
+			s_TransparentQuadData.Vertices.insert(s_TransparentQuadData.Vertices.end(), transparentVertices.begin(), transparentVertices.end());
+
+			for (const auto& pos : chunk->GetDrawList().GetTransparentQuadPositions())
+			{
+				s_TransparentQuadData.Distances.emplace_back(quadIndex, glm::length2(pos - cameraPosition));
+				quadIndex++;
+			}
+		}
+
 		if (!s_TransparentQuadData.Vertices.size())
 			return;
 
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
+		RendererCommand::DisableDepthMask();
 
 		s_TransparentQuadData.Shader      .Bind();
 		s_TransparentQuadData.VertexArray .Bind();
 		s_TransparentQuadData.VertexBuffer.Bind();
 		s_TransparentQuadData.IndexBuffer .Bind();
+
+		std::sort(s_TransparentQuadData.Distances.begin(), s_TransparentQuadData.Distances.end(), [](const auto& v1, const auto& v2) {
+			return v1.second > v2.second;
+		});
+
+		for (const auto& [index, distance] : s_TransparentQuadData.Distances)
+		{
+			uint32_t offset = index * 4;
+			s_TransparentQuadData.Indices.emplace_back(offset + 0);
+			s_TransparentQuadData.Indices.emplace_back(offset + 1);
+			s_TransparentQuadData.Indices.emplace_back(offset + 2);
+			s_TransparentQuadData.Indices.emplace_back(offset + 2);
+			s_TransparentQuadData.Indices.emplace_back(offset + 3);
+			s_TransparentQuadData.Indices.emplace_back(offset + 0);
+		}
+
+		s_TransparentQuadData.IndexBuffer.SetData(&s_TransparentQuadData.Indices[0], s_TransparentQuadData.Indices.size());
 
 		s_TransparentQuadData.VertexOffset = 0;
 		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
@@ -798,6 +832,8 @@ namespace KuchCraft {
 		}
 
 		FlushTransparentQuads();
+
+		RendererCommand::EnableDepthMask();
 	}
 
 	void Renderer3D::FlushTransparentQuads()
@@ -809,8 +845,6 @@ namespace KuchCraft {
 
 		s_TransparentQuadData.VertexBuffer.SetData(&s_TransparentQuadData.Vertices[s_TransparentQuadData.VertexOffset], vertexCount * sizeof(TransparentQuad3DVertex));
 		s_TransparentQuadData.VertexOffset += vertexCount;
-
-		// TODO: Set index buffer, offset??
 
 		for (uint32_t i = 0; i < s_TransparentQuadData.TextureSlotIndex; i++)
 			Texture2D::Bind(s_TransparentQuadData.TextureSlots[i], i);
@@ -960,7 +994,7 @@ namespace KuchCraft {
 
 			offset += 4;
 		}
-		s_TransparentQuadData.IndexBuffer.Create(indices, indexBufferElementCount);
+		s_TransparentQuadData.IndexBuffer.Create(indexBufferElementCount);
 		delete[] indices;
 
 		{
@@ -990,6 +1024,8 @@ namespace KuchCraft {
 		s_TransparentQuadData.TextureSlots[0] = s_TransparentQuadData.WhiteTexture.GetRendererID();
 
 		s_TransparentQuadData.Vertices .reserve(s_Info.MaxVertices);
+		s_TransparentQuadData.Distances.reserve(s_Info.MaxVertices / quad_vertex_count);
+		s_TransparentQuadData.Indices  .reserve(s_Info.MaxIndices);
 
 		s_TransparentQuadData.VertexArray .Unbind();
 		s_TransparentQuadData.VertexBuffer.Unbind();

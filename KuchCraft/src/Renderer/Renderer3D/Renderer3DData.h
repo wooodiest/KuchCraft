@@ -91,7 +91,9 @@ namespace KuchCraft {
 
 		Texture2D WhiteTexture;
 
-		std::vector<TransparentQuad3DVertex> Vertices;
+		std::vector<TransparentQuad3DVertex>    Vertices;
+		std::vector<std::pair<uint32_t, float>> Distances;
+		std::vector<uint32_t>                   Indices;
 
 		uint32_t* TextureSlots;
 		uint32_t  TextureSlotIndex = 1;
