@@ -790,45 +790,33 @@ namespace KuchCraft {
 			if (s_TransparentQuadData.IndexCount == s_Info.MaxIndices)
 				NextTransparentQuadsBatch();
 
-			if (s_TransparentQuadData.Vertices[i].TexIndex == 0.0f) // just color, TexIndex temporarily holds the texture rendererID
+			float textureIndex = 0.0f;
+			for (uint32_t j = 1; j < s_TransparentQuadData.TextureSlotIndex; j++)
 			{
-				s_TransparentQuadData.Vertices[i + 0].TexIndex = 0.0f;
-				s_TransparentQuadData.Vertices[i + 1].TexIndex = 0.0f;
-				s_TransparentQuadData.Vertices[i + 2].TexIndex = 0.0f;
-				s_TransparentQuadData.Vertices[i + 3].TexIndex = 0.0f;
-
-				s_TransparentQuadData.IndexCount += quad_index_count;
+				if (s_TransparentQuadData.TextureSlots[j] == s_TransparentQuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
+				{
+					textureIndex = (float)j;
+					break;
+				}
 			}
-			else // textures
+
+			if (textureIndex == 0.0f)
 			{
-				float textureIndex = 0.0f;
-				for (uint32_t j = 1; j < s_TransparentQuadData.TextureSlotIndex; j++)
-				{
-					if (s_TransparentQuadData.TextureSlots[j] == s_TransparentQuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
-					{
-						textureIndex = (float)j;
-						break;
-					}
-				}
+				if (s_TransparentQuadData.TextureSlotIndex >= maxTextureSlots)
+					NextTransparentQuadsBatch();
 
-				if (textureIndex == 0.0f)
-				{
-					if (s_TransparentQuadData.TextureSlotIndex >= maxTextureSlots)
-						NextTransparentQuadsBatch();
+				textureIndex = (float)s_TransparentQuadData.TextureSlotIndex;
+				s_TransparentQuadData.TextureSlots[s_TransparentQuadData.TextureSlotIndex] = s_TransparentQuadData.Vertices[i].TexIndex;
 
-					textureIndex = (float)s_TransparentQuadData.TextureSlotIndex;
-					s_TransparentQuadData.TextureSlots[s_TransparentQuadData.TextureSlotIndex] = s_TransparentQuadData.Vertices[i].TexIndex;
-
-					s_TransparentQuadData.TextureSlotIndex++;
-				}
-
-				s_TransparentQuadData.Vertices[i + 0].TexIndex = textureIndex;
-				s_TransparentQuadData.Vertices[i + 1].TexIndex = textureIndex;
-				s_TransparentQuadData.Vertices[i + 2].TexIndex = textureIndex;
-				s_TransparentQuadData.Vertices[i + 3].TexIndex = textureIndex;
-
-				s_TransparentQuadData.IndexCount += quad_index_count;
+				s_TransparentQuadData.TextureSlotIndex++;
 			}
+
+			s_TransparentQuadData.Vertices[i + 0].TexIndex = textureIndex;
+			s_TransparentQuadData.Vertices[i + 1].TexIndex = textureIndex;
+			s_TransparentQuadData.Vertices[i + 2].TexIndex = textureIndex;
+			s_TransparentQuadData.Vertices[i + 3].TexIndex = textureIndex;
+
+			s_TransparentQuadData.IndexCount += quad_index_count;
 		}
 
 		FlushTransparentQuads();
@@ -973,7 +961,6 @@ namespace KuchCraft {
 		s_TransparentQuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(TransparentQuad3DVertex));
 		s_TransparentQuadData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
-			{ ShaderDataType::Float4, "a_Color"    },
 			{ ShaderDataType::Float2, "a_TexCoor"  },
 			{ ShaderDataType::Float,  "a_TexIndex" }
 		});
