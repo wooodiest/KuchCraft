@@ -83,6 +83,17 @@ namespace KuchCraft {
 		glDepthMask(GL_FALSE);
 	}
 
+	void RendererCommand::EnablePolygonOffset(float factor, float units)
+	{
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(factor, units);
+	}
+
+	void RendererCommand::DisablePolygonOffset()
+	{
+		glDisable(GL_POLYGON_OFFSET_FILL);
+	}
+
 	static void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
 		switch (severity)

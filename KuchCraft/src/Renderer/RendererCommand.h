@@ -26,6 +26,9 @@ namespace KuchCraft
 		static void EnableDepthMask();
 		static void DisableDepthMask();
 
+		static void EnablePolygonOffset(float factor, float units);
+		static void DisablePolygonOffset();
+
 		static void EnableLogMessages();
 
 	public:

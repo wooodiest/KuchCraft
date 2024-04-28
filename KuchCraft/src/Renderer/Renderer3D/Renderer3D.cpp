@@ -792,8 +792,9 @@ namespace KuchCraft {
 		// Renderer non sorted quads
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
-		RendererCommand::EnableLessEqualDepthTesting();
+		RendererCommand::EnableDepthTesting();
 		RendererCommand::DisableDepthMask();
+		RendererCommand::EnablePolygonOffset(1.0f, 1.0f);
 
 		s_TransparentQuadData.Shader      .Bind();
 		s_TransparentQuadData.VertexArray .Bind();
@@ -899,6 +900,7 @@ namespace KuchCraft {
 		FlushSortedTransparentQuads();
 
 		RendererCommand::EnableDepthMask();
+		RendererCommand::DisablePolygonOffset();
 	}
 
 	void Renderer3D::FlushTransparentQuads()
