@@ -126,14 +126,18 @@ namespace KuchCraft {
 		s_ChunkData.ChunksToRender.clear();
 
 		s_OutlinedCubeData.Status = false;
-		s_TintedData.Tinted        = false;
+		s_TintedData.Tinted       = false;
 
 		s_QuadData.Vertices.clear();
 		s_CubeData.Vertices.clear();
 
-		s_TransparentQuadData.Vertices .clear();
-		s_TransparentQuadData.Distances.clear();
-		s_TransparentQuadData.Indices  .clear();
+		s_TransparentQuadData.CurrentQuadIndex = 0;
+		s_TransparentQuadData.Vertices          .clear();
+		s_TransparentQuadData.SortedVertices    .clear();
+		s_TransparentQuadData.ChunkIndexDistance.clear();
+		s_TransparentQuadData.ChunksToSort      .clear();
+		s_TransparentQuadData.QuadIndexDistance .clear();
+		s_TransparentQuadData.Indices           .clear();
 
 		s_TextData.Data.clear();
 	}
@@ -734,67 +738,58 @@ namespace KuchCraft {
 
 	void Renderer3D::RenderTransparentQuads()
 	{
-		// Only one batch supported right now, more = troubles
+		const glm::vec3& cameraPosition         = Renderer::s_Data.CurrentCamera->GetPosition();
+		const glm::vec2  absoluteCameraPosition = { cameraPosition.x, cameraPosition.z};
 
-		glm::vec3 cameraPosition = Renderer::s_Data.CurrentCamera->GetPosition();
-		std::vector<std::pair<uint32_t, float>> chunksDistances;
-		chunksDistances.reserve(s_ChunkData.ChunksToRender.size());
-
-		std::vector<Chunk*> chunksToSort;
-		chunksToSort.reserve(10);
-
-		uint32_t chunkIndex = 0;
-		uint32_t quadIndex  = 0;
-		for (const auto& chunk : s_ChunkData.ChunksToRender)
+		// Check if the chunk is within quad sorting range
+		for (uint32_t i = 0; i < s_ChunkData.ChunksToRender.size(); i++)
 		{
-			constexpr float distanceToBeSorted = chunk_size_XZ * chunk_size_XZ * 4;
-			float distance = glm::length2(glm::vec2(chunk->GetPosition().x, chunk->GetPosition().z) + glm::vec2(chunk_size_XZ / 2.0f, chunk_size_XZ / 2.0f) - glm::vec2(cameraPosition.x, cameraPosition.z));
+			constexpr float     sorting_range        = chunk_size_XZ * chunk_size_XZ * 4;
+			constexpr glm::vec2 distanceToBeInMiddle = { chunk_size_XZ / 2.0f, chunk_size_XZ / 2.0f };
 
-			if (distance < distanceToBeSorted)
-			{
-				chunksToSort.push_back(chunk);
-			}
+			const auto& chunk = s_ChunkData.ChunksToRender[i];
+			const glm::vec3& chunkPosition         = chunk->GetPosition();
+			const glm::vec2  absoluteChunkPosition = glm::vec2{ chunkPosition.x, chunkPosition.z } + distanceToBeInMiddle;
+
+			const float distance = glm::length2(absoluteChunkPosition - absoluteCameraPosition);
+			if (distance < sorting_range)
+				s_TransparentQuadData.ChunksToSort.emplace_back(chunk);
 			else
-			{
-				chunksDistances.emplace_back(chunkIndex, distance);
-			}
-			chunkIndex++;
+				s_TransparentQuadData.ChunkIndexDistance.emplace_back(i, distance);
 		}
 
-		std::sort(chunksDistances.begin(), chunksDistances.end(), [](const auto& v1, const auto& v2) {
+		// Sort the remaining chunks based only on their distance from the camera add add their vertices to render list
+		std::sort(s_TransparentQuadData.ChunkIndexDistance.begin(), s_TransparentQuadData.ChunkIndexDistance.end(), [](const auto& v1, const auto& v2) {
 			return v1.second > v2.second;
 		});
 
-		for (const auto& [in, pos] : chunksDistances)
+		for (const auto& [index, distance] : s_TransparentQuadData.ChunkIndexDistance)
 		{
-			const auto& chunk = s_ChunkData.ChunksToRender[in];
-			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
+			const auto& transparentVertices = s_ChunkData.ChunksToRender[index]->GetDrawList().GetTransparentQuadVertices();
 			s_TransparentQuadData.Vertices.insert(s_TransparentQuadData.Vertices.end(), transparentVertices.begin(), transparentVertices.end());
+		}
+
+		// Count the distance from specific quads from all chunks to be sorted and then sort them
+		for (const auto& chunk : s_TransparentQuadData.ChunksToSort)
+		{
+			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
+			s_TransparentQuadData.SortedVertices.insert(s_TransparentQuadData.SortedVertices.end(), transparentVertices.begin(), transparentVertices.end());
 
 			for (const auto& pos : chunk->GetDrawList().GetTransparentQuadPositions())
 			{
-				s_TransparentQuadData.Distances.emplace_back(quadIndex, 0.0f);
-				quadIndex++;
+				s_TransparentQuadData.QuadIndexDistance.emplace_back(s_TransparentQuadData.CurrentQuadIndex, glm::length2(pos - cameraPosition));
+				s_TransparentQuadData.CurrentQuadIndex++;
 			}
 		}
 
-		auto end = s_TransparentQuadData.Distances.end();
+		std::sort(s_TransparentQuadData.QuadIndexDistance.begin(), s_TransparentQuadData.QuadIndexDistance.end(), [](const auto& v1, const auto& v2) {
+			return v1.second > v2.second;
+		});
 
-		for (const auto& chunk : chunksToSort)
-		{
-			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
-			s_TransparentQuadData.Vertices.insert(s_TransparentQuadData.Vertices.end(), transparentVertices.begin(), transparentVertices.end());
-
-			for (const auto& pos : chunk->GetDrawList().GetTransparentQuadPositions())
-			{
-				s_TransparentQuadData.Distances.emplace_back(quadIndex, glm::length2(pos - cameraPosition));
-				quadIndex++;
-			}
-		}
-
-		if (!s_TransparentQuadData.Vertices.size())
+		if (!s_TransparentQuadData.Vertices.size() && !s_TransparentQuadData.SortedVertices.size())
 			return;
 
+		// Renderer non sorted quads
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::EnableLessEqualDepthTesting();
@@ -803,24 +798,7 @@ namespace KuchCraft {
 		s_TransparentQuadData.Shader      .Bind();
 		s_TransparentQuadData.VertexArray .Bind();
 		s_TransparentQuadData.VertexBuffer.Bind();
-		s_TransparentQuadData.IndexBuffer .Bind();
-
-		std::sort(end, s_TransparentQuadData.Distances.end(), [](const auto& v1, const auto& v2) {
-			return v1.second > v2.second;
-		});
-
-		for (const auto& [index, distance] : s_TransparentQuadData.Distances)
-		{
-			uint32_t offset = index * 4;
-			s_TransparentQuadData.Indices.emplace_back(offset + 0);
-			s_TransparentQuadData.Indices.emplace_back(offset + 1);
-			s_TransparentQuadData.Indices.emplace_back(offset + 2);
-			s_TransparentQuadData.Indices.emplace_back(offset + 2);
-			s_TransparentQuadData.Indices.emplace_back(offset + 3);
-			s_TransparentQuadData.Indices.emplace_back(offset + 0);
-		}
-
-		s_TransparentQuadData.IndexBuffer.SetData(&s_TransparentQuadData.Indices[0], s_TransparentQuadData.Indices.size());
+		s_Data.QuadIndexBuffer            .Bind();
 
 		s_TransparentQuadData.VertexOffset = 0;
 		uint32_t maxTextureSlots = Renderer::GetInfo().MaxTextureSlots;
@@ -829,7 +807,7 @@ namespace KuchCraft {
 
 		for (uint32_t i = 0; i < s_TransparentQuadData.Vertices.size(); i += quad_vertex_count)
 		{
-			if (s_TransparentQuadData.IndexCount == s_Info.MaxIndices)
+			if (s_TransparentQuadData.IndexCount == s_Info.MaxTransparentIndices)
 				NextTransparentQuadsBatch();
 
 			float textureIndex = 0.0f;
@@ -863,6 +841,63 @@ namespace KuchCraft {
 
 		FlushTransparentQuads();
 
+		// For now more than one batch means troubles
+		// Renderer sorted quads
+		s_TransparentQuadData.IndexBuffer.Bind();
+
+		// Set up dynamic index buffer
+		for (const auto& [index, distance] : s_TransparentQuadData.QuadIndexDistance)
+		{
+			uint32_t offset = index * 4;
+			s_TransparentQuadData.Indices.emplace_back(offset + 0);
+			s_TransparentQuadData.Indices.emplace_back(offset + 1);
+			s_TransparentQuadData.Indices.emplace_back(offset + 2);
+			s_TransparentQuadData.Indices.emplace_back(offset + 2);
+			s_TransparentQuadData.Indices.emplace_back(offset + 3);
+			s_TransparentQuadData.Indices.emplace_back(offset + 0);
+		}
+
+		s_TransparentQuadData.IndexBuffer.SetData(&s_TransparentQuadData.Indices[0], s_TransparentQuadData.Indices.size());
+		s_TransparentQuadData.VertexOffset = 0;
+
+		StartTransparentQuadsBatch();
+
+		for (uint32_t i = 0; i < s_TransparentQuadData.SortedVertices.size(); i += quad_vertex_count)
+		{
+			if (s_TransparentQuadData.IndexCount == s_Info.MaxTransparentIndices)
+				NextSortedTransparentQuadsBatch();
+
+			float textureIndex = 0.0f;
+			for (uint32_t j = 1; j < s_TransparentQuadData.TextureSlotIndex; j++)
+			{
+				if (s_TransparentQuadData.TextureSlots[j] == s_TransparentQuadData.SortedVertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
+				{
+					textureIndex = (float)j;
+					break;
+				}
+			}
+
+			if (textureIndex == 0.0f)
+			{
+				if (s_TransparentQuadData.TextureSlotIndex >= maxTextureSlots)
+					NextSortedTransparentQuadsBatch();
+
+				textureIndex = (float)s_TransparentQuadData.TextureSlotIndex;
+				s_TransparentQuadData.TextureSlots[s_TransparentQuadData.TextureSlotIndex] = s_TransparentQuadData.SortedVertices[i].TexIndex;
+
+				s_TransparentQuadData.TextureSlotIndex++;
+			}
+
+			s_TransparentQuadData.SortedVertices[i + 0].TexIndex = textureIndex;
+			s_TransparentQuadData.SortedVertices[i + 1].TexIndex = textureIndex;
+			s_TransparentQuadData.SortedVertices[i + 2].TexIndex = textureIndex;
+			s_TransparentQuadData.SortedVertices[i + 3].TexIndex = textureIndex;
+
+			s_TransparentQuadData.IndexCount += quad_index_count;
+		}
+
+		FlushSortedTransparentQuads();
+
 		RendererCommand::EnableDepthMask();
 	}
 
@@ -894,6 +929,31 @@ namespace KuchCraft {
 	void Renderer3D::NextTransparentQuadsBatch()
 	{
 		FlushTransparentQuads();
+		StartTransparentQuadsBatch();
+	}
+
+	void Renderer3D::FlushSortedTransparentQuads()
+	{
+		if (s_TransparentQuadData.IndexCount == 0)
+			return;
+
+		uint32_t vertexCount = s_TransparentQuadData.IndexCount / quad_index_count * quad_vertex_count;
+
+		s_TransparentQuadData.VertexBuffer.SetData(&s_TransparentQuadData.SortedVertices[s_TransparentQuadData.VertexOffset], vertexCount * sizeof(TransparentQuad3DVertex));
+		s_TransparentQuadData.VertexOffset += vertexCount;
+
+		for (uint32_t i = 0; i < s_TransparentQuadData.TextureSlotIndex; i++)
+			Texture2D::Bind(s_TransparentQuadData.TextureSlots[i], i);
+
+		RendererCommand::DrawElements(s_TransparentQuadData.IndexCount);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
+	}
+
+	void Renderer3D::NextSortedTransparentQuadsBatch()
+	{
+		FlushSortedTransparentQuads();
 		StartTransparentQuadsBatch();
 	}
 
@@ -1000,7 +1060,7 @@ namespace KuchCraft {
 		s_TransparentQuadData.VertexArray.Create();
 		s_TransparentQuadData.VertexArray.Bind();
 
-		s_TransparentQuadData.VertexBuffer.Create(s_Info.MaxVertices * sizeof(TransparentQuad3DVertex));
+		s_TransparentQuadData.VertexBuffer.Create(s_Info.MaxTransparentVertices * sizeof(TransparentQuad3DVertex));
 		s_TransparentQuadData.VertexBuffer.SetBufferLayout({
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float2, "a_TexCoor"  },
@@ -1009,7 +1069,7 @@ namespace KuchCraft {
 
 		s_TransparentQuadData.VertexArray.SetVertexBuffer(s_TransparentQuadData.VertexBuffer);
 
-		uint32_t  indexBufferElementCount = s_Info.MaxIndices > max_indices_in_chunk ? s_Info.MaxIndices : max_indices_in_chunk;
+		uint32_t  indexBufferElementCount = s_Info.MaxTransparentIndices > max_indices_in_chunk ? s_Info.MaxTransparentIndices : max_indices_in_chunk;
 		uint32_t* indices = new uint32_t[indexBufferElementCount];
 		uint32_t  offset = 0;
 		for (uint32_t i = 0; i < indexBufferElementCount; i += quad_index_count)
@@ -1052,9 +1112,10 @@ namespace KuchCraft {
 		s_TransparentQuadData.TextureSlots = new uint32_t[maxTextureSlots];
 		s_TransparentQuadData.TextureSlots[0] = s_TransparentQuadData.WhiteTexture.GetRendererID();
 
-		s_TransparentQuadData.Vertices .reserve(s_Info.MaxVertices);
-		s_TransparentQuadData.Distances.reserve(s_Info.MaxVertices / quad_vertex_count);
-		s_TransparentQuadData.Indices  .reserve(s_Info.MaxIndices);
+		s_TransparentQuadData.Vertices         .reserve(s_Info.MaxTransparentVertices);
+		s_TransparentQuadData.SortedVertices   .reserve(s_Info.MaxTransparentVertices);
+		s_TransparentQuadData.QuadIndexDistance.reserve(s_Info.MaxTransparentVertices / quad_vertex_count);
+		s_TransparentQuadData.Indices          .reserve(s_Info.MaxTransparentIndices);
 
 		s_TransparentQuadData.VertexArray .Unbind();
 		s_TransparentQuadData.VertexBuffer.Unbind();

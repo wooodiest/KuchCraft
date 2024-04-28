@@ -17,6 +17,10 @@ namespace KuchCraft {
 		uint32_t MaxQuads    = 20000;
 		uint32_t MaxVertices = MaxQuads * 4;
 		uint32_t MaxIndices  = MaxQuads * 6;
+		
+		uint32_t MaxTransparentQuads    = 100000;
+		uint32_t MaxTransparentVertices = MaxTransparentQuads * 4;
+		uint32_t MaxTransparentIndices  = MaxTransparentQuads * 6;
 	};
 
 	struct Renderer3DData
@@ -91,8 +95,12 @@ namespace KuchCraft {
 
 		Texture2D WhiteTexture;
 
+		uint32_t CurrentQuadIndex = 0;
 		std::vector<TransparentQuad3DVertex>    Vertices;
-		std::vector<std::pair<uint32_t, float>> Distances;
+		std::vector<TransparentQuad3DVertex>    SortedVertices;
+		std::vector<Chunk*>                     ChunksToSort;
+		std::vector<std::pair<uint32_t, float>> ChunkIndexDistance;
+		std::vector<std::pair<uint32_t, float>> QuadIndexDistance;
 		std::vector<uint32_t>                   Indices;
 
 		uint32_t* TextureSlots;

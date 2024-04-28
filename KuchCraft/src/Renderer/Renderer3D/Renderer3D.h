@@ -73,6 +73,8 @@ namespace KuchCraft {
 		static void FlushTransparentQuads();
 		static void StartTransparentQuadsBatch();
 		static void NextTransparentQuadsBatch();
+		static void FlushSortedTransparentQuads();
+		static void NextSortedTransparentQuadsBatch();
 
 	private:
 		Renderer3D() = default;
