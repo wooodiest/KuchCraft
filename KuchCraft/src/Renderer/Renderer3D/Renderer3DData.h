@@ -63,7 +63,7 @@ namespace KuchCraft {
 	struct Renderer3DTintedData
 	{
 		bool Tinted = false;
-		glm::vec4 Color{ 0.0f, 0.0f, 0.75f, 1.0f };
+		glm::vec4 Color{ 0.0f, 0.0f, 0.8f, 0.3f };
 
 		Shader       Shader;
 		VertexArray  VertexArray;

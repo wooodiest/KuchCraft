@@ -182,6 +182,22 @@ namespace KuchCraft {
 
 		/* TRANSPARENT BLOCKS */
 		Glass,
+		BlackGlass,
+		BlueGlass,
+		BrownGlass,
+		CyanGlass,
+		GreyGlass,
+		GreenGlass,
+		LightBlueGlass,
+		LightGreyGlass,
+		LimeGlass,
+		MagentaGlass,
+		OrangeGlass,
+		PinkGlass,
+		PurpleGlass,
+		RedGlass,
+		WhiteGlass,
+		YellowGlass,
 		Water,
 
 		/* FOLIAGE QUADS */
