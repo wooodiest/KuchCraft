@@ -737,8 +737,50 @@ namespace KuchCraft {
 		// Only one batch supported right now, more = troubles
 
 		glm::vec3 cameraPosition = Renderer::s_Data.CurrentCamera->GetPosition();
-		uint32_t quadIndex = 0;
+		std::vector<std::pair<uint32_t, float>> chunksDistances;
+		chunksDistances.reserve(s_ChunkData.ChunksToRender.size());
+
+		std::vector<Chunk*> chunksToSort;
+		chunksToSort.reserve(10);
+
+		uint32_t chunkIndex = 0;
+		uint32_t quadIndex  = 0;
 		for (const auto& chunk : s_ChunkData.ChunksToRender)
+		{
+			constexpr float distanceToBeSorted = chunk_size_XZ * chunk_size_XZ * 4;
+			float distance = glm::length2(glm::vec2(chunk->GetPosition().x, chunk->GetPosition().z) + glm::vec2(chunk_size_XZ / 2.0f, chunk_size_XZ / 2.0f) - glm::vec2(cameraPosition.x, cameraPosition.z));
+
+			if (distance < distanceToBeSorted)
+			{
+				chunksToSort.push_back(chunk);
+			}
+			else
+			{
+				chunksDistances.emplace_back(chunkIndex, distance);
+			}
+			chunkIndex++;
+		}
+
+		std::sort(chunksDistances.begin(), chunksDistances.end(), [](const auto& v1, const auto& v2) {
+			return v1.second > v2.second;
+		});
+
+		for (const auto& [in, pos] : chunksDistances)
+		{
+			const auto& chunk = s_ChunkData.ChunksToRender[in];
+			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
+			s_TransparentQuadData.Vertices.insert(s_TransparentQuadData.Vertices.end(), transparentVertices.begin(), transparentVertices.end());
+
+			for (const auto& pos : chunk->GetDrawList().GetTransparentQuadPositions())
+			{
+				s_TransparentQuadData.Distances.emplace_back(quadIndex, 0.0f);
+				quadIndex++;
+			}
+		}
+
+		auto end = s_TransparentQuadData.Distances.end();
+
+		for (const auto& chunk : chunksToSort)
 		{
 			const auto& transparentVertices = chunk->GetDrawList().GetTransparentQuadVertices();
 			s_TransparentQuadData.Vertices.insert(s_TransparentQuadData.Vertices.end(), transparentVertices.begin(), transparentVertices.end());
@@ -763,7 +805,7 @@ namespace KuchCraft {
 		s_TransparentQuadData.VertexBuffer.Bind();
 		s_TransparentQuadData.IndexBuffer .Bind();
 
-		std::sort(s_TransparentQuadData.Distances.begin(), s_TransparentQuadData.Distances.end(), [](const auto& v1, const auto& v2) {
+		std::sort(end, s_TransparentQuadData.Distances.end(), [](const auto& v1, const auto& v2) {
 			return v1.second > v2.second;
 		});
 
