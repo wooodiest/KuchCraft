@@ -37,6 +37,8 @@ namespace KuchCraft {
 		inline bool IsTranslucent() const { return Type == ItemType::Air || IsTransparentBlock() || IsFoliageQuad(); }
 		inline bool IsPhysical()    const { return IsSolidBlock() || (IsTransparentBlock() && Type != ItemType::Water); }
 
+		inline bool IsTransparentCumulatively() const { return IsTransparentBlock(); } // for now its true
+
 	public:
 		static std::map<ItemType, std::string> s_ItemNames;
 

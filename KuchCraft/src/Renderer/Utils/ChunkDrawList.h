@@ -57,7 +57,7 @@ namespace KuchCraft {
 
 		void AddSolid(const glm::ivec3& position, uint32_t verticesIndex, const Item& item);
 		void AddTransparent(const glm::vec3& position, const Item& item);
-		void AddWater(const glm::vec3& position, uint32_t verticesIndex);
+		void AddTransparentQuad(const glm::vec3& position, const Item& item, uint32_t verticesIndex);
 		void AddFoliageQuad(const glm::vec3& position, const Item& item);
 
 	private:

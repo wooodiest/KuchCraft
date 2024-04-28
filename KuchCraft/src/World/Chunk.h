@@ -36,7 +36,7 @@ namespace KuchCraft {
 		static Chunk*    Create(const glm::vec3& position);
 
 	private:
-		void AddToDrawList(const glm::ivec3& position, Item neighbourItem, uint32_t verticesIndex, bool isWater);
+		void AddToDrawList(const glm::ivec3& position, Item neighbourItem, uint32_t verticesIndex);
 
 	private:
 		// Chunk position starts at (0, 0, 0) and continue along the axis + (chunk_size_XZ, 0, chunk_size_XZ)

@@ -160,9 +160,9 @@ namespace KuchCraft {
 			m_TransparentQuadsPositions.emplace_back(position + block_quad_centers[i]);
 	}
 
-	void ChunkDrawList::AddWater(const glm::vec3& position, uint32_t verticesIndex)
+	void ChunkDrawList::AddTransparentQuad(const glm::vec3& position, const Item& item, uint32_t verticesIndex)
 	{
-		float texture = AssetManager::GetItemTexture(ItemType::Water).GetRendererID();
+		float texture = AssetManager::GetItemTexture(item.Type).GetRendererID();
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
