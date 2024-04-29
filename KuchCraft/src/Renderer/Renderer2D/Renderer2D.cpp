@@ -41,7 +41,8 @@ namespace KuchCraft {
 	{
 		s_QuadData.Vertices.clear();
 
-		s_TextData.Data.clear();
+		s_TextData.Data             .clear();
+		s_TextData.TextIndexDistance.clear();
 	}
 
 	void Renderer2D::Render()
@@ -177,7 +178,9 @@ namespace KuchCraft {
 
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
-		RendererCommand::EnableLessEqualDepthTesting();
+		RendererCommand::EnableDepthTesting();
+		RendererCommand::DisableDepthMask();
+		RendererCommand::EnablePolygonOffset(1.0f, 1.0f);
 
 		s_TextData.Shader      .Bind();
 		s_TextData.Texture     .Bind();
@@ -187,11 +190,20 @@ namespace KuchCraft {
 		Renderer2DUniformText* textBuffer = new Renderer2DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
 		uint32_t currentIndex = 0;
 
+		for (uint32_t i = 0; i < s_TextData.Data.size(); i++)
+			s_TextData.TextIndexDistance.emplace_back(i, s_TextData.Data[i].second.Position.z);
+		
+		
+		std::sort(s_TextData.TextIndexDistance.begin(), s_TextData.TextIndexDistance.end(), [](const auto& v1, const auto& v2) {
+			return v1.second < v2.second;
+		});
+
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize(); 
 
-		for (const auto& [text, textStyle] : s_TextData.Data)
+		for (const auto& [index, distance] : s_TextData.TextIndexDistance)
 		{
-			glm::vec2 currentPosition = textStyle.Position;
+			const auto& [text, textStyle] = s_TextData.Data[index];
+			glm::vec2 currentPosition     = textStyle.Position;
 
 			if (textStyle.NormalizedPosition_X)
 				currentPosition.x *= width;
@@ -206,7 +218,7 @@ namespace KuchCraft {
 			if (!text.empty())
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(text[0]);
-				currentPosition.y -= (character.Size.y) * scale;
+				currentPosition.y -= (character.Size.y) * scale * (1.0f + textStyle.FontSpacing);
 			}
 
 			for (auto c = text.begin(); c != text.end(); c++)
@@ -261,6 +273,8 @@ namespace KuchCraft {
 		}
 
 		delete[] textBuffer;
+
+		RendererCommand::EnableDepthMask();
 	}
 
 	void Renderer2D::PrepareQuadRendering()

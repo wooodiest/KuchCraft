@@ -102,6 +102,7 @@ namespace KuchCraft {
 		UniformBuffer UniformBuffer;
 		FontTexture   Texture;
 
+		std::vector<std::pair<uint32_t, float>> TextIndexDistance;
 		std::vector<std::pair<std::string, TextStyle2D>> Data;
 	};
 
