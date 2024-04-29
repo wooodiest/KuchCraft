@@ -106,11 +106,11 @@ namespace KuchCraft {
 		RenderQuads();
 		Renderer::s_Stats.Renderer3DQuadsTimer.Finish();
 
+		RenderText();
+
 		Renderer::s_Stats.Renderer3DTransparentQuadsTimer.Start();
 		RenderTransparentQuads();
 		Renderer::s_Stats.Renderer3DTransparentQuadsTimer.Finish();
-
-		RenderText(); // TODO: think of place to put this and fix depth testing issues
 
 		s_TintedData.FrameBuffer.BindAndClear();
 		RenderTinted();
@@ -139,7 +139,8 @@ namespace KuchCraft {
 		s_TransparentQuadData.QuadIndexDistance .clear();
 		s_TransparentQuadData.Indices           .clear();
 
-		s_TextData.Data.clear();
+		s_TextData.Data             .clear();
+		s_TextData.TextIndexDistance.clear();
 	}
 
 	void Renderer3D::OnViewportSizeChanged(uint32_t width, uint32_t height)
@@ -451,19 +452,34 @@ namespace KuchCraft {
 
 		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
-		RendererCommand::DisableDepthTesting();
+		RendererCommand::EnableDepthTesting();
+		RendererCommand::DisableDepthMask();
+		RendererCommand::EnablePolygonOffset(1.0f, 1.0f);
 
-		s_TextData.Shader. Bind();
-		s_TextData.Texture.Bind();
-
-		s_TextData.VertexArray. Bind();
+		s_TextData.Shader      .Bind();
+		s_TextData.Texture     .Bind();
+		s_TextData.VertexArray .Bind();
 		s_TextData.VertexBuffer.Bind();
 
 		Renderer3DUniformText* textBuffer = new Renderer3DUniformText[s_TextInfo.MaxCharacterUniformArrayLimit];
+		const glm::vec3& cameraPosition   = Renderer::s_Data.CurrentCamera->GetPosition();
+
+		for (uint32_t i = 0; i < s_TextData.Data.size(); i++)
+		{
+			constexpr float max_distance = chunk_size_XZ * chunk_size_XZ * chunk_size_XZ / 2.0f;
+			float distance = glm::length2(cameraPosition - s_TextData.Data[i].second.Position); 
+			if (distance < max_distance)
+				s_TextData.TextIndexDistance.emplace_back(i, distance);
+		}
+
+		std::sort(s_TextData.TextIndexDistance.begin(), s_TextData.TextIndexDistance.end(), [](const auto& v1, const auto& v2) {
+			return v1.second > v2.second;
+		});
 
 		uint32_t currentIndex = 0;
-		for (const auto& [text, textStyle] : s_TextData.Data)
+		for (const auto& [index, distance] : s_TextData.TextIndexDistance)
 		{
+			const auto& [text, textStyle] = s_TextData.Data[index];
 			glm::vec2 currentPosition = textStyle.Position;
 
 			float scale = textStyle.FontSize / s_TextInfo.FontTextureSize;
@@ -530,6 +546,8 @@ namespace KuchCraft {
 		}
 
 		delete[] textBuffer;
+
+		RendererCommand::EnableDepthMask();
 	}
 
 	void Renderer3D::RenderQuads()
@@ -744,7 +762,7 @@ namespace KuchCraft {
 		// Check if the chunk is within quad sorting range
 		for (uint32_t i = 0; i < s_ChunkData.ChunksToRender.size(); i++)
 		{
-			constexpr float     sorting_range        = chunk_size_XZ * chunk_size_XZ * 4;
+			constexpr float     sorting_range        = chunk_size_XZ * chunk_size_XZ * chunk_size_XZ / 8.0f;
 			constexpr glm::vec2 distanceToBeInMiddle = { chunk_size_XZ / 2.0f, chunk_size_XZ / 2.0f };
 
 			const auto& chunk = s_ChunkData.ChunksToRender[i];

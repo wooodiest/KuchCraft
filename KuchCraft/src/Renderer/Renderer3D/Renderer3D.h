@@ -9,8 +9,6 @@
 
 namespace KuchCraft {
 
-	// TODO: Fix depthtesting with text and sort it by length
-
 	class Renderer3D
 	{
 	public:
