@@ -134,7 +134,7 @@ namespace KuchCraft {
 		}
 
 		m_DebugText =
-			  "\nPlayer:"
+			  "Player:"
 			  "\n   Position: "  + Utils::VecToString(m_Position, 2)
 			+ "\n   Rotation: "  + Utils::VecToString(glm::vec2{ glm::degrees(m_Rotation.x), glm::degrees(m_Rotation.y) }, 2)
 			+ "\n   Gamemode: "  + gameMode;

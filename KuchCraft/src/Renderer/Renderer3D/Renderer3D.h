@@ -15,7 +15,7 @@ namespace KuchCraft {
 		static void DrawChunk(Chunk* chunk);
 		static void DrawChunks(const std::vector<Chunk*>& chunks);
 
-		static void DrawItem(const glm::vec3& position, const Item& item);
+		static void DrawItem(const glm::vec3& position, const glm::vec3& rotation, const Item& item);
 		static void DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const glm::vec4& color);
 		static void DrawCube(const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& size, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
 

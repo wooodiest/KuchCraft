@@ -1152,19 +1152,29 @@ namespace KuchCraft {
 		s_ChunkData.Chunks.insert(s_ChunkData.Chunks.end(), chunks.begin(), chunks.end());
 	}
 
-	void Renderer3D::DrawItem(const glm::vec3& position, const Item& item)
+	void Renderer3D::DrawItem(const glm::vec3& position, const glm::vec3& rotation, const Item& item)
 	{
 		if (item.IsSolidBlock())
 		{
 			constexpr glm::vec3 block_initial_displacement{ 0.5f, 0.5f, 0.5f };
 			glm::vec3 blockPosition = glm::vec3{ (int)position.x, (int)position.y, (int)position.z } + block_initial_displacement;
 
-			DrawCube(blockPosition, { 0.0f, -glm::radians(90.0f * (float)item.Rotation), 0.0f }, { 1.0f, 1.0f, 1.0f }, AssetManager::GetItemTexture(item.Type));
+			DrawCube(blockPosition, glm::vec3{ 0.0f, -glm::radians(90.0f * (float)item.Rotation), 0.0f } + rotation, { 1.0f, 1.0f, 1.0f }, AssetManager::GetItemTexture(item.Type));
+		}
+		else if (item.IsFoliageQuad())
+		{
+			DrawQuad(position, glm::vec3{ 0.0f, 0.0f,                0.0f } + rotation, { 0.5f, 0.5f }, AssetManager::GetItemTexture(item.Type));
+			DrawQuad(position, glm::vec3{ 0.0f, glm::radians(90.0f), 0.0f } + rotation, { 0.5f, 0.5f }, AssetManager::GetItemTexture(item.Type));
+		}
+		else if (item.IsTransparentBlock())
+		{
+			// todo:
+			KC_ERROR("DrawItem - TransparentBlock - not supported");
 		}
 		else
 		{
 			// todo:
-			KC_ERROR("DrawItem other than solid is not supported");
+			KC_ERROR("DrawItem - {0} - not supported", item.GetName().c_str());
 		}
 	}
 
