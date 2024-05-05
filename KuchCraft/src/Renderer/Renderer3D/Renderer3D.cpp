@@ -112,6 +112,8 @@ namespace KuchCraft {
 		RenderTransparentQuads();
 		Renderer::s_Stats.Renderer3DTransparentQuadsTimer.Finish();
 
+		RenderText();
+
 		s_TintedData.FrameBuffer.BindAndClear();
 		RenderTinted();
 
