@@ -26,7 +26,9 @@ namespace KuchCraft {
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
+			GLenum type = internalFormat == GL_RGBA16F ? GL_FLOAT : GL_UNSIGNED_BYTE;
+
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, nullptr);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -59,30 +61,48 @@ namespace KuchCraft {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(multisampled), id, 0);
 	}
 
-	static bool IsDepthFormat(FrameBufferTextureFormat format)
+	inline static bool IsDepthFormat(FrameBufferTextureFormat format)
 	{
 		switch (format)
 		{
 			case FrameBufferTextureFormat::DEPTH24STENCIL8: return true;
+			default: return false;
 		}
-
-		return false;
 	}
 
-	static void BindTexture(bool multisampled, uint32_t id)
+	inline static void BindTexture(bool multisampled, uint32_t id)
 	{
 		glBindTexture(TextureTarget(multisampled), id);
 	}
 
-	static GLenum TextureFormatToOpenGL(FrameBufferTextureFormat format)
+	inline static GLenum TextureFormatToOpenGLInternal(FrameBufferTextureFormat format)
 	{
 		switch (format)
 		{
 			case FrameBufferTextureFormat::RGBA8:       return GL_RGBA8;
-			case FrameBufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
+			case FrameBufferTextureFormat::RED_INTEGER: return GL_R32I;
+			case FrameBufferTextureFormat::RGBA16F:		return GL_RGBA16F;
 		}
+	}
 
-		return 0;
+	inline static GLenum TextureFormatToOpenGL(FrameBufferTextureFormat format)
+	{
+		switch (format)
+		{
+			case FrameBufferTextureFormat::RGBA8:       return GL_RGBA;
+			case FrameBufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
+			case FrameBufferTextureFormat::RGBA16F:		return GL_RGBA;
+		}
+	}
+
+	inline static GLenum TextureFormatToOpenGLType(FrameBufferTextureFormat format)
+	{
+		switch (format)
+		{
+			case FrameBufferTextureFormat::RGBA8:       return GL_FLOAT;
+			case FrameBufferTextureFormat::RED_INTEGER: return GL_INT;
+			case FrameBufferTextureFormat::RGBA16F:		return GL_FLOAT;
+		}
 	}
 
 	FrameBuffer::FrameBuffer()
@@ -137,19 +157,14 @@ namespace KuchCraft {
 			for (size_t i = 0; i < m_ColorAttachments.size(); i++)
 			{
 				BindTexture(multisample, m_ColorAttachments[i]);
-				switch (m_ColorAttachmentSpecifications[i].TextureFormat)
-				{
-					case FrameBufferTextureFormat::RGBA8:
-					{
-						AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA8, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
-						break;
-					}
-					case FrameBufferTextureFormat::RED_INTEGER:
-					{
-						AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
-						break;
-					}
-				}
+				AttachColorTexture(
+					m_ColorAttachments[i],
+					m_Specification.Samples,
+					TextureFormatToOpenGLInternal(m_ColorAttachmentSpecifications[i].TextureFormat),
+					TextureFormatToOpenGL(m_ColorAttachmentSpecifications[i].TextureFormat), 
+					m_Specification.Width, m_Specification.Height,
+					i
+				);
 			}
 		}
 
@@ -211,28 +226,22 @@ namespace KuchCraft {
 
 	int FrameBuffer::ReadPixel(uint32_t attachmentIndex, int x, int y) const
 	{
-		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
-		int pixelData;
-		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
-		return pixelData;
+		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
+		if (spec.TextureFormat == FrameBufferTextureFormat::RED_INTEGER)
+		{
+			glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
+			int pixelData;
+			glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+			return pixelData;
+		}
+		
+		return -1;
 	}
 
 	void FrameBuffer::ClearColorAttachment(uint32_t attachmentIndex, const glm::vec4& color) const
 	{
 		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
-		switch (spec.TextureFormat)
-		{
-			case FrameBufferTextureFormat::RGBA8:
-			{
-				glClearTexImage(m_ColorAttachments[attachmentIndex], 0, GL_RGBA, GL_FLOAT, &color.x);
-				break;
-			}
-			case FrameBufferTextureFormat::RED_INTEGER:
-			{
-				glClearTexImage(m_ColorAttachments[attachmentIndex], 0, GL_RED_INTEGER, GL_INT, &color.x);
-				break;
-			}
-		}
+		glClearTexImage(m_ColorAttachments[attachmentIndex], 0, TextureFormatToOpenGL(spec.TextureFormat), TextureFormatToOpenGLType(spec.TextureFormat), &color.x);
 	}
 
 	void FrameBuffer::ClearColorAttachments(const glm::vec4& color) const
