@@ -56,7 +56,7 @@ namespace KuchCraft {
 
 		{
 			FrameBufferSpecification frameBufferSpecification;
-			frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::DEPTH24STENCIL8 };
+			frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::RGBA16F , FrameBufferTextureFormat::DEPTH24STENCIL8 };
 			frameBufferSpecification.Width = Application::Get().GetWindow().GetWidth();
 			frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
 			s_Data.RenderFrameBuffer.Create(frameBufferSpecification);
@@ -95,10 +95,6 @@ namespace KuchCraft {
 		RenderChunks();
 		Renderer::s_Stats.Renderer3DChunkTimer.Finish();
 
-		Renderer::s_Stats.Renderer3DSkyboxTimer.Start();
-		RenderSkybox();
-		Renderer::s_Stats.Renderer3DSkyboxTimer.Finish();
-
 		RenderOutlinedCube();
 
 		Renderer::s_Stats.Renderer3DQuadsTimer.Start();
@@ -106,7 +102,9 @@ namespace KuchCraft {
 		RenderQuads();
 		Renderer::s_Stats.Renderer3DQuadsTimer.Finish();
 
-		RenderText();
+		Renderer::s_Stats.Renderer3DSkyboxTimer.Start();
+		RenderSkybox();
+		Renderer::s_Stats.Renderer3DSkyboxTimer.Finish();
 
 		Renderer::s_Stats.Renderer3DTransparentQuadsTimer.Start();
 		RenderTransparentQuads();

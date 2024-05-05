@@ -5,7 +5,7 @@
 
 layout (location = 0) in uint a_PackedData;
 
-layout(std140, binding = 0) uniform UniformCameraData
+layout (std140, binding = 0) uniform UniformCameraData
 {
 	mat4 u_ViewProjection;
 	mat4 u_AbsoluteViewProjection;
@@ -16,6 +16,7 @@ uniform vec3 u_ChunkPosition;
 
 out vec2 v_TexCoord;
 out flat uint v_TexIndex;
+out vec3 v_Normal;
 
 void main()
 {
@@ -40,5 +41,6 @@ void main()
 		rotated_uv[index * 4 + rotation] : chunk_vertex_data[index].UV + vec2(0.25 * rotation, 0.0);
 
 	v_TexIndex  = (a_PackedData >> 24 ) & 0x7F;
+	v_Normal    = chunk_vertex_data[index].Normal;
 	gl_Position = u_ViewProjection * transform * chunk_vertex_data[index].Position;
 }

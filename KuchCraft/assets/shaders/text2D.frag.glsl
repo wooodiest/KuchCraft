@@ -11,7 +11,7 @@ struct TextData
 	vec4 Letter;
 };
 
-layout(std140, binding = 1) uniform UniformTextData
+layout (std140, binding = 1) uniform UniformTextData
 {
 	TextData u_Text[#max_text_uniform_array_limit];
 };

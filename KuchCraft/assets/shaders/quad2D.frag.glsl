@@ -1,6 +1,6 @@
 #version 450 core
 
-layout(location = 0) out vec4 Color;
+layout (location = 0) out vec4 Color;
 
 in vec4 v_Color;
 in vec2 v_TexCoord;
