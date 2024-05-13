@@ -116,6 +116,14 @@ namespace KuchCraft {
 		uint32_t FontCharactersCount           = 128;
 	};
 
+	struct Renderer2DMouseData
+	{
+		bool Show = true;
+		glm::vec2 Position = { 0.0f, 0.0f };
+
+		glm::vec2 PrevPosition = { 0.0f, 0.0f };
+	};
+
 	constexpr glm::vec4 quad_vertex_positions[4] = {
 		{ -1.0f, -1.0f, 0.0f, 1.0f },
 		{  1.0f, -1.0f, 0.0f, 1.0f },

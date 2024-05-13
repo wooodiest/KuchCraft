@@ -19,6 +19,8 @@ namespace KuchCraft {
 
 		static void DrawText(const std::string& text, const TextStyle2D& textStyle);
 
+		static void ResetMousePosition(const glm::vec2& position = { -1.0f, -1.0f });
+
 	private:
 		static void Init();
 		static void ShutDown();
@@ -45,6 +47,7 @@ namespace KuchCraft {
 		static Renderer2DFullScreenQuadData s_FullScreenQuadData;
 		static Renderer2DTextInfo           s_TextInfo;
 		static Renderer2DTextData           s_TextData;
+		static Renderer2DMouseData			s_MouseData;
 
 	public:
 		friend class Renderer;

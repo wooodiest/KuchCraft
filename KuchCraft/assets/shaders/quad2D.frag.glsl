@@ -10,5 +10,10 @@ uniform sampler2D u_Textures[#max_texture_slots];
 
 void main()
 {
-	Color = v_Color * texture(u_Textures[int(v_TexIndex)], v_TexCoord);
+	vec4 color = v_Color * texture(u_Textures[int(v_TexIndex)], v_TexCoord);
+
+	if (color.a == 0.0)
+		discard;
+
+	Color = color;
 }

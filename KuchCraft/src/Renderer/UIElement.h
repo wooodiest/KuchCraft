@@ -10,6 +10,7 @@ namespace KuchCraft {
 		HotbarSelected,
 
 		Crosshair,
+		Cursor,
 
 		HeartEmpty,
 		HeartFull,

@@ -17,6 +17,7 @@ namespace KuchCraft {
 	Renderer2DFullScreenQuadData Renderer2D::s_FullScreenQuadData;
 	Renderer2DTextInfo           Renderer2D::s_TextInfo;
 	Renderer2DTextData           Renderer2D::s_TextData;
+	Renderer2DMouseData			 Renderer2D::s_MouseData;
 
 	void Renderer2D::Init()
 	{
@@ -25,6 +26,9 @@ namespace KuchCraft {
 		PrepareQuadRendering();
 		PrepareFullScreenQuadRendering();
 		PrepareTextRendering();
+
+		s_MouseData.PrevPosition = Input::GetMousePosition();
+		ResetMousePosition();
 	}
 
 	void Renderer2D::ShutDown()
@@ -48,6 +52,21 @@ namespace KuchCraft {
 	void Renderer2D::Render()
 	{
 		Renderer::s_Stats.Renderer2DTimer.Start();
+
+		glm::vec2 mousePosition  = Input::GetMousePosition();
+		glm::vec2 positionDiff   = mousePosition - s_MouseData.PrevPosition;
+		s_MouseData.PrevPosition = mousePosition;
+
+		if (s_MouseData.Show)
+		{
+			auto [width, height] = Application::Get().GetWindow().GetWindowSize();
+			s_MouseData.Position = glm::clamp(s_MouseData.Position + glm::vec2{ positionDiff.x, positionDiff.y * -1.0f }, { 0.0f, 0.0f }, { width, height });
+
+			Renderer2DQuadInfo data;
+			data.Size = { 30.0f, 30.0f };
+			data.Position = glm::vec3(s_MouseData.Position, 1.0f);
+			DrawQuad(data, AssetManager::GetUIElementTexture(UIElement::Cursor));
+		}
 
 		RenderQuads();
 		RenderText();
@@ -455,6 +474,17 @@ namespace KuchCraft {
 	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle)
 	{
 		s_TextData.Data.emplace_back(text, textStyle);
+	}
+
+	void Renderer2D::ResetMousePosition(const glm::vec2& position)
+	{
+		if (position.x < 0.0f || position.y < 0.0f)
+		{
+			auto [width, height] = Application::Get().GetWindow().GetWindowSize();
+			s_MouseData.Position = { width / 2.0f, height / 2.0f };
+		}
+		else
+			s_MouseData.Position = position;
 	}
 
 }
