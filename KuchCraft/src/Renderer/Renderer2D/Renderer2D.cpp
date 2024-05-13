@@ -221,6 +221,8 @@ namespace KuchCraft {
 				currentPosition.y -= (character.Size.y) * scale * (1.0f + textStyle.FontSpacing);
 			}
 
+			float absolutePositionX = currentPosition.x;
+
 			for (auto c = text.begin(); c != text.end(); c++)
 			{
 				const FontCharacter& character = s_TextData.Texture.GetCharacter(*c);
@@ -228,7 +230,7 @@ namespace KuchCraft {
 				if (*c == '\n')
 				{
 					currentPosition.y -= (character.Size.y) * textStyle.FontSpacing * scale;
-					currentPosition.x = textStyle.Position.x;
+					currentPosition.x = absolutePositionX;
 				}
 				else if (*c == ' ')
 				{
