@@ -7,7 +7,7 @@ namespace Utils {
 	{
 		std::ostringstream stream;
 		stream << std::fixed << std::setprecision(precision);
-		stream << vec.x << ", " << vec.y << ", ";
+		stream << vec.x << ", " << vec.y;
 		return stream.str();
 	}
 
