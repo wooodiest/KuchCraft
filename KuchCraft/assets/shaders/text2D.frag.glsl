@@ -1,6 +1,6 @@
 #version 450 core
 
-layout (location = 0) out vec4 Color;
+layout (location = 0) out vec4 out_Color;
 
 uniform sampler2DArray u_Texture;
 
@@ -21,5 +21,5 @@ in flat int v_Index;
 
 void main()
 {
-    Color = u_Text[v_Index].Color * vec4(1.0, 1.0, 1.0, texture(u_Texture, vec3(v_TexCoord.xy, u_Text[v_Index].Letter.x)).r);
+    out_Color = u_Text[v_Index].Color * vec4(1.0, 1.0, 1.0, texture(u_Texture, vec3(v_TexCoord.xy, u_Text[v_Index].Letter.x)).r);
 }
