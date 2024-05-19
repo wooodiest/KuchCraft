@@ -224,11 +224,6 @@ namespace KuchCraft {
 			const auto& [text, textStyle] = s_TextData.Data[index];
 			glm::vec2 currentPosition     = textStyle.Position;
 
-			if (textStyle.NormalizedPosition_X)
-				currentPosition.x *= width;
-			if (textStyle.NormalizedPosition_Y)
-				currentPosition.y *= height;
-
 			if (textStyle.PositionFromTopLeft)
 				currentPosition.y = height - currentPosition.y;
 
@@ -431,12 +426,10 @@ namespace KuchCraft {
 
 	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color)
 	{
-		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-
 		glm::mat4 transform = 
-			glm::translate(glm::mat4(1.0f), { info.NormalizedPosition_X ? info.Position.x * width : info.Position.x, info.NormalizedPosition_Y ? info.Position.y * height : info.Position.y, info.Position.z, }) *
+			glm::translate(glm::mat4(1.0f), info.Position) *
 			glm::toMat4(glm::quat(info.Rotation)) * 
-			glm::scale(glm::mat4(1.0f), { info.NormalizedSize_X ? info.Size.x * width : info.Size.x , info.NormalizedSize_Y ? info.Size.y * width : info.Size.y, 1.0f });
+			glm::scale(glm::mat4(1.0f), glm::vec3(info.Size, 1.0f));
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
@@ -449,22 +442,19 @@ namespace KuchCraft {
 		}
 	}
 
-	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture)
 	{
-		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 		float textureID = texture.GetRendererID();
-
 		glm::mat4 transform =
-			glm::translate(glm::mat4(1.0f), { info.NormalizedPosition_X ? info.Position.x * width : info.Position.x, info.NormalizedPosition_Y ? info.Position.y * height : info.Position.y, info.Position.z, }) *
+			glm::translate(glm::mat4(1.0f), info.Position) *
 			glm::toMat4(glm::quat(info.Rotation)) *
-			glm::scale(glm::mat4(1.0f), { info.NormalizedSize_X ? info.Size.x * width : info.Size.x , info.NormalizedSize_Y ? info.Size.y * width : info.Size.y, 1.0f });
+			glm::scale(glm::mat4(1.0f), glm::vec3(info.Size, 1.0f));
 
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
 			Quad2DVertex vertex;
 			vertex.Position = transform * quad_vertex_positions[i];
-			vertex.Color    = tintColor;
-			vertex.TexCoord = quad_vertex_tex_coords[i] * tilingFactor;
+			vertex.TexCoord = quad_vertex_tex_coords[i];
 			vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
 
 			s_QuadData.Vertices.emplace_back(vertex);

@@ -15,11 +15,6 @@ namespace KuchCraft {
 		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
 		glm::vec2 Size     = { 100.0f,    100.f };
-
-		bool NormalizedPosition_X = false;
-		bool NormalizedPosition_Y = false;
-		bool NormalizedSize_X     = false;
-		bool NormalizedSize_Y     = false;
 	};
 
 	struct Renderer2DInfo
@@ -82,8 +77,6 @@ namespace KuchCraft {
 		glm::vec4 Color       { 1.0f, 1.0f, 1.0f, 1.0f };
 		float     FontSize    = 24.0f;
 		float     FontSpacing = 1.3f;
-		bool      NormalizedPosition_X = false;
-		bool      NormalizedPosition_Y = false;
 		bool      PositionFromTopLeft  = false;
 	};
 

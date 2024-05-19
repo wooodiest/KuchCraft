@@ -15,7 +15,7 @@ namespace KuchCraft {
 	{
 	public:
 		static void DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color);
-		static void DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f));
+		static void DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture);
 
 		static void DrawText(const std::string& text, const TextStyle2D& textStyle);
 

@@ -202,9 +202,8 @@ namespace KuchCraft {
 		if (m_GameMode != GameMode::Spectator)
 		{
 			Renderer2DQuadInfo hotbarQuadInfo;
-			hotbarQuadInfo.Position = { 0.5f, 33.0f, 0.0f };
+			hotbarQuadInfo.Position = { 0.5f * width, 33.0f, 0.0f };
 			hotbarQuadInfo.Size     = { 273.0f, 33.0f };
-			hotbarQuadInfo.NormalizedPosition_X = true;
 			Renderer2D::DrawQuad(hotbarQuadInfo, AssetManager::GetUIElementTexture(UIElement::Hotbar));
 
 			Renderer2DQuadInfo hotbarSelectionQuadInfo;
@@ -213,10 +212,8 @@ namespace KuchCraft {
 			Renderer2D::DrawQuad(hotbarSelectionQuadInfo, AssetManager::GetUIElementTexture(UIElement::HotbarSelected));
 
 			Renderer2DQuadInfo crosshairQuadInfo;
-			crosshairQuadInfo.Position = { 0.5f, 0.5f, 1.0f };
+			crosshairQuadInfo.Position = { 0.5f * width, 0.5f * height, 1.0f };
 			crosshairQuadInfo.Size     = { 15.0f, 15.0f };
-			crosshairQuadInfo.NormalizedPosition_X = true;
-			crosshairQuadInfo.NormalizedPosition_Y = true;
 			Renderer2D::DrawQuad(crosshairQuadInfo, AssetManager::GetUIElementTexture(UIElement::Crosshair));
 		}
 
