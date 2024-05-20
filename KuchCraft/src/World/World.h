@@ -43,6 +43,8 @@ namespace KuchCraft {
 		Camera& GetCamera() { return m_Player.GetCamera(); }
 		bool GetQuitStatus() const { return m_QuitStatus; }
 
+		const std::string& GetDebugText();
+
 		// TODO: Fix do not work properly
 		void ReloadChunks();
 
@@ -66,7 +68,6 @@ namespace KuchCraft {
 	private:
 		void Shutdown();
 		void DeleteUnusedChunks(const glm::vec3& position);
-		std::string& GetDebugText();
 
 	private:
 		static World* s_Instance;

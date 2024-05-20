@@ -13,7 +13,7 @@ struct TextData
 {
 	mat4 Transform;
 	vec4 Color;
-	vec4 Letter;
+	vec4 Data;
 };
 
 layout (std140, binding = 1) uniform UniformTextData

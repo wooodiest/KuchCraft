@@ -241,7 +241,13 @@ namespace KuchCraft {
 	void FrameBuffer::ClearColorAttachment(uint32_t attachmentIndex, const glm::vec4& color) const
 	{
 		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
-		glClearTexImage(m_ColorAttachments[attachmentIndex], 0, TextureFormatToOpenGL(spec.TextureFormat), TextureFormatToOpenGLType(spec.TextureFormat), &color.x);
+		if (spec.TextureFormat == FrameBufferTextureFormat::RED_INTEGER)
+		{
+			int value = static_cast<int>(color.x);
+			glClearTexImage(m_ColorAttachments[attachmentIndex], 0, TextureFormatToOpenGL(spec.TextureFormat), TextureFormatToOpenGLType(spec.TextureFormat), &value);
+		}
+		else
+			glClearTexImage(m_ColorAttachments[attachmentIndex], 0, TextureFormatToOpenGL(spec.TextureFormat), TextureFormatToOpenGLType(spec.TextureFormat), &color.x);	
 	}
 
 	void FrameBuffer::ClearColorAttachments(const glm::vec4& color) const

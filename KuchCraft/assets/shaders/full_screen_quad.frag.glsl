@@ -8,5 +8,10 @@ in vec2 v_TexCoord;
 
 void main()
 {
-	out_Color = texture(u_Texture, v_TexCoord);
+	vec4 color = texture(u_Texture, v_TexCoord);
+	
+	if (color.a == 0.0)
+		discard;
+
+	out_Color = color;
 }

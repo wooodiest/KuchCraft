@@ -14,12 +14,14 @@ namespace KuchCraft {
 	class Renderer2D
 	{
 	public:
-		static void DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color);
-		static void DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture);
+		static void DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color,   Renderer2DID id = Renderer2DID());
+		static void DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, Renderer2DID id = Renderer2DID());
 
-		static void DrawText(const std::string& text, const TextStyle2D& textStyle);
+		static void DrawText(const std::string& text, const TextStyle2D& textStyle, Renderer2DID id = Renderer2DID());
 
 		static void ResetMousePosition(const glm::vec2& position = { -1.0f, -1.0f });
+
+		static Renderer2DID GetHoveredID() { return s_QuadData.ID; }
 
 	private:
 		static void Init();
@@ -36,10 +38,13 @@ namespace KuchCraft {
 
 		static void RenderFullScreenQuad(uint32_t rendererID);
 		static void RenderText();
+		static void RenderMouse();
 
 		static void PrepareQuadRendering();
 		static void PrepareFullScreenQuadRendering();
 		static void PrepareTextRendering();
+
+		static uint32_t GetRendererdColorAttachmentRendererID() { return s_QuadData.FrameBuffer.GetColorAttachmentRendererID(); }
 
 	private:
 		static Renderer2DInfo               s_Info;

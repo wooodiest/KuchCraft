@@ -2,7 +2,7 @@
 
 namespace KuchCraft {
 
-	inline constexpr glm::vec4 default_clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	inline constexpr glm::vec4 default_clear_color = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	enum class FrameBufferTextureFormat
 	{

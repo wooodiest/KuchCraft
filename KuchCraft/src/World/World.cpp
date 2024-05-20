@@ -143,10 +143,6 @@ namespace KuchCraft {
 		// Renderer draw commands
 		Renderer3D::DrawChunks(m_ChunksToUpdate);
 
-		TextStyle2D style;
-		style.PositionFromTopLeft = true;
-		style.Position            = { 5.0f, 5.0f, 0.0f };
-		Renderer2D::DrawText(m_Player.GetDebugText() + GetDebugText() + Renderer::GetDubugText(), style);
 	}
 
 	void World::SetItem(const glm::vec3& position, const Item& block)
@@ -337,7 +333,7 @@ namespace KuchCraft {
 		}
 	}
 
-	std::string& World::GetDebugText()
+	const std::string& World::GetDebugText()
 	{
 		m_DebugText =
 			"\nWorld:"

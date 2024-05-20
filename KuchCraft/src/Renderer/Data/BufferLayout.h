@@ -5,7 +5,7 @@ namespace KuchCraft {
 	enum class ShaderDataType
 	{
 		None = 0,
-		Uint,
+		Uint, Int,
 		Float, Float2, Float3, Float4
 	};
 

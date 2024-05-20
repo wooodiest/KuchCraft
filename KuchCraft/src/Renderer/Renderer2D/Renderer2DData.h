@@ -5,6 +5,7 @@
 #include "Renderer/Data/VertexBuffer.h"
 #include "Renderer/Data/VertexArray.h"
 #include "Renderer/Data/UniformBuffer.h"
+#include "Renderer/Data/FrameBuffer.h"
 #include "Renderer/Data/Texture2D.h"
 #include "Renderer/Data/FontTexture.h"
 
@@ -30,6 +31,7 @@ namespace KuchCraft {
 		glm::vec4 Color    { 1.0f, 1.0f, 1.0f, 1.0f };
 		glm::vec2 TexCoord { 0.0f, 0.0f             };
 		float     TexIndex = 0.0f;
+		int32_t   ID       = -1;
 	};
 
 	struct Quad3DVertex
@@ -48,8 +50,24 @@ namespace KuchCraft {
 		float     TexIndex = 0.0f;
 	};
 
+	struct Renderer2DID
+	{
+		int32_t ID;
+
+		Renderer2DID()
+			: ID(-1) {}
+
+		Renderer2DID(int32_t id)
+			: ID(id) {}
+
+		operator int32_t() const { return ID; }
+	};
+
 	struct Renderer2DQuadData
 	{
+		FrameBuffer   FrameBuffer;
+		Renderer2DID ID;
+
 		Shader		 Shader;
 		IndexBuffer  IndexBuffer;
 		VertexArray  VertexArray;
@@ -84,7 +102,7 @@ namespace KuchCraft {
 	{
 		glm::mat4 Transform;
 		glm::vec4 Color{ 1.0f };
-		glm::vec4 Letter{ 0.0f }; // weird alignment
+		glm::vec4 Data{ 0.0f, -1.0f, 0.0f, 0.0f }; // Letter, ID
 	};
 
 	struct Renderer2DTextData
@@ -96,7 +114,7 @@ namespace KuchCraft {
 		FontTexture   Texture;
 
 		std::vector<std::pair<uint32_t, float>> TextIndexDistance;
-		std::vector<std::pair<std::string, TextStyle2D>> Data;
+		std::vector<std::tuple<std::string, TextStyle2D, Renderer2DID>> Data;
 	};
 
 	struct Renderer2DTextInfo

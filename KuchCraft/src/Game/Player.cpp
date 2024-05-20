@@ -112,6 +112,7 @@ namespace KuchCraft {
 			Renderer3D::DrawOutlinedCube(m_TargetedItem.Position, m_TargetedItem.Size);
 
 		ShowExampleUI();
+		ShowDebugText();
 	}
 
 	void Player::OnEvent(Event& event)
@@ -189,22 +190,14 @@ namespace KuchCraft {
 
 	void Player::ShowExampleUI()
 	{
-		auto& [width, height] = Application::Get().GetWindow().GetWindowSize();
+		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 
-#if 0
-		{
-			Renderer2DQuadInfo textDebugQuadInfo;
-			textDebugQuadInfo.Position = { 150.0f, height - 150.0f, 0.0f };
-			textDebugQuadInfo.Size     = { 150.0f, 150.0f };
-			Renderer2D::DrawQuad(textDebugQuadInfo, { 1.0f, 1.0f, 1.0f, 0.5f });
-		}
-#endif
 		if (m_GameMode != GameMode::Spectator)
 		{
 			Renderer2DQuadInfo hotbarQuadInfo;
 			hotbarQuadInfo.Position = { 0.5f * width, 33.0f, 0.0f };
 			hotbarQuadInfo.Size     = { 273.0f, 33.0f };
-			Renderer2D::DrawQuad(hotbarQuadInfo, AssetManager::GetUIElementTexture(UIElement::Hotbar));
+			Renderer2D::DrawQuad(hotbarQuadInfo, AssetManager::GetUIElementTexture(UIElement::Hotbar), 1);
 
 			Renderer2DQuadInfo hotbarSelectionQuadInfo;
 			hotbarSelectionQuadInfo.Position = { 0.5f * width - 3 * 60.0f, 34.0f, 1.0f };
@@ -300,6 +293,18 @@ namespace KuchCraft {
 				}
 			}
 		}
+	}
+
+	void Player::ShowDebugText()
+	{
+		TextStyle2D style;
+		style.PositionFromTopLeft = true;
+		style.Position = { 5.0f, 5.0f, 0.0f };
+
+		std::string text = GetDebugText() + World::Get().GetDebugText() + Renderer::GetDubugText();
+		text += "\n    Hovered ID: " + std::to_string(Renderer2D::GetHoveredID());
+
+		Renderer2D::DrawText(text, style);
 	}
 
 	bool Player::OnKeyPressed(KeyPressedEvent& e)

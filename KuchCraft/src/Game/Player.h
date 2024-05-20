@@ -64,6 +64,7 @@ namespace KuchCraft {
 		TargetedItemInfo GetTargetItemInfo();
 
 		void ShowExampleUI();
+		void ShowDebugText();
 
 	private:
 		glm::vec3 m_Position{ 0.0f };

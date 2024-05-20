@@ -29,6 +29,14 @@ namespace KuchCraft {
 
 		s_MouseData.PrevPosition = Input::GetMousePosition();
 		ResetMousePosition();
+
+		{
+			FrameBufferSpecification frameBufferSpecification;
+			frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::RED_INTEGER , FrameBufferTextureFormat::DEPTH24STENCIL8 };
+			frameBufferSpecification.Width  = Application::Get().GetWindow().GetWidth();
+			frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
+			s_QuadData.FrameBuffer.Create(frameBufferSpecification);
+		}
 	}
 
 	void Renderer2D::ShutDown()
@@ -53,23 +61,32 @@ namespace KuchCraft {
 	{
 		Renderer::s_Stats.Renderer2DTimer.Start();
 
-		glm::vec2 mousePosition  = Input::GetMousePosition();
-		glm::vec2 positionDiff   = mousePosition - s_MouseData.PrevPosition;
-		s_MouseData.PrevPosition = mousePosition;
-
-		if (s_MouseData.Show)
-		{
-			auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-			s_MouseData.Position = glm::clamp(s_MouseData.Position + glm::vec2{ positionDiff.x, positionDiff.y * -1.0f }, { 0.0f, 0.0f }, { width, height });
-
-			Renderer2DQuadInfo data;
-			data.Size = { 30.0f, 30.0f };
-			data.Position = glm::vec3(s_MouseData.Position, 1.0f);
-			DrawQuad(data, AssetManager::GetUIElementTexture(UIElement::Cursor));
-		}
+		s_QuadData.FrameBuffer.Bind();
+		s_QuadData.FrameBuffer.ClearColorAttachment(0, {  0.0f, 0.0f, 0.0f, 0.0f });
+		s_QuadData.FrameBuffer.ClearColorAttachment(1, { -1.0f, 0.0f, 0.0f, 0.0f });
+		s_QuadData.FrameBuffer.ClearDepthAttachment();
 
 		RenderQuads();
 		RenderText();
+
+		if (s_MouseData.Show)
+		{
+			glm::vec2 mousePosition  = Input::GetMousePosition();
+			glm::vec2 positionDiff   = mousePosition - s_MouseData.PrevPosition;
+			s_MouseData.PrevPosition = mousePosition;
+
+			auto [width, height] = Application::Get().GetWindow().GetWindowSize();
+			s_MouseData.Position = glm::clamp(s_MouseData.Position + glm::vec2{ positionDiff.x, positionDiff.y * -1.0f }, { 0.0f, 0.0f }, { width, height });
+
+			// slow
+			s_QuadData.ID = s_QuadData.FrameBuffer.ReadPixel(1, s_MouseData.Position.x, s_MouseData.Position.y);
+
+			RenderMouse();
+		}
+		else
+			s_QuadData.ID = -1;
+		
+		s_QuadData.FrameBuffer.Unbind();
 
 		Renderer::s_Stats.Renderer2DTimer.Finish();
 	}
@@ -175,7 +192,7 @@ namespace KuchCraft {
 
 	void Renderer2D::RenderFullScreenQuad(uint32_t rendererID)
 	{
-		RendererCommand::DisableBlending();
+		RendererCommand::EnableBlending();
 		RendererCommand::DisableFaceCulling();
 		RendererCommand::DisableDepthTesting();
 
@@ -210,7 +227,7 @@ namespace KuchCraft {
 		uint32_t currentIndex = 0;
 
 		for (uint32_t i = 0; i < s_TextData.Data.size(); i++)
-			s_TextData.TextIndexDistance.emplace_back(i, s_TextData.Data[i].second.Position.z);
+			s_TextData.TextIndexDistance.emplace_back(i, std::get<1>(s_TextData.Data[i]).Position.z);
 		
 		
 		std::sort(s_TextData.TextIndexDistance.begin(), s_TextData.TextIndexDistance.end(), [](const auto& v1, const auto& v2) {
@@ -221,7 +238,7 @@ namespace KuchCraft {
 
 		for (const auto& [index, distance] : s_TextData.TextIndexDistance)
 		{
-			const auto& [text, textStyle] = s_TextData.Data[index];
+			const auto& [text, textStyle, id] = s_TextData.Data[index];
 			glm::vec2 currentPosition     = textStyle.Position;
 
 			if (textStyle.PositionFromTopLeft)
@@ -261,7 +278,8 @@ namespace KuchCraft {
 
 					textBuffer[currentIndex].Color = textStyle.Color;
 
-					textBuffer[currentIndex].Letter.x = (float)character.ID;
+					textBuffer[currentIndex].Data.x = (float)character.ID;
+					textBuffer[currentIndex].Data.y = (float)id;
 
 					currentPosition.x += (character.Advance >> 6) * scale;
 					currentIndex++;
@@ -293,6 +311,42 @@ namespace KuchCraft {
 		RendererCommand::EnableDepthMask();
 	}
 
+	void Renderer2D::RenderMouse()
+	{
+		s_QuadData.Vertices.clear();
+
+		RendererCommand::DisableBlending();
+		RendererCommand::DisableFaceCulling();
+		RendererCommand::DisableDepthTesting();
+
+		s_QuadData.Shader      .Bind();
+		s_QuadData.VertexArray .Bind();
+		s_QuadData.VertexBuffer.Bind();
+		s_QuadData.IndexBuffer .Bind();
+
+		constexpr uint32_t   slot        = 1;
+		constexpr uint32_t   vertexCount = quad_index_count / quad_index_count * quad_vertex_count;
+		const     Texture2D& texture     = AssetManager::GetUIElementTexture(UIElement::Cursor);
+		constexpr glm::vec2  textureSize = { 30.0f, 30.0f };
+
+		Renderer2DQuadInfo data;
+		data.Size     = textureSize;
+		data.Position = glm::vec3(s_MouseData.Position, 1.0f);
+		DrawQuad(data, texture);
+
+		s_QuadData.Vertices[0].TexIndex = slot;
+		s_QuadData.Vertices[1].TexIndex = slot;
+		s_QuadData.Vertices[2].TexIndex = slot;
+		s_QuadData.Vertices[3].TexIndex = slot;
+			
+		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[0], vertexCount * sizeof(Quad2DVertex));
+		Texture2D::Bind(texture.GetRendererID(), slot);
+		RendererCommand::DrawElements(quad_index_count);
+
+		Renderer::s_Stats.DrawCalls++;
+		Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
+	}
+
 	void Renderer2D::PrepareQuadRendering()
 	{
 		s_QuadData.VertexArray.Create();
@@ -303,7 +357,8 @@ namespace KuchCraft {
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Color"    },
 			{ ShaderDataType::Float2, "a_TexCoor"  },
-			{ ShaderDataType::Float,  "a_TexIndex" }
+			{ ShaderDataType::Float,  "a_TexIndex" },
+			{ ShaderDataType::Int,    "a_ID"       },
 		});
 
 		s_QuadData.VertexArray.SetVertexBuffer(s_QuadData.VertexBuffer);
@@ -424,7 +479,7 @@ namespace KuchCraft {
 		s_TextData.Shader.Unbind();
 	}
 
-	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color, Renderer2DID id)
 	{
 		glm::mat4 transform = 
 			glm::translate(glm::mat4(1.0f), info.Position) *
@@ -437,12 +492,13 @@ namespace KuchCraft {
 			vertex.Position = transform * quad_vertex_positions[i];
 			vertex.Color    = color;
 			vertex.TexCoord = quad_vertex_tex_coords[i];
+			vertex.ID       = id;
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
 	}
 
-	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture)
+	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, Renderer2DID id)
 	{
 		float textureID = texture.GetRendererID();
 		glm::mat4 transform =
@@ -456,14 +512,15 @@ namespace KuchCraft {
 			vertex.Position = transform * quad_vertex_positions[i];
 			vertex.TexCoord = quad_vertex_tex_coords[i];
 			vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
+			vertex.ID       = id;
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
 	}
 
-	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle)
+	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle, Renderer2DID id)
 	{
-		s_TextData.Data.emplace_back(text, textStyle);
+		s_TextData.Data.emplace_back(text, textStyle, id);
 	}
 
 	void Renderer2D::ResetMousePosition(const glm::vec2& position)

@@ -60,11 +60,12 @@ namespace KuchCraft {
 		}
 
 		Renderer3D::Render();
+		Renderer2D::Render();
 
 		DefaultFrameBuffer::BindAndClear();
+		// todo: combine it into one shader width draw list
 		Renderer2D::RenderFullScreenQuad(Renderer3D::GetRendererdColorAttachmentRendererID());
-
-		Renderer2D::Render();
+		Renderer2D::RenderFullScreenQuad(Renderer2D::GetRendererdColorAttachmentRendererID());
 
 		s_Stats.RenderTimer.Finish();
 	}

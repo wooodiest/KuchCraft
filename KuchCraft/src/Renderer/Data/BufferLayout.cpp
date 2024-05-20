@@ -14,6 +14,7 @@ namespace KuchCraft {
 		switch (Type)
 		{
 			case ShaderDataType::Uint:   return 1;
+			case ShaderDataType::Int:    return 1;
 			case ShaderDataType::Float:  return 1;
 			case ShaderDataType::Float2: return 2;
 			case ShaderDataType::Float3: return 3;
@@ -28,6 +29,7 @@ namespace KuchCraft {
 		switch (Type)
 		{
 			case ShaderDataType::Uint:   return 1 * sizeof(uint32_t);
+			case ShaderDataType::Int:    return 1 * sizeof(int32_t);
 			case ShaderDataType::Float:  return 1 * sizeof(float);
 			case ShaderDataType::Float2: return 2 * sizeof(float);
 			case ShaderDataType::Float3: return 3 * sizeof(float);

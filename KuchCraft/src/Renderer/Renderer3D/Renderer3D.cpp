@@ -57,7 +57,7 @@ namespace KuchCraft {
 		{
 			FrameBufferSpecification frameBufferSpecification;
 			frameBufferSpecification.Attachments = { FrameBufferTextureFormat::RGBA8, FrameBufferTextureFormat::RGBA16F , FrameBufferTextureFormat::DEPTH24STENCIL8 };
-			frameBufferSpecification.Width = Application::Get().GetWindow().GetWidth();
+			frameBufferSpecification.Width  = Application::Get().GetWindow().GetWidth();
 			frameBufferSpecification.Height = Application::Get().GetWindow().GetHeight();
 			s_Data.RenderFrameBuffer.Create(frameBufferSpecification);
 		}

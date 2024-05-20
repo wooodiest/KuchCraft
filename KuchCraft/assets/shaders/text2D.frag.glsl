@@ -1,6 +1,7 @@
 #version 450 core
 
 layout (location = 0) out vec4 out_Color;
+layout (location = 1) out int  out_ID;
 
 uniform sampler2DArray u_Texture;
 
@@ -8,7 +9,7 @@ struct TextData
 {
 	mat4 Transform;
 	vec4 Color;
-	vec4 Letter;
+	vec4 Data;
 };
 
 layout (std140, binding = 1) uniform UniformTextData
@@ -21,5 +22,6 @@ in flat int v_Index;
 
 void main()
 {
-    out_Color = u_Text[v_Index].Color * vec4(1.0, 1.0, 1.0, texture(u_Texture, vec3(v_TexCoord.xy, u_Text[v_Index].Letter.x)).r);
+    out_Color = u_Text[v_Index].Color * vec4(1.0, 1.0, 1.0, texture(u_Texture, vec3(v_TexCoord.xy, u_Text[v_Index].Data.x)).r);
+	out_ID    = int(u_Text[v_Index].Data.y);
 }
