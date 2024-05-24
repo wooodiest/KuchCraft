@@ -19,9 +19,10 @@ namespace KuchCraft {
 
 		static void DrawText(const std::string& text, const TextStyle2D& textStyle, Renderer2DID id = Renderer2DID());
 
-		static void ResetMousePosition(const glm::vec2& position = { -1.0f, -1.0f });
-
-		static Renderer2DID GetHoveredID() { return s_QuadData.ID; }
+		static Renderer2DID GetHoveredID()           { return s_QuadData.ID;                 }
+		static void SetShowCursorStatus(bool status) { s_MouseData.Show = status;            }
+		static void SwitchShowCursorSatatus()        { s_MouseData.Show = !s_MouseData.Show; }
+		static void ResetCursorPosition(const glm::vec2& position = { -1.0f, -1.0f });
 
 	private:
 		static void Init();

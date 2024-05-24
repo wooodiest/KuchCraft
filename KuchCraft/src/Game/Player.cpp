@@ -341,6 +341,13 @@ namespace KuchCraft {
 				SetGameMode(GameMode::Spectator);
 				return false;
 			}
+			case KeyCode::E:
+			{
+				Renderer2D::SwitchShowCursorSatatus();
+				Renderer2D::ResetMousePosition();
+
+				return false;
+			}
 		}
 		return false;
 	}

@@ -129,7 +129,7 @@ namespace KuchCraft {
 
 	struct Renderer2DMouseData
 	{
-		bool Show = true;
+		bool Show = false;
 		glm::vec2 Position = { 0.0f, 0.0f };
 
 		glm::vec2 PrevPosition = { 0.0f, 0.0f };

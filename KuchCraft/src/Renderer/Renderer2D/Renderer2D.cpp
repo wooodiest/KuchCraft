@@ -28,7 +28,7 @@ namespace KuchCraft {
 		PrepareTextRendering();
 
 		s_MouseData.PrevPosition = Input::GetMousePosition();
-		ResetMousePosition();
+		ResetCursorPosition();
 
 		{
 			FrameBufferSpecification frameBufferSpecification;
@@ -69,18 +69,16 @@ namespace KuchCraft {
 		RenderQuads();
 		RenderText();
 
+		glm::vec2 mousePosition  = Input::GetMousePosition();
+		glm::vec2 positionDiff   = mousePosition - s_MouseData.PrevPosition;
+		s_MouseData.PrevPosition = mousePosition;
+
 		if (s_MouseData.Show)
 		{
-			glm::vec2 mousePosition  = Input::GetMousePosition();
-			glm::vec2 positionDiff   = mousePosition - s_MouseData.PrevPosition;
-			s_MouseData.PrevPosition = mousePosition;
-
 			auto [width, height] = Application::Get().GetWindow().GetWindowSize();
 			s_MouseData.Position = glm::clamp(s_MouseData.Position + glm::vec2{ positionDiff.x, positionDiff.y * -1.0f }, { 0.0f, 0.0f }, { width, height });
 
-			// slow
-			s_QuadData.ID = s_QuadData.FrameBuffer.ReadPixel(1, s_MouseData.Position.x, s_MouseData.Position.y);
-
+			s_QuadData.ID = s_QuadData.FrameBuffer.ReadPixel(1, s_MouseData.Position.x, s_MouseData.Position.y); // slow
 			RenderMouse();
 		}
 		else
@@ -523,7 +521,7 @@ namespace KuchCraft {
 		s_TextData.Data.emplace_back(text, textStyle, id);
 	}
 
-	void Renderer2D::ResetMousePosition(const glm::vec2& position)
+	void Renderer2D::ResetCursorPosition(const glm::vec2& position)
 	{
 		if (position.x < 0.0f || position.y < 0.0f)
 		{
