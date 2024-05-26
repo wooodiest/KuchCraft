@@ -105,10 +105,35 @@ namespace KuchCraft {
 			inventoryQuadInfo.Size     = { inventory_texture_size_x, inventory_texture_size_y };
 			Renderer2D::DrawQuad(inventoryQuadInfo, AssetManager::GetUIElementTexture(UIElement::Inventory));
 
-			Renderer2DQuadInfo exampleQuadInfo;
-			exampleQuadInfo.Position = { 0.5f * width - 4 * 2 * inventory_cell_size, 0.5f * height - inventory_cell_size, 0.1f };
-			exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
-			Renderer2D::DrawQuad(exampleQuadInfo, { 1.0f, 0.0, 0.0f, 1.0f });
+			const glm::vec2 leftTopCorner     = { 0.5f * width - 4.0f * 2.0f * inventory_cell_size, 0.5f * height - inventory_cell_size };
+			const glm::vec2 rightBottomCorner = leftTopCorner + glm::vec2{ 9.0f * 2.0f * inventory_cell_size, -2.0f * 2.0f * inventory_cell_size};
+			uint32_t index = 0;
+
+			const glm::vec2 hotbarLeft = { 0.5f * width - 4.0f * 2.0f * inventory_cell_size, 0.5f * height - 2.0f * 3.0f * inventory_cell_size - 11.0f - inventory_cell_size };
+
+			for (float x = hotbarLeft.x; x <= hotbarLeft.x + 9.0f * 2.0f * inventory_cell_size; x += 2.0f * inventory_cell_size)
+			{
+				Renderer2DQuadInfo exampleQuadInfo;
+				exampleQuadInfo.Position = { x, hotbarLeft.y, 0.2f };
+				exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
+
+				Renderer2D::DrawQuad(exampleQuadInfo, { 1.0f, 1.0f, 1.0f, 0.01f }, index);
+
+				index++;
+			}
+
+			for (float y = leftTopCorner.y; y >= rightBottomCorner.y; y -= 2.0f * inventory_cell_size)
+			{
+				for (float x = leftTopCorner.x; x <= rightBottomCorner.x; x += 2.0f * inventory_cell_size)
+				{
+					Renderer2DQuadInfo exampleQuadInfo;
+					exampleQuadInfo.Position = { x, y, 0.1f };
+					exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
+					Renderer2D::DrawQuad(exampleQuadInfo, { 1.0f, 1.0f, 1.0f, 0.01f}, index);
+
+					index++;
+				}
+			}
 
 		}
 
@@ -120,7 +145,6 @@ namespace KuchCraft {
 
 		Renderer2D::SetShowCursorStatus(true);
 		auto [width, height] = Application::Get().GetWindow().GetWindowSize();
-		// todo cal 17
 		const glm::vec2 focuedCurosorPosition = { 0.5f * width + (m_HotbarSlot - 4) * inventory_texture_size_x / 4.9f, 0.5f * height - inventory_texture_size_y + inventory_texture_size_y / 5.0f };
 		Renderer2D::ResetCursorPosition(focuedCurosorPosition);
 	}
