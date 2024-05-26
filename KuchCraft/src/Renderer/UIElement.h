@@ -19,6 +19,8 @@ namespace KuchCraft {
 		ArmorEmpty,
 		ArmorFull,
 
+		Inventory,
+
 		None
 	};
 

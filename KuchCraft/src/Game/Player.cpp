@@ -39,6 +39,8 @@ namespace KuchCraft {
 	void Player::OnUpdate(float dt)
 	{
 		// Movement	
+		const bool canMove = !m_Inventory.GetOpenStatus();
+		
 		// Mouse
 		{
 			glm::vec2 position     = Input::GetMousePosition();
@@ -46,59 +48,68 @@ namespace KuchCraft {
 			m_PrevMousePosition    = position;
 
 			constexpr float camera_sensitivity = 0.25f;
-			m_Rotation.x += positionDiff.x * camera_sensitivity * 0.001f;
-			m_Rotation.y -= positionDiff.y * camera_sensitivity * 0.001f;
 
-			constexpr float min_pitch = glm::radians(-89.9f);
-			constexpr float max_pitch = glm::radians( 89.9f);
+			if (canMove)
+			{
+				m_Rotation.x += positionDiff.x * camera_sensitivity * 0.001f;
+				m_Rotation.y -= positionDiff.y * camera_sensitivity * 0.001f;
 
-			if (m_Rotation.y < min_pitch)
-				m_Rotation.y = min_pitch;
+				constexpr float min_pitch = glm::radians(-89.9f);
+				constexpr float max_pitch = glm::radians(89.9f);
 
-			if (m_Rotation.y > max_pitch)
-				m_Rotation.y = max_pitch;
+				if (m_Rotation.y < min_pitch)
+					m_Rotation.y = min_pitch;
 
-			constexpr float yaw_boundary = glm::radians(360.0f);
+				if (m_Rotation.y > max_pitch)
+					m_Rotation.y = max_pitch;
 
-			if (m_Rotation.x > yaw_boundary)
-				m_Rotation.x -= yaw_boundary;
+				constexpr float yaw_boundary = glm::radians(360.0f);
 
-			if (m_Rotation.x < 0.0f)
-				m_Rotation.x += yaw_boundary;
+				if (m_Rotation.x > yaw_boundary)
+					m_Rotation.x -= yaw_boundary;
+
+				if (m_Rotation.x < 0.0f)
+					m_Rotation.x += yaw_boundary;
+			}
 		}
 
 		// Keyboard
 		m_PhysicsBody.SetData(m_Position, m_Camera.GetAbsoluteFront(), m_Camera.GetAbsoluteRight());
 
-		if (Input::IsKeyPressed(KeyCode::W))
+		if (canMove)
 		{
-			if (Input::IsKeyPressed(KeyCode::LeftShift))
-				m_PhysicsBody.SprintForward();
-			else
-				m_PhysicsBody.MoveForward();
-		}
-		if (Input::IsKeyPressed(KeyCode::S))
-			m_PhysicsBody.MoveBackward();
-		
-		if (Input::IsKeyPressed(KeyCode::A))
-			m_PhysicsBody.MoveLeft();
-		if (Input::IsKeyPressed(KeyCode::D))
-			m_PhysicsBody.MoveRight();
+			if (Input::IsKeyPressed(KeyCode::W))
+			{
+				if (Input::IsKeyPressed(KeyCode::LeftShift))
+					m_PhysicsBody.SprintForward();
+				else
+					m_PhysicsBody.MoveForward();
+			}
+			if (Input::IsKeyPressed(KeyCode::S))
+				m_PhysicsBody.MoveBackward();
 
-		if (Input::IsKeyPressed(KeyCode::Space))
-			m_PhysicsBody.SwimUp();
+			if (Input::IsKeyPressed(KeyCode::A))
+				m_PhysicsBody.MoveLeft();
+			if (Input::IsKeyPressed(KeyCode::D))
+				m_PhysicsBody.MoveRight();
 
-		if ((m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator) && m_PhysicsBody.GetFlyingStatus())
-		{
 			if (Input::IsKeyPressed(KeyCode::Space))
-				m_PhysicsBody.FlyUp();
-			if (Input::IsKeyPressed(KeyCode::LeftControl))
-				m_PhysicsBody.FlyDown();
+				m_PhysicsBody.SwimUp();
+
+			if ((m_GameMode == GameMode::Creative || m_GameMode == GameMode::Spectator) && m_PhysicsBody.GetFlyingStatus())
+			{
+				if (Input::IsKeyPressed(KeyCode::Space))
+					m_PhysicsBody.FlyUp();
+				if (Input::IsKeyPressed(KeyCode::LeftControl))
+					m_PhysicsBody.FlyDown();
+			}
 		}
+
 		m_PhysicsBody.OnUpdate(dt);
 
 		m_Position = m_PhysicsBody.GetPosition();
 		m_Camera.OnUpdate(GetEyePosition(), m_Rotation);
+		m_Inventory.OnUpdate(dt);
 
 		if (m_GameMode != GameMode::Spectator)
 			m_TargetedItem = GetTargetItemInfo();
@@ -119,11 +130,17 @@ namespace KuchCraft {
 
 	void Player::OnEvent(Event& event)
 	{
-		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<KeyPressedEvent>(KC_BIND_EVENT_FN(Player::OnKeyPressed));
-		dispatcher.Dispatch<MouseButtonPressedEvent>(KC_BIND_EVENT_FN(Player::OnMouseButtonPressed));
+		const bool canMove = !m_Inventory.GetOpenStatus();
 
-		m_Camera.OnEvent(event);
+		if (canMove)
+		{
+			EventDispatcher dispatcher(event);
+			dispatcher.Dispatch<KeyPressedEvent>(KC_BIND_EVENT_FN(Player::OnKeyPressed));
+			dispatcher.Dispatch<MouseButtonPressedEvent>(KC_BIND_EVENT_FN(Player::OnMouseButtonPressed));
+		}
+
+		m_Inventory.OnEvent(event);
+		m_Camera   .OnEvent(event);
 	}
 
 	std::string& Player::GetDebugText()
@@ -196,18 +213,8 @@ namespace KuchCraft {
 
 		if (m_GameMode != GameMode::Spectator)
 		{
-			Renderer2DQuadInfo hotbarQuadInfo;
-			hotbarQuadInfo.Position = { 0.5f * width, 33.0f, 0.0f };
-			hotbarQuadInfo.Size     = { 273.0f, 33.0f };
-			Renderer2D::DrawQuad(hotbarQuadInfo, AssetManager::GetUIElementTexture(UIElement::Hotbar), 1);
-
-			Renderer2DQuadInfo hotbarSelectionQuadInfo;
-			hotbarSelectionQuadInfo.Position = { 0.5f * width - 3 * 60.0f, 34.0f, 1.0f };
-			hotbarSelectionQuadInfo.Size     = { 33.0f, 33.0f };
-			Renderer2D::DrawQuad(hotbarSelectionQuadInfo, AssetManager::GetUIElementTexture(UIElement::HotbarSelected));
-
 			Renderer2DQuadInfo crosshairQuadInfo;
-			crosshairQuadInfo.Position = { 0.5f * width, 0.5f * height, 1.0f };
+			crosshairQuadInfo.Position = { 0.5f * width, 0.5f * height, 0.0f };
 			crosshairQuadInfo.Size     = { 15.0f, 15.0f };
 			Renderer2D::DrawQuad(crosshairQuadInfo, AssetManager::GetUIElementTexture(UIElement::Crosshair));
 		}
@@ -346,13 +353,6 @@ namespace KuchCraft {
 			case KeyCode::F6:
 			{
 				SetGameMode(GameMode::Spectator);
-				return false;
-			}
-			case KeyCode::E:
-			{
-				Renderer2D::SwitchShowCursorSatatus();
-				Renderer2D::ResetMousePosition();
-
 				return false;
 			}
 		}

@@ -13,6 +13,8 @@
 #include "Core/Events/KeyEvent.h"
 #include "Core/Events/MouseEvent.h"
 
+#include "Game/Inventory.h"
+
 namespace KuchCraft {
 
 	constexpr float player_height          = 1.8f;
@@ -75,6 +77,7 @@ namespace KuchCraft {
 		GameMode		  m_GameMode;
 		PlayerPhysicsBody m_PhysicsBody;
 		TargetedItemInfo  m_TargetedItem;
+		Inventory         m_Inventory;
 
 		std::string m_DebugText;
 		bool m_ShowDebugText = false;
