@@ -112,7 +112,9 @@ namespace KuchCraft {
 			Renderer3D::DrawOutlinedCube(m_TargetedItem.Position, m_TargetedItem.Size);
 
 		ShowExampleUI();
-		ShowDebugText();
+
+		if (m_ShowDebugText)
+			ShowDebugText();
 	}
 
 	void Player::OnEvent(Event& event)
@@ -326,6 +328,11 @@ namespace KuchCraft {
 				
 				return false;
 			}	
+			case KeyCode::F3:
+			{
+				m_ShowDebugText = !m_ShowDebugText;
+				return false;
+			}
 			case KeyCode::F4:
 			{
 				SetGameMode(GameMode::Survival);

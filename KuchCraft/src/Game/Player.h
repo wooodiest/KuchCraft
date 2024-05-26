@@ -77,6 +77,7 @@ namespace KuchCraft {
 		TargetedItemInfo  m_TargetedItem;
 
 		std::string m_DebugText;
+		bool m_ShowDebugText = false;
 
 	};
 
