@@ -477,6 +477,11 @@ namespace KuchCraft {
 		s_TextData.Shader.Unbind();
 	}
 
+	void Renderer2D::OnViewportSizeChanged(uint32_t width, uint32_t height)
+	{
+		s_QuadData.FrameBuffer.Resize(width, height);
+	}
+
 	void Renderer2D::DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color, Renderer2DID id)
 	{
 		glm::mat4 transform = 

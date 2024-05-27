@@ -104,6 +104,7 @@ namespace KuchCraft {
 	void Renderer::OnViewportSizeChanged(uint32_t width, uint32_t height)
 	{
 		Renderer3D::OnViewportSizeChanged(width, height);
+		Renderer2D::OnViewportSizeChanged(width, height);
 
 		s_Data.SpareCamera->UpdateProjection(width, height);
 	}

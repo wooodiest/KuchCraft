@@ -45,6 +45,8 @@ namespace KuchCraft {
 		static void PrepareFullScreenQuadRendering();
 		static void PrepareTextRendering();
 
+		static void OnViewportSizeChanged(uint32_t width, uint32_t height);
+
 		static uint32_t GetRendererdColorAttachmentRendererID() { return s_QuadData.FrameBuffer.GetColorAttachmentRendererID(); }
 
 	private:
