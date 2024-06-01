@@ -114,14 +114,15 @@ namespace KuchCraft {
 			for (float x = hotbarLeft.x; x <= hotbarLeft.x + 9.0f * 2.0f * inventory_cell_size; x += 2.0f * inventory_cell_size)
 			{
 				Renderer2DQuadInfo exampleQuadInfo;
-				exampleQuadInfo.Position = { x, hotbarLeft.y, 0.2f };
+				exampleQuadInfo.Position = { x, hotbarLeft.y, 0.1f };
 				exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
 
 				Renderer2D::DrawQuad(exampleQuadInfo, { 1.0f, 1.0f, 1.0f, 0.01f }, index);
-
+				Renderer2D::DrawItem(Item(ItemType((int)ItemType::Dirt + index)), { x, hotbarLeft.y, 0.1f }, index);
 				index++;
 			}
 
+			int flower = 0; //tmp
 			for (float y = leftTopCorner.y; y >= rightBottomCorner.y; y -= 2.0f * inventory_cell_size)
 			{
 				for (float x = leftTopCorner.x; x <= rightBottomCorner.x; x += 2.0f * inventory_cell_size)
@@ -130,8 +131,10 @@ namespace KuchCraft {
 					exampleQuadInfo.Position = { x, y, 0.1f };
 					exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
 					Renderer2D::DrawQuad(exampleQuadInfo, { 1.0f, 1.0f, 1.0f, 0.01f}, index);
+					Renderer2D::DrawItem(Item(ItemType((int)ItemType::BeetrootsCrops + flower)), { x, y, 0.1f }, index);
 
 					index++;
+					flower++;
 				}
 			}
 

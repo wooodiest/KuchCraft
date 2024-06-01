@@ -4,6 +4,8 @@
 
 #include "Renderer/Data/Texture2D.h"
 
+#include "World/Item.h"
+
 // LOVE windows.h <3
 #ifdef DrawText
 	#undef DrawText
@@ -16,6 +18,8 @@ namespace KuchCraft {
 	public:
 		static void DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color,   Renderer2DID id = Renderer2DID());
 		static void DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, Renderer2DID id = Renderer2DID());
+
+		static void DrawItem(const Item& item, const glm::vec3& position, Renderer2DID id);
 
 		static void DrawText(const std::string& text, const TextStyle2D& textStyle, Renderer2DID id = Renderer2DID());
 

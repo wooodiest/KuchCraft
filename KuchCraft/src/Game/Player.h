@@ -80,7 +80,7 @@ namespace KuchCraft {
 		Inventory         m_Inventory;
 
 		std::string m_DebugText;
-		bool m_ShowDebugText = false;
+		bool m_ShowDebugText = true;
 
 	};
 

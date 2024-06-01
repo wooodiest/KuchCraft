@@ -4,6 +4,7 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/RendererData.h"
 #include "Renderer/RendererCommand.h"
+#include "Renderer/Renderer3D/Renderer3DData.h"
 #include "Renderer/Data/Texture2D.h"
 
 #include "Renderer/AssetManager.h"
@@ -519,6 +520,54 @@ namespace KuchCraft {
 
 			s_QuadData.Vertices.emplace_back(vertex);
 		}
+	}
+
+	void Renderer2D::DrawItem(const Item& item, const glm::vec3& position, Renderer2DID id)
+	{
+		constexpr glm::vec3 size = { 30.0f, 30.0f, 1.0f };
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), size);
+		const Texture2D& texture   = AssetManager::GetItemTexture(item.Type);
+		float            textureID = texture.GetRendererID();
+
+		if (item.IsSolidBlock())
+		{
+			// todo smart rotations and position dispacement to simulate cube
+			// Front;
+			{
+				Renderer2DQuadInfo info;
+				info.Position = position;
+				info.Size     = { size.x / 2.0f, size.y / 2.0f };
+				info.Rotation = { 0.0f, 0.0f, 0.0f };
+
+				glm::mat4 t =
+					glm::translate(glm::mat4(1.0f), info.Position) *
+					glm::toMat4(glm::quat(info.Rotation)) *
+					glm::scale(glm::mat4(1.0f), glm::vec3(info.Size, 1.0f));
+
+				for (uint32_t i = 0; i < quad_vertex_count; i++)
+				{
+					Quad2DVertex vertex;
+					vertex.Position = t * quad_vertex_positions[i];
+					vertex.TexCoord = cube_vertices[i + 8].UV;
+					vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
+					vertex.ID       = id;
+
+					s_QuadData.Vertices.emplace_back(vertex);
+				}
+			}
+		}
+		else if (item.IsTransparentBlock())
+		{
+
+		}
+		else
+		{
+			Renderer2DQuadInfo info;
+			info.Position = position;
+			info.Size     = { size.x / 2.0f, size.y / 2.0f };
+			DrawQuad(info, AssetManager::GetItemTexture(item.Type), id);
+		}
+		
 	}
 
 	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle, Renderer2DID id)
