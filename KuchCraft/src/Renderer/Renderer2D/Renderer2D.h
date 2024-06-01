@@ -21,7 +21,7 @@ namespace KuchCraft {
 
 		static void DrawItem(const Item& item, const glm::vec3& position, Renderer2DID id);
 
-		static void DrawText(const std::string& text, const TextStyle2D& textStyle, Renderer2DID id = Renderer2DID());
+		static void DrawText(const std::string& text, const TextStyle2D& textStyle);
 
 		static Renderer2DID GetHoveredID()           { return s_QuadData.ID;                 }
 		static void SetShowCursorStatus(bool status) { s_MouseData.Show = status;            }
@@ -43,7 +43,6 @@ namespace KuchCraft {
 
 		static void RenderFullScreenQuad(uint32_t rendererID);
 		static void RenderText();
-		static void RenderMouse();
 
 		static void PrepareQuadRendering();
 		static void PrepareFullScreenQuadRendering();

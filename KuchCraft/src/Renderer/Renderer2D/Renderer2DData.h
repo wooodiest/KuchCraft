@@ -65,7 +65,7 @@ namespace KuchCraft {
 
 	struct Renderer2DQuadData
 	{
-		FrameBuffer   FrameBuffer;
+		FrameBuffer  FrameBuffer;
 		Renderer2DID ID;
 
 		Shader		 Shader;
@@ -76,10 +76,12 @@ namespace KuchCraft {
 		Texture2D WhiteTexture;
 
 		std::vector<Quad2DVertex> Vertices;
+		std::vector<Quad2DVertex> IDVertices;
+
 		uint32_t* TextureSlots;
 		uint32_t  TextureSlotIndex = 1;
-		uint32_t  IndexCount   = 0;
-		uint32_t  VertexOffset = 0;
+		uint32_t  IndexCount       = 0;
+		uint32_t  VertexOffset     = 0;
 	};
 
 	struct Renderer2DFullScreenQuadData
@@ -114,7 +116,7 @@ namespace KuchCraft {
 		FontTexture   Texture;
 
 		std::vector<std::pair<uint32_t, float>> TextIndexDistance;
-		std::vector<std::tuple<std::string, TextStyle2D, Renderer2DID>> Data;
+		std::vector<std::pair<std::string, TextStyle2D>> Data;
 	};
 
 	struct Renderer2DTextInfo

@@ -20,6 +20,8 @@ namespace KuchCraft {
 	Renderer2DTextData           Renderer2D::s_TextData;
 	Renderer2DMouseData			 Renderer2D::s_MouseData;
 
+	static bool s_DrawWithID = true;
+
 	void Renderer2D::Init()
 	{
 		LoadRenderer2DInfo();
@@ -52,7 +54,8 @@ namespace KuchCraft {
 
 	void Renderer2D::Clear()
 	{
-		s_QuadData.Vertices.clear();
+		s_QuadData.Vertices  .clear();
+		s_QuadData.IDVertices.clear();
 
 		s_TextData.Data             .clear();
 		s_TextData.TextIndexDistance.clear();
@@ -67,8 +70,8 @@ namespace KuchCraft {
 		s_QuadData.FrameBuffer.ClearColorAttachment(1, { -1.0f, 0.0f, 0.0f, 0.0f });
 		s_QuadData.FrameBuffer.ClearDepthAttachment();
 
+		s_DrawWithID = true;
 		RenderQuads();
-		RenderText();
 
 		glm::vec2 mousePosition  = Input::GetMousePosition();
 		glm::vec2 positionDiff   = mousePosition - s_MouseData.PrevPosition;
@@ -80,11 +83,19 @@ namespace KuchCraft {
 			s_MouseData.Position = glm::clamp(s_MouseData.Position + glm::vec2{ positionDiff.x, positionDiff.y * -1.0f }, { 0.0f, 0.0f }, { width, height });
 
 			s_QuadData.ID = s_QuadData.FrameBuffer.ReadPixel(1, s_MouseData.Position.x, s_MouseData.Position.y); // slow
-			RenderMouse();
+			
+			Renderer2DQuadInfo data;
+			data.Size     = { 30.0f, 30.0f };
+			data.Position = glm::vec3(s_MouseData.Position, 1.0f);
+			DrawQuad(data, AssetManager::GetUIElementTexture(UIElement::Cursor));
 		}
 		else
 			s_QuadData.ID = -1;
 		
+		s_DrawWithID = false;
+		RenderQuads();
+		RenderText();
+
 		s_QuadData.FrameBuffer.Unbind();
 
 		Renderer::s_Stats.Renderer2DTimer.Finish();
@@ -92,7 +103,9 @@ namespace KuchCraft {
 
 	void Renderer2D::RenderQuads()
 	{
-		if (!s_QuadData.Vertices.size())
+		auto& vertices = s_DrawWithID ? s_QuadData.IDVertices : s_QuadData.Vertices;
+
+		if (!vertices.size())
 			return;
 
 		RendererCommand::EnableBlending();
@@ -109,17 +122,17 @@ namespace KuchCraft {
 
 		StartQuadsBatch();
 
-		for (uint32_t i = 0; i < s_QuadData.Vertices.size(); i += quad_vertex_count)
+		for (uint32_t i = 0; i < vertices.size(); i += quad_vertex_count)
 		{
 			if (s_QuadData.IndexCount == s_Info.MaxIndices)
 				NextQuadsBatch();
 
-			if (s_QuadData.Vertices[i].TexIndex == 0.0f) // just color, TexIndex temporarily holds the texture rendererID
+			if (vertices[i].TexIndex == 0.0f) // just color, TexIndex temporarily holds the texture rendererID
 			{
-				s_QuadData.Vertices[i + 0].TexIndex = 0.0f;
-				s_QuadData.Vertices[i + 1].TexIndex = 0.0f;
-				s_QuadData.Vertices[i + 2].TexIndex = 0.0f;
-				s_QuadData.Vertices[i + 3].TexIndex = 0.0f;
+				vertices[i + 0].TexIndex = 0.0f;
+				vertices[i + 1].TexIndex = 0.0f;
+				vertices[i + 2].TexIndex = 0.0f;
+				vertices[i + 3].TexIndex = 0.0f;
 
 				s_QuadData.IndexCount += quad_index_count;
 			}
@@ -128,7 +141,7 @@ namespace KuchCraft {
 				float textureIndex = 0.0f;
 				for (uint32_t j = 1; j < s_QuadData.TextureSlotIndex; j++)
 				{
-					if (s_QuadData.TextureSlots[j] == s_QuadData.Vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
+					if (s_QuadData.TextureSlots[j] == vertices[i].TexIndex) // TexIndex temporarily holds the texture rendererID
 					{
 						textureIndex = (float)j;
 						break;
@@ -141,15 +154,15 @@ namespace KuchCraft {
 						NextQuadsBatch();
 
 					textureIndex = (float)s_QuadData.TextureSlotIndex;
-					s_QuadData.TextureSlots[s_QuadData.TextureSlotIndex] = s_QuadData.Vertices[i].TexIndex;
+					s_QuadData.TextureSlots[s_QuadData.TextureSlotIndex] = vertices[i].TexIndex;
 
 					s_QuadData.TextureSlotIndex++;
 				}
 
-				s_QuadData.Vertices[i + 0].TexIndex = textureIndex;
-				s_QuadData.Vertices[i + 1].TexIndex = textureIndex;
-				s_QuadData.Vertices[i + 2].TexIndex = textureIndex;
-				s_QuadData.Vertices[i + 3].TexIndex = textureIndex;
+				vertices[i + 0].TexIndex = textureIndex;
+				vertices[i + 1].TexIndex = textureIndex;
+				vertices[i + 2].TexIndex = textureIndex;
+				vertices[i + 3].TexIndex = textureIndex;
 
 				s_QuadData.IndexCount += quad_index_count;
 			}
@@ -165,7 +178,8 @@ namespace KuchCraft {
 
 		uint32_t vertexCount = s_QuadData.IndexCount / quad_index_count * quad_vertex_count;
 
-		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[s_QuadData.VertexOffset], vertexCount * sizeof(Quad2DVertex));
+		auto& vertices = s_DrawWithID ? s_QuadData.IDVertices : s_QuadData.Vertices;
+		s_QuadData.VertexBuffer.SetData(&vertices[s_QuadData.VertexOffset], vertexCount * sizeof(Quad2DVertex));
 		s_QuadData.VertexOffset += vertexCount;
 
 		for (uint32_t i = 0; i < s_QuadData.TextureSlotIndex; i++)
@@ -237,7 +251,7 @@ namespace KuchCraft {
 
 		for (const auto& [index, distance] : s_TextData.TextIndexDistance)
 		{
-			const auto& [text, textStyle, id] = s_TextData.Data[index];
+			const auto& [text, textStyle] = s_TextData.Data[index];
 			glm::vec2 currentPosition     = textStyle.Position;
 
 			if (textStyle.PositionFromTopLeft)
@@ -278,7 +292,7 @@ namespace KuchCraft {
 					textBuffer[currentIndex].Color = textStyle.Color;
 
 					textBuffer[currentIndex].Data.x = (float)character.ID;
-					textBuffer[currentIndex].Data.y = (float)id;
+					textBuffer[currentIndex].Data.y = -1.0f;
 
 					currentPosition.x += (character.Advance >> 6) * scale;
 					currentIndex++;
@@ -308,42 +322,6 @@ namespace KuchCraft {
 		delete[] textBuffer;
 
 		RendererCommand::EnableDepthMask();
-	}
-
-	void Renderer2D::RenderMouse()
-	{
-		s_QuadData.Vertices.clear();
-
-		RendererCommand::DisableBlending();
-		RendererCommand::DisableFaceCulling();
-		RendererCommand::DisableDepthTesting();
-
-		s_QuadData.Shader      .Bind();
-		s_QuadData.VertexArray .Bind();
-		s_QuadData.VertexBuffer.Bind();
-		s_QuadData.IndexBuffer .Bind();
-
-		constexpr uint32_t   slot        = 1;
-		constexpr uint32_t   vertexCount = quad_index_count / quad_index_count * quad_vertex_count;
-		const     Texture2D& texture     = AssetManager::GetUIElementTexture(UIElement::Cursor);
-		constexpr glm::vec2  textureSize = { 30.0f, 30.0f };
-
-		Renderer2DQuadInfo data;
-		data.Size     = textureSize;
-		data.Position = glm::vec3(s_MouseData.Position, 1.0f);
-		DrawQuad(data, texture);
-
-		s_QuadData.Vertices[0].TexIndex = slot;
-		s_QuadData.Vertices[1].TexIndex = slot;
-		s_QuadData.Vertices[2].TexIndex = slot;
-		s_QuadData.Vertices[3].TexIndex = slot;
-			
-		s_QuadData.VertexBuffer.SetData(&s_QuadData.Vertices[0], vertexCount * sizeof(Quad2DVertex));
-		Texture2D::Bind(texture.GetRendererID(), slot);
-		RendererCommand::DrawElements(quad_index_count);
-
-		Renderer::s_Stats.DrawCalls++;
-		Renderer::s_Stats.Quads += vertexCount / quad_vertex_count;
 	}
 
 	void Renderer2D::PrepareQuadRendering()
@@ -404,7 +382,8 @@ namespace KuchCraft {
 		s_QuadData.TextureSlots    = new uint32_t[maxTextureSlots];
 		s_QuadData.TextureSlots[0] = s_QuadData.WhiteTexture.GetRendererID();
 
-		s_QuadData.Vertices.reserve(s_Info.MaxVertices);
+		s_QuadData.Vertices  .reserve(s_Info.MaxVertices);
+		s_QuadData.IDVertices.reserve(s_Info.MaxVertices);
 
 		s_QuadData.IndexBuffer .Unbind();
 		s_QuadData.VertexArray. Unbind();
@@ -490,6 +469,8 @@ namespace KuchCraft {
 			glm::toMat4(glm::quat(info.Rotation)) * 
 			glm::scale(glm::mat4(1.0f), glm::vec3(info.Size, 1.0f));
 
+		auto& vertices = id == -1 ? s_QuadData.Vertices : s_QuadData.IDVertices;
+
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
 			Quad2DVertex vertex;
@@ -498,7 +479,7 @@ namespace KuchCraft {
 			vertex.TexCoord = quad_vertex_tex_coords[i];
 			vertex.ID       = id;
 
-			s_QuadData.Vertices.emplace_back(vertex);
+			vertices.emplace_back(vertex);
 		}
 	}
 
@@ -510,6 +491,8 @@ namespace KuchCraft {
 			glm::toMat4(glm::quat(info.Rotation)) *
 			glm::scale(glm::mat4(1.0f), glm::vec3(info.Size, 1.0f));
 
+		auto& vertices = id == -1 ? s_QuadData.Vertices : s_QuadData.IDVertices;
+
 		for (uint32_t i = 0; i < quad_vertex_count; i++)
 		{
 			Quad2DVertex vertex;
@@ -518,7 +501,7 @@ namespace KuchCraft {
 			vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
 			vertex.ID       = id;
 
-			s_QuadData.Vertices.emplace_back(vertex);
+			vertices.emplace_back(vertex);
 		}
 	}
 
@@ -552,7 +535,7 @@ namespace KuchCraft {
 					vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
 					vertex.ID       = id;
 
-					s_QuadData.Vertices.emplace_back(vertex);
+					s_QuadData.IDVertices.emplace_back(vertex);
 				}
 			}
 		}
@@ -570,9 +553,9 @@ namespace KuchCraft {
 		
 	}
 
-	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle, Renderer2DID id)
+	void Renderer2D::DrawText(const std::string& text, const TextStyle2D& textStyle)
 	{
-		s_TextData.Data.emplace_back(text, textStyle, id);
+		s_TextData.Data.emplace_back(text, textStyle);
 	}
 
 	void Renderer2D::ResetCursorPosition(const glm::vec2& position)

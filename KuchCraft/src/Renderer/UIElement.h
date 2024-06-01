@@ -20,6 +20,7 @@ namespace KuchCraft {
 		ArmorFull,
 
 		Inventory,
+		Slot,
 
 		None
 	};

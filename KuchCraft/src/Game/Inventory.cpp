@@ -101,9 +101,10 @@ namespace KuchCraft {
 		if (m_Open)
 		{
 			Renderer2DQuadInfo inventoryQuadInfo;
-			inventoryQuadInfo.Position = { 0.5f * width, 0.5f * height, 0.1f };
+			inventoryQuadInfo.Position = { 0.5f * width, 0.5f * height, 0.09f };
 			inventoryQuadInfo.Size     = { inventory_texture_size_x, inventory_texture_size_y };
 			Renderer2D::DrawQuad(inventoryQuadInfo, AssetManager::GetUIElementTexture(UIElement::Inventory));
+			const Texture2D& slotTexture = AssetManager::GetUIElementTexture(UIElement::Slot);
 
 			const glm::vec2 leftTopCorner     = { 0.5f * width - 4.0f * 2.0f * inventory_cell_size, 0.5f * height - inventory_cell_size };
 			const glm::vec2 rightBottomCorner = leftTopCorner + glm::vec2{ 9.0f * 2.0f * inventory_cell_size, -2.0f * 2.0f * inventory_cell_size};
@@ -117,7 +118,7 @@ namespace KuchCraft {
 				exampleQuadInfo.Position = { x, hotbarLeft.y, 0.1f };
 				exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
 
-				Renderer2D::DrawQuad(exampleQuadInfo, { 1.0f, 1.0f, 1.0f, 0.01f }, index);
+				Renderer2D::DrawQuad(exampleQuadInfo, slotTexture, index);
 				Renderer2D::DrawItem(Item(ItemType((int)ItemType::Dirt + index)), { x, hotbarLeft.y, 0.1f }, index);
 				index++;
 			}
@@ -130,7 +131,7 @@ namespace KuchCraft {
 					Renderer2DQuadInfo exampleQuadInfo;
 					exampleQuadInfo.Position = { x, y, 0.1f };
 					exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
-					Renderer2D::DrawQuad(exampleQuadInfo, { 1.0f, 1.0f, 1.0f, 0.01f}, index);
+					Renderer2D::DrawQuad(exampleQuadInfo, slotTexture, index);
 					Renderer2D::DrawItem(Item(ItemType((int)ItemType::BeetrootsCrops + flower)), { x, y, 0.1f }, index);
 
 					index++;
