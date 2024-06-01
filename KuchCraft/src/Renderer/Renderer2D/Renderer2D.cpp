@@ -507,47 +507,44 @@ namespace KuchCraft {
 
 	void Renderer2D::DrawItem(const Item& item, const glm::vec3& position, Renderer2DID id)
 	{
-		constexpr glm::vec3 size = { 30.0f, 30.0f, 1.0f };
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), size);
+		constexpr glm::vec3 size = { 17.0f, 17.0f, 1.0f };
 		const Texture2D& texture   = AssetManager::GetItemTexture(item.Type);
 		float            textureID = texture.GetRendererID();
 
 		if (item.IsSolidBlock())
 		{
-			// todo smart rotations and position dispacement to simulate cube
-			// Front;
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), size);
+			for (uint32_t i = 0; i < quad_vertex_count * 3; i++)
 			{
-				Renderer2DQuadInfo info;
-				info.Position = position;
-				info.Size     = { size.x / 2.0f, size.y / 2.0f };
-				info.Rotation = { 0.0f, 0.0f, 0.0f };
+				Quad2DVertex vertex;
+				vertex.Position = transform * fake_cube_vertices[i].Position;
+				vertex.TexCoord = fake_cube_vertices[i].TexCoord;
+				vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
+				vertex.ID       = id;
 
-				glm::mat4 t =
-					glm::translate(glm::mat4(1.0f), info.Position) *
-					glm::toMat4(glm::quat(info.Rotation)) *
-					glm::scale(glm::mat4(1.0f), glm::vec3(info.Size, 1.0f));
-
-				for (uint32_t i = 0; i < quad_vertex_count; i++)
-				{
-					Quad2DVertex vertex;
-					vertex.Position = t * quad_vertex_positions[i];
-					vertex.TexCoord = cube_vertices[i + 8].UV;
-					vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
-					vertex.ID       = id;
-
-					s_QuadData.IDVertices.emplace_back(vertex);
-				}
+				s_QuadData.IDVertices.emplace_back(vertex);
 			}
 		}
-		else if (item.IsTransparentBlock())
+		else if (item.IsTransparentBlock()) // todo: fix transparency
 		{
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), size);
 
+			for (uint32_t i = 0; i < quad_vertex_count; i++)
+			{
+				Quad2DVertex vertex;
+				vertex.Position = transform * quad_vertex_positions[i];
+				vertex.TexCoord = fake_cube_vertices[i].TexCoord;
+				vertex.TexIndex = textureID; // TexIndex temporarily holds the texture rendererID
+				vertex.ID       = id;
+
+				s_QuadData.IDVertices.emplace_back(vertex);
+			}
 		}
 		else
 		{
 			Renderer2DQuadInfo info;
 			info.Position = position;
-			info.Size     = { size.x / 2.0f, size.y / 2.0f };
+			info.Size     = { size.x, size.y };
 			DrawQuad(info, AssetManager::GetItemTexture(item.Type), id);
 		}
 		

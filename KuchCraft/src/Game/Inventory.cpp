@@ -119,7 +119,12 @@ namespace KuchCraft {
 				exampleQuadInfo.Size     = { inventory_cell_size, inventory_cell_size };
 
 				Renderer2D::DrawQuad(exampleQuadInfo, slotTexture, index);
-				Renderer2D::DrawItem(Item(ItemType((int)ItemType::Dirt + index)), { x, hotbarLeft.y, 0.1f }, index);
+
+				if (index == 0)
+					Renderer2D::DrawItem(Item(ItemType::BlueGlass), { x, hotbarLeft.y, 0.1f }, index);
+				else
+					Renderer2D::DrawItem(Item(ItemType((int)ItemType::Dirt + index)), { x, hotbarLeft.y, 0.1f }, index);
+
 				index++;
 			}
 

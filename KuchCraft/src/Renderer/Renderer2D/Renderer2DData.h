@@ -151,4 +151,29 @@ namespace KuchCraft {
 		{ 0.0f, 1.0f }
 	};
 
+	struct FakeCubeVertex
+	{
+		glm::vec4 Position;
+		glm::vec2 TexCoord;
+	};
+
+	constexpr float sqrt3 = 1.73205080757f;
+	constexpr FakeCubeVertex fake_cube_vertices[12] = {
+		// front
+		FakeCubeVertex{ glm::vec4{  0.0f,         -1.0f, 0.0f, 1.0f }, glm::vec2{ 0.0f,  0.5f }},
+		FakeCubeVertex{ glm::vec4{  sqrt3 / 2.0f, -0.5f, 0.0f, 1.0f }, glm::vec2{ 0.25f, 0.5f }},
+		FakeCubeVertex{ glm::vec4{  sqrt3 / 2.0f,  0.5f, 0.0f, 1.0f }, glm::vec2{ 0.25f, 1.0f }},
+		FakeCubeVertex{ glm::vec4{  0.0f,          0.0f, 0.0f, 1.0f }, glm::vec2{ 0.0f,  1.0f }},
+		// left
+		FakeCubeVertex{ glm::vec4{ -sqrt3 / 2.0f, -0.5f, 0.0f, 1.0f }, glm::vec2{ 0.75f, 0.5f }},
+		FakeCubeVertex{ glm::vec4{  0.0f,         -1.0f, 0.0f, 1.0f }, glm::vec2{ 1.0f,  0.5f }},
+		FakeCubeVertex{ glm::vec4{  0.0f,          0.0f, 0.0f, 1.0f }, glm::vec2{ 1.0f,  1.0f }},
+		FakeCubeVertex{ glm::vec4{ -sqrt3 / 2.0f,  0.5f, 0.0f, 1.0f }, glm::vec2{ 0.75f, 1.0f }},
+		// top
+		FakeCubeVertex{ glm::vec4{  sqrt3 / 2.0f,  0.5f, 0.0f, 1.0f }, glm::vec2{ 0.25f, 0.0f }},
+		FakeCubeVertex{ glm::vec4{  0.0f,          0.0f, 0.0f, 1.0f }, glm::vec2{ 0.5f,  0.0f }},
+		FakeCubeVertex{ glm::vec4{ -sqrt3 / 2.0f,  0.5f, 0.0f, 1.0f }, glm::vec2{ 0.5f,  0.5f }},
+		FakeCubeVertex{ glm::vec4{  0.0f,          1.0f, 0.0f, 1.0f }, glm::vec2{ 0.25f, 0.5f }}
+	};
+
 }
