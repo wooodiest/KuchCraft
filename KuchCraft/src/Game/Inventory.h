@@ -39,6 +39,10 @@ namespace KuchCraft {
 		Item GetItem(uint32_t slot, bool reduce = true);
 
 	private:
+		void DrawInventoryItem(uint32_t index, const glm::vec3& position); // todo: do map, index to position
+		void DrawHotbarItem   (uint32_t index, const glm::vec3& position); // todo: do map, index to position
+
+	private:
 		bool m_Open = false;
 		InventoryItem m_Items[inventory_items_count];
 
