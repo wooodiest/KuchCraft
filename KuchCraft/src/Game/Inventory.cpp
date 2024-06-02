@@ -174,7 +174,7 @@ namespace KuchCraft {
 		info.Size     = { inventory_cell_size, inventory_cell_size };
 
 		Renderer2D::DrawQuad(info, slotTexture, id);
-		Renderer2D::DrawItem(item.Item, position, id);
+		Renderer2D::DrawItem(item.Item, position, { info.Size.x - 5.0f, info.Size.y - 5.0f }, id);
 
 		TextStyle2D style;
 		style.FontSize = 16.0f;
@@ -190,18 +190,15 @@ namespace KuchCraft {
 		Renderer2DID id = (uint32_t)slot;
 
 		glm::vec3 position = { 0.5f * Application::Get().GetWindow().GetWidth() + ((float)slot - 4.0f) * 60.0f, 34.0f, 0.1f};
+		glm::vec2 size = { hotbar_texture_slot_size - 12.0f, hotbar_texture_slot_size - 12.0f};
 
-		Renderer2DQuadInfo info;
-		info.Position = position;
-		info.Size     = { hotbar_texture_slot_size, hotbar_texture_slot_size };
-
-		Renderer2D::DrawItem(item.Item, position, id);
+		Renderer2D::DrawItem(item.Item, position, size, id);
 
 		TextStyle2D style;
-		style.FontSize = 16.0f;
-		style.Position = { position.x + 10.0f, position.y - 7.0f, 0.11f };
+		style.FontSize = 18.0f;
+		style.Position = { position.x + 10.0f, position.y - 9.0f, 0.11f };
 		if (item.Count > 9)
-			style.Position.x -= 10.0f;
+			style.Position.x -= 9.0f;
 		Renderer2D::DrawText(std::to_string(item.Count), style);
 	}
 

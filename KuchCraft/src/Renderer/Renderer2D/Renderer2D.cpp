@@ -505,15 +505,14 @@ namespace KuchCraft {
 		}
 	}
 
-	void Renderer2D::DrawItem(const Item& item, const glm::vec3& position, Renderer2DID id)
+	void Renderer2D::DrawItem(const Item& item, const glm::vec3& position, const glm::vec2& size, Renderer2DID id)
 	{
-		constexpr glm::vec3 size = { 17.0f, 17.0f, 1.0f };
 		const Texture2D& texture   = AssetManager::GetItemTexture(item.Type);
 		float            textureID = texture.GetRendererID();
 
 		if (item.IsSolidBlock())
 		{
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), size);
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(size, 1.0f));
 			for (uint32_t i = 0; i < quad_vertex_count * 3; i++)
 			{
 				Quad2DVertex vertex;
@@ -527,7 +526,7 @@ namespace KuchCraft {
 		}
 		else if (item.IsTransparentBlock()) // todo: fix transparency
 		{
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), size);
+			glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), glm::vec3(size, 1.0f));
 
 			for (uint32_t i = 0; i < quad_vertex_count; i++)
 			{

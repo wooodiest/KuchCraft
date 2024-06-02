@@ -19,7 +19,7 @@ namespace KuchCraft {
 		static void DrawQuad(const Renderer2DQuadInfo& info, const glm::vec4& color,   Renderer2DID id = Renderer2DID());
 		static void DrawQuad(const Renderer2DQuadInfo& info, const Texture2D& texture, Renderer2DID id = Renderer2DID());
 
-		static void DrawItem(const Item& item, const glm::vec3& position, Renderer2DID id);
+		static void DrawItem(const Item& item, const glm::vec3& position, const glm::vec2& size, Renderer2DID id);
 
 		static void DrawText(const std::string& text, const TextStyle2D& textStyle);
 
