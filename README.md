@@ -1,6 +1,8 @@
-# KuchCraft 1
+# KuchCraft
 
 KuchCraft is the **first version of a Minecraft clone** developed in C++. Unlike its successor, KuchCraft 2, this version does **not** utilize an **Entity Component System (ECS)** and features a more basic implementation of core game mechanics.
+
+![KuchCraft game screenshot](game.png)
 
 ## Features
 
