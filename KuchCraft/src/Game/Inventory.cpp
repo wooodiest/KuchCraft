@@ -151,6 +151,11 @@ namespace KuchCraft {
 
 	}
 
+	Item& Inventory::GetCurrent()
+	{
+		return m_Items[(int)m_HotbarSlot].Item;
+	}
+
 	void Inventory::Open()
 	{
 		m_Open = true;

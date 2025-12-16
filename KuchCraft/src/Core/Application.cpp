@@ -14,7 +14,7 @@ namespace KuchCraft {
 		Random::Init();
 		s_Instance = this;
 
-		m_Window = std::make_unique<Window>("KuchCraft", 1920, 1080, false);
+		m_Window = std::make_unique<Window>("KuchCraft", 1280, 720, false);
 		m_Window->SetEventCallback(KC_BIND_EVENT_FN(Application::OnEvent));
 
 		m_Game = std::make_unique<KuchCraft>();

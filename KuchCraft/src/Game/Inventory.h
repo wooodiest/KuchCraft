@@ -36,6 +36,8 @@ namespace KuchCraft {
 		bool OnMouseScrolled(MouseScrolledEvent& e);
 		void OnUpdate(float dt);
 
+		Item& GetCurrent();
+
 		void Open();
 		void Close();
 
